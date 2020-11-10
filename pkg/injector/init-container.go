@@ -15,8 +15,8 @@ const (
 
 func getInitContainerSpec(pod *corev1.Pod, data *InitContainerData) (corev1.Container, error) {
 	return corev1.Container{
-		Name:  data.Name,
-		Image: data.Image,
+		Name:            data.Name,
+		Image:           data.Image,
 		ImagePullPolicy: "Always",
 		SecurityContext: &corev1.SecurityContext{
 			Capabilities: &corev1.Capabilities{
@@ -37,6 +37,10 @@ func getInitContainerSpec(pod *corev1.Pod, data *InitContainerData) (corev1.Cont
 			{
 				Name:  "OSM_ENVOY_OUTBOUND_PORT",
 				Value: fmt.Sprintf("%d", constants.EnvoyOutboundListenerPort),
+			},
+			{
+				Name:  "CLUSTER_CIDR",
+				Value: fmt.Sprintf("%s", "10.52.0.0/16"),
 			},
 		},
 	}, nil
