@@ -39,8 +39,12 @@ func getInitContainerSpec(pod *corev1.Pod, data *InitContainerData) (corev1.Cont
 				Value: fmt.Sprintf("%d", constants.EnvoyOutboundListenerPort),
 			},
 			{
-				Name:  "CLUSTER_CIDR",
-				Value: fmt.Sprintf("%s", "10.52.0.0/16"),
+				Name:  "POD_CIDR",
+				Value: data.PodCIDR,
+			},
+			{
+				Name:  "SERVICE_CIDR",
+				Value: data.ServiceCIDR,
 			},
 		},
 	}, nil

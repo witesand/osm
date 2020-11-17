@@ -24,8 +24,10 @@ iptables -t nat -N PROXY_REDIRECT
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "22" -j ACCEPT # ssh port
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "49" -j ACCEPT # tacacs
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "69" -j ACCEPT # tftp
+iptables -t nat -A PROXY_REDIRECT -p tcp --dport "139" -j ACCEPT # samba
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "389" -j ACCEPT # radius port
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "443" -j ACCEPT # aruba
+iptables -t nat -A PROXY_REDIRECT -p tcp --dport "445" -j ACCEPT # samba
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "587" -j ACCEPT # email port
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "636" -j ACCEPT # ldaps
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "830" -j ACCEPT # netconf 
@@ -84,8 +86,10 @@ iptables -t nat -A PROXY_INBOUND -p tcp --dport "${PROXY_STATS_PORT}" -j RETURN
 
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "49" -j RETURN  # tacacs
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "69" -j RETURN  # tftp
+iptables -t nat -A PROXY_INBOUND -p tcp --dport "139" -j RETURN  # samba
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "389" -j RETURN  # radius
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "443" -j RETURN  # aruba
+iptables -t nat -A PROXY_INBOUND -p tcp --dport "445" -j RETURN  # samba
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "587" -j RETURN  # email
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "636" -j RETURN  # ldaps
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "830" -j RETURN  # netconf
@@ -137,8 +141,12 @@ iptables -t nat -A PROXY_OUTPUT -m owner --uid-owner "${PROXY_UID}" -j RETURN
 
 # Skip localhost traffic
 iptables -t nat -A PROXY_OUTPUT -d 127.0.0.1/32 -j RETURN
-#iptables -t nat -A PROXY_OUTPUT \! -d 10.84.0.0/15 -j RETURN # allow non-k8s traffic
-iptables -t nat -A PROXY_OUTPUT \! -d $CLUSTER_CIDR -j RETURN # allow non-k8s traffic
 
-# Redirect remaining outbound traffic to Envoy
-iptables -t nat -A PROXY_OUTPUT -j PROXY_REDIRECT
+
+# Redirect pod and service-bound traffic to envoy
+iptables -t nat -A PROXY_OUTPUT -d ${POD_CIDR} -j PROXY_REDIRECT
+iptables -t nat -A PROXY_OUTPUT -d ${SERVICE_CIDR} -j PROXY_REDIRECT
+
+# skip remaining trafifc
+iptables -t nat -A PROXY_OUTPUT -j RETURN # allow non-k8s traffic
+
