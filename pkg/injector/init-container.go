@@ -38,6 +38,14 @@ func getInitContainerSpec(pod *corev1.Pod, data *InitContainerData) (corev1.Cont
 				Name:  "OSM_ENVOY_OUTBOUND_PORT",
 				Value: fmt.Sprintf("%d", constants.EnvoyOutboundListenerPort),
 			},
+			{
+				Name:  "POD_CIDR",
+				Value: data.PodCIDR,
+			},
+			{
+				Name:  "SERVICE_CIDR",
+				Value: data.ServiceCIDR,
+			},
 		},
 	}, nil
 }

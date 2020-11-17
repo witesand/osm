@@ -53,8 +53,10 @@ type JSONPatchOperation struct {
 
 // InitContainerData is the type used to represent information about the init container
 type InitContainerData struct {
-	Name  string
-	Image string
+	Name        string
+	Image       string
+	PodCIDR     string
+	ServiceCIDR string
 }
 
 // EnvoySidecarData is the type used to represent information about the Envoy sidecar
