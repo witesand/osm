@@ -15,8 +15,8 @@ const (
 
 func getInitContainerSpec(pod *corev1.Pod, data *InitContainerData) (corev1.Container, error) {
 	return corev1.Container{
-		Name:  data.Name,
-		Image: data.Image,
+		Name:            data.Name,
+		Image:           data.Image,
 		ImagePullPolicy: "Always",
 		SecurityContext: &corev1.SecurityContext{
 			Capabilities: &corev1.Capabilities{

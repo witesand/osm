@@ -142,6 +142,7 @@ iptables -t nat -A PROXY_OUTPUT -m owner --uid-owner "${PROXY_UID}" -j RETURN
 # Skip localhost traffic
 iptables -t nat -A PROXY_OUTPUT -d 127.0.0.1/32 -j RETURN
 
+
 # Redirect pod and service-bound traffic to envoy
 iptables -t nat -A PROXY_OUTPUT -d ${POD_CIDR} -j PROXY_REDIRECT
 iptables -t nat -A PROXY_OUTPUT -d ${SERVICE_CIDR} -j PROXY_REDIRECT
