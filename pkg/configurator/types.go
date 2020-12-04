@@ -1,6 +1,8 @@
 package configurator
 
 import (
+	"time"
+
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/openservicemesh/osm/pkg/logger"
@@ -34,23 +36,23 @@ type Configurator interface {
 	// IsEgressEnabled determines whether egress is globally enabled in the mesh or not
 	IsEgressEnabled() bool
 
+	// IsDebugServerEnabled determines whether osm debug HTTP server is enabled
+	IsDebugServerEnabled() bool
+
 	// IsPrometheusScrapingEnabled determines whether Prometheus is enabled for scraping metrics
 	IsPrometheusScrapingEnabled() bool
 
-	// IsZipkinTracingEnabled determines whether Zipkin tracing is enabled
-	IsZipkinTracingEnabled() bool
+	// IsTracingEnabled returns whether tracing is enabled
+	IsTracingEnabled() bool
 
-	// GetZipkinHost is the host to which we send Zipkin spans
-	GetZipkinHost() string
+	// GetTracingHost is the host to which we send tracing spans
+	GetTracingHost() string
 
-	// GetZipkinPort returns the Zipkin port
-	GetZipkinPort() uint32
+	// GetTracingPort returns the tracing listener port
+	GetTracingPort() uint32
 
-	// GetZipkinEndpoint returns the Zipkin endpoint
-	GetZipkinEndpoint() string
-
-	// GetMeshCIDRRanges returns a list of mesh CIDR ranges
-	GetMeshCIDRRanges() []string
+	// GetTracingEndpoint returns the collector endpoint
+	GetTracingEndpoint() string
 
 	// UseHTTPSIngress determines whether protocol used for traffic from ingress to backend pods should be HTTPS.
 	UseHTTPSIngress() bool
@@ -60,4 +62,7 @@ type Configurator interface {
 
 	// GetAnnouncementsChannel returns a channel, which is used to announce when changes have been made to the OSM ConfigMap
 	GetAnnouncementsChannel() <-chan interface{}
+
+	// GetServiceCertValidityPeriod returns the validity duration for service certificates
+	GetServiceCertValidityPeriod() time.Duration
 }

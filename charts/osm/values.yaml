@@ -5,15 +5,15 @@ OpenServiceMesh:
   replicaCount: 1
   image:
     registry: openservicemesh
-    pullPolicy: Always
-    tag: v0.3.0
+    pullPolicy: IfNotPresent
+    tag: v0.5.0
   imagePullSecrets: []
   sidecarImage: envoyproxy/envoy-alpine:v1.15.0
   prometheus:
     port: 7070
     retention:
       time: 15d
-  certficateManager: tresor
+  certificateManager: tresor
   vault:
     host:
     protocol: http
@@ -23,7 +23,7 @@ OpenServiceMesh:
     issuerName: osm-ca
     issuerKind: Issuer
     issuerGroup: cert-manager
-  serviceCertValidityMinutes: 1
+  serviceCertValidityDuration: 24h
   caBundleSecretName: osm-ca-bundle
   grafana:
     port: 3000
@@ -32,30 +32,38 @@ OpenServiceMesh:
   enablePermissiveTrafficPolicy: false
   enableBackpressureExperimental: false
   enableEgress: false
-  enableMetricsStack: true
+  enablePrometheus: true
+  enableGrafana: false
+  enableFluentbit: false
+  fluentBitImage:
+    name: fluentbit-logger
+    registry: fluent
+    tag: 1.5
+    pullPolicy: IfNotPresent
   meshName: osm
-  meshCIDRRanges: 0.0.0.0/0
   useHTTPSIngress: false
-  envoyLogLevel: debug
+  envoyLogLevel: error
+  enforceSingleMesh: false
 
-  # Set deployZipkin to true to deploy a Zipkin cluster in the
-  # namespace where OSM resides. Set this to false if Zipkin
-  # has already been installed or is not needed.
-  deployZipkin: false
+  # Set deployJaeger to true to deploy a Jaeger cluster in the
+  # namespace where OSM resides.
+  deployJaeger: true
 
-  # The following section configures Zipkin tracing for the Envoys
-  # connected to the OSM control plane.
-  zipkin:
+  # The following section configures a destination where to send
+  # tracing data. Current implementation supports only Zipkin format
+  # backends (https://github.com/openservicemesh/osm/issues/1596)
+  tracing:
 
     ## Toggles Envoy's tracing functionality on/off
     ## for all proxies in the mesh.
-    enable: false
+    enable: true
 
-    # Informs Envoys where the Zipkin spans should be sent
-    address: "zipkin.osm-system.svc.cluster.local"
+    # Tracing destination cluster
+    address: "jaeger.osm-system.svc.cluster.local"
 
-    # Port of the Zipkin cluster
+    # Destination port for the listener
     port: 9411
 
-    # Endpoint for the Zipkin cluster
+    # Destination's API or collector endpoint where the spans will
+    # be sent to
     endpoint: "/api/v2/spans"

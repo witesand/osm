@@ -5,15 +5,13 @@ import (
 	"sort"
 	"strings"
 
+	set "github.com/deckarep/golang-set"
 	xds_route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	xds_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
-
-	set "github.com/deckarep/golang-set"
 	"github.com/golang/protobuf/ptypes/wrappers"
 
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/envoy"
-	"github.com/openservicemesh/osm/pkg/kubernetes"
 	"github.com/openservicemesh/osm/pkg/service"
 	"github.com/openservicemesh/osm/pkg/trafficpolicy"
 )
@@ -36,31 +34,17 @@ const (
 	//OutboundRouteConfigName is the name of the route config that the envoy will identify
 	OutboundRouteConfigName = "RDS_Outbound"
 
-	// maxRegexProgramSize is the max supported regex complexity
-	maxRegexProgramSize = 1024
-
-	//InboundVirtualHost is the name of the virtual host on the inbound route configuration
+	// inboundVirtualHost is the name of the virtual host on the inbound route configuration
 	inboundVirtualHost = "inbound_virtualHost"
 
-	//OutboundVirtualHost is the name of the virtual host on the outbound route configuration
+	// outboundVirtualHost is the name of the virtual host on the outbound route configuration
 	outboundVirtualHost = "outbound_virtualHost"
 
 	// MethodHeaderKey is the key of the header for HTTP methods
 	MethodHeaderKey = ":method"
 
-	// wildcardPathPrefix is the wildcard path prefix for HTTP paths
-	wildcardPathPrefix = "/"
-
 	// httpHostHeader is the name of the HTTP host header
 	httpHostHeader = "host"
-)
-
-var (
-	regexEngine = &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{
-		MaxProgramSize: &wrappers.UInt32Value{
-			Value: uint32(maxRegexProgramSize),
-		},
-	}}
 )
 
 //UpdateRouteConfiguration consrtucts the Envoy construct necessary for TrafficTarget implementation
@@ -80,26 +64,24 @@ func UpdateRouteConfiguration(domainRoutesMap map[string]map[string]trafficpolic
 		return
 	}
 
-	for domain, routePolicyWeightedClustersMap := range domainRoutesMap {
-		virtualHost := createVirtualHostStub(virtualHostPrefix, domain)
+	for host, routePolicyWeightedClustersMap := range domainRoutesMap {
+		domains := getDistinctDomains(routePolicyWeightedClustersMap)
+		virtualHost := createVirtualHostStub(virtualHostPrefix, host, domains)
 		virtualHost.Routes = createRoutes(routePolicyWeightedClustersMap, direction)
 		routeConfig.VirtualHosts = append(routeConfig.VirtualHosts, virtualHost)
 	}
 }
 
-func createVirtualHostStub(namePrefix string, domain string) *xds_route.VirtualHost {
-	// If domain consists a comma separated list of domains, it means multiple
-	// domains match against the same route config.
-	domains := strings.Split(domain, ",")
-	for i := range domains {
-		domains[i] = strings.TrimSpace(domains[i])
+func createVirtualHostStub(namePrefix string, host string, domains set.Set) *xds_route.VirtualHost {
+	var domainsSlice []string
+	for domainIntf := range domains.Iter() {
+		domainsSlice = append(domainsSlice, strings.TrimSpace(domainIntf.(string)))
 	}
 
-	name := fmt.Sprintf("%s|%s", namePrefix, kubernetes.GetServiceFromHostname(domains[0]))
+	name := fmt.Sprintf("%s|%s", namePrefix, host)
 	virtualHost := xds_route.VirtualHost{
 		Name:    name,
-		Domains: domains,
-		Routes:  []*xds_route.Route{},
+		Domains: domainsSlice,
 	}
 	return &virtualHost
 }
@@ -118,9 +100,9 @@ func createRoutes(routePolicyWeightedClustersMap map[string]trafficpolicy.RouteW
 	for _, routePolicyWeightedClusters := range routePolicyWeightedClustersMap {
 		// For a given route path, sanitize the methods in case there
 		// is wildcard or if there are duplicates
-		allowedMethods := sanitizeHTTPMethods(routePolicyWeightedClusters.Route.Methods)
+		allowedMethods := sanitizeHTTPMethods(routePolicyWeightedClusters.HTTPRoute.Methods)
 		for _, method := range allowedMethods {
-			route := getRoute(routePolicyWeightedClusters.Route.PathRegex, method, routePolicyWeightedClusters.Route.Headers, routePolicyWeightedClusters.WeightedClusters, 100, direction)
+			route := getRoute(routePolicyWeightedClusters.HTTPRoute.PathRegex, method, routePolicyWeightedClusters.HTTPRoute.Headers, routePolicyWeightedClusters.WeightedClusters, 100, direction)
 			routes = append(routes, route)
 		}
 	}
@@ -132,7 +114,7 @@ func getRoute(pathRegex string, method string, headersMap map[string]string, wei
 		Match: &xds_route.RouteMatch{
 			PathSpecifier: &xds_route.RouteMatch_SafeRegex{
 				SafeRegex: &xds_matcher.RegexMatcher{
-					EngineType: regexEngine,
+					EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
 					Regex:      pathRegex,
 				},
 			},
@@ -157,7 +139,7 @@ func getHeadersForRoute(method string, headersMap map[string]string) []*xds_rout
 		Name: MethodHeaderKey,
 		HeaderMatchSpecifier: &xds_route.HeaderMatcher_SafeRegexMatch{
 			SafeRegexMatch: &xds_matcher.RegexMatcher{
-				EngineType: regexEngine,
+				EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
 				Regex:      getRegexForMethod(method),
 			},
 		},
@@ -174,13 +156,12 @@ func getHeadersForRoute(method string, headersMap map[string]string) []*xds_rout
 			Name: headerKey,
 			HeaderMatchSpecifier: &xds_route.HeaderMatcher_SafeRegexMatch{
 				SafeRegexMatch: &xds_matcher.RegexMatcher{
-					EngineType: regexEngine,
+					EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
 					Regex:      headerValue,
 				},
 			},
 		}
 		headers = append(headers, &header)
-
 	}
 	return headers
 }
@@ -226,6 +207,19 @@ func getDistinctWeightedClusters(routePolicyWeightedClustersMap map[string]traff
 	return weightedClusters
 }
 
+// This method gets a list of all the distinct domains for a host
+// needed to configure virtual hosts
+func getDistinctDomains(routePolicyWeightedClustersMap map[string]trafficpolicy.RouteWeightedClusters) set.Set {
+	domains := set.NewSet()
+	for _, perRouteWeightedClusters := range routePolicyWeightedClustersMap {
+		if domains.Cardinality() == 0 {
+			domains = perRouteWeightedClusters.Hostnames
+		}
+		domains.Union(perRouteWeightedClusters.Hostnames)
+	}
+	return domains
+}
+
 func getTotalWeightForClusters(weightedClusters set.Set) int {
 	var totalWeight int
 	for clusterInterface := range weightedClusters.Iter() {
@@ -249,7 +243,7 @@ func (c clusterWeightByName) Less(i, j int) bool {
 // sanitizeHTTPMethods takes in a list of HTTP methods including a wildcard (*) and returns a wildcard if any of
 // the methods is a wildcard or sanitizes the input list to avoid duplicates.
 func sanitizeHTTPMethods(allowedMethods []string) []string {
-	newAllowedMethods := []string{}
+	var newAllowedMethods []string
 	keys := make(map[string]interface{})
 	for _, method := range allowedMethods {
 		if method != "" {
@@ -270,7 +264,6 @@ func sanitizeHTTPMethods(allowedMethods []string) []string {
 func NewRouteConfigurationStub(routeConfigName string) *xds_route.RouteConfiguration {
 	routeConfiguration := xds_route.RouteConfiguration{
 		Name:             routeConfigName,
-		VirtualHosts:     []*xds_route.VirtualHost{},
 		ValidateClusters: &wrappers.BoolValue{Value: true},
 	}
 	return &routeConfiguration

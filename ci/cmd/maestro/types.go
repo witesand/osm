@@ -20,9 +20,6 @@ const (
 	// TestsTimedOut is used for tests that timed out.
 	TestsTimedOut
 
-	// KubeConfigEnvVar is the environment variable for KUBECONFIG.
-	KubeConfigEnvVar = "KUBECONFIG"
-
 	// OSMNamespaceEnvVar is the environment variable for the OSM namespace.
 	OSMNamespaceEnvVar = "K8S_NAMESPACE"
 
@@ -55,6 +52,6 @@ var (
 	// FailureLogsFromTimeSince is the interval we go back in time to get pod logs
 	FailureLogsFromTimeSince = 10 * time.Minute
 
-	log            = logger.New("ci/maestro")
+	log            = logger.NewPretty("ci/maestro")
 	errNoPodsFound = errors.New("no pods found")
 )
