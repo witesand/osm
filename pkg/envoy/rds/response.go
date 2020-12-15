@@ -1,14 +1,10 @@
 package rds
 
 import (
-<<<<<<< HEAD
-	"context"
-	"strings"
 	"fmt"
+	"strings"
 
-=======
 	set "github.com/deckarep/golang-set"
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 	xds_route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	xds_discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/golang/protobuf/ptypes"
@@ -51,19 +47,11 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 	outboundAggregatedRoutesByHostnames := make(map[string]map[string]trafficpolicy.RouteWeightedClusters)
 	inboundAggregatedRoutesByHostnames := make(map[string]map[string]trafficpolicy.RouteWeightedClusters)
 
-<<<<<<< HEAD
-	for _, trafficPolicies := range allTrafficPolicies {
-		isSourceService := trafficPolicies.Source.Equals(proxyServiceName)
-		isDestinationService := trafficPolicies.Destination.GetMeshService().Equals(proxyServiceName)
-		svc := trafficPolicies.Destination.GetMeshService()
-		hostnames, err := catalog.GetHostnamesForService(svc)
-=======
 	for _, trafficPolicy := range allTrafficPolicies {
 		isSourceService := trafficPolicy.Source.Equals(proxyServiceName)
 		isDestinationService := trafficPolicy.Destination.Equals(proxyServiceName)
 		svc := trafficPolicy.Destination
 		hostnames, err := catalog.GetResolvableHostnamesForUpstreamService(proxyServiceName, svc)
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 		if err != nil {
 			log.Error().Err(err).Msg("Failed listing domains")
 			return nil, err

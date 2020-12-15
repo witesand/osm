@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/rs/zerolog/log"
 	target "github.com/servicemeshinterface/smi-sdk-go/pkg/apis/access/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 
@@ -77,6 +76,51 @@ func (mc *MeshCatalog) ListAllowedOutboundServices(svc service.MeshService) ([]s
 	}
 
 	log.Trace().Msgf("Allowed outbound services from source %q: %+v", svc, allowedServices)
+
+	return allowedServices, nil
+}
+
+// This function returns the list of connected services.
+// This is a bimodal function:
+//   - it could list services that are allowed to connect to the given service (inbound)
+//   - it could list services that the given service can connect to (outbound)
+func (mc *MeshCatalog) getAllowedDirectionalServices(svc service.MeshService, directn direction) ([]service.MeshService, error) {
+	allTrafficPolicies, err := mc.ListTrafficPolicies(svc)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed listing traffic routes")
+		return nil, err
+	}
+
+	allowedServicesSet := mapset.NewSet()
+
+	for _, policy := range allTrafficPolicies {
+		if directn == inbound {
+			// we are looking for services that can connect to the given service
+			if policy.Destination.Equals(svc) {
+				allowedServicesSet.Add(policy.Source)
+			}
+		}
+
+		if directn == outbound {
+			// we are looking for services the given svc can connect to
+			if policy.Source.Equals(svc) {
+				allowedServicesSet.Add(policy.Destination)
+			}
+		}
+	}
+
+	// Convert the set of interfaces to a list of namespaced services
+	var allowedServices []service.MeshService
+	for svc := range allowedServicesSet.Iter() {
+		allowedServices = append(allowedServices, svc.(service.MeshService))
+	}
+
+	msg := map[direction]string{
+		inbound:  "Allowed inbound services for destination service %q: %+v",
+		outbound: "Allowed outbound services from source %q: %+v",
+	}[directn]
+
+	log.Trace().Msgf(msg, svc, allowedServices)
 
 	return allowedServices, nil
 }
