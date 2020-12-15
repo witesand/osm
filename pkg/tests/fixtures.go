@@ -146,17 +146,10 @@ var (
 		Port: endpoint.Port(ServicePort),
 	}
 
-<<<<<<< HEAD
-	// TrafficPolicy is a traffic policy SMI object.
-	TrafficPolicy = trafficpolicy.TrafficTarget{
-		Name:        TrafficTargetName,
-		//Destination: BookstoreService,
-=======
 	// BookstoreV1TrafficPolicy is a traffic policy SMI object.
 	BookstoreV1TrafficPolicy = trafficpolicy.TrafficTarget{
 		Name:        fmt.Sprintf("%s:default/bookbuyer->default/bookstore-v1", TrafficTargetName),
 		Destination: BookstoreV1Service,
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 		Source:      BookbuyerService,
 		HTTPRoutes: []trafficpolicy.HTTPRoute{
 			{

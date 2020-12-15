@@ -47,10 +47,7 @@ func getRemoteServiceCluster(remoteService, localService service.MeshServicePort
 				TypedConfig: marshalledUpstreamTLSContext,
 			},
 		},
-<<<<<<< HEAD
 		*/
-=======
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 		ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
 		Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
 	}
@@ -84,10 +81,6 @@ func getOutboundPassthroughCluster() *xds_cluster.Cluster {
 }
 
 // getLocalServiceCluster returns an Envoy Cluster corresponding to the local service
-<<<<<<< HEAD
-func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName service.MeshService) ([]*xds_cluster.Cluster, error) {
-	xdsClusters := make([]*xds_cluster.Cluster, 0)
-=======
 func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName service.MeshService, clusterName string) (*xds_cluster.Cluster, error) {
 	xdsCluster := xds_cluster.Cluster{
 		// The name must match the domain being cURLed in the demo
@@ -111,7 +104,6 @@ func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName serv
 		Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
 	}
 
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 	endpoints, err := catalog.ListEndpointsForService(proxyServiceName)
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to get endpoints for service %s", proxyServiceName)

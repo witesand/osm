@@ -21,17 +21,10 @@ type HTTPRoute struct {
 
 // TrafficTarget is a struct to represent a traffic policy between a source and destination along with its routes
 type TrafficTarget struct {
-<<<<<<< HEAD
-	Name        string                  `json:"name:omitempty"`
-	Destination service.MeshServicePort `json:"destination:omitempty"`
-	Source      service.MeshService     `json:"source:omitempty"`
-	Route       Route                   `json:"route:omitempty"`
-=======
 	Name        string              `json:"name:omitempty"`
 	Destination service.MeshService `json:"destination:omitempty"`
 	Source      service.MeshService `json:"source:omitempty"`
 	HTTPRoutes  []HTTPRoute         `json:"http_route:omitempty"`
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 }
 
 // RouteWeightedClusters is a struct of an HTTPRoute, associated weighted clusters and the domains

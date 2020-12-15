@@ -107,16 +107,8 @@ type MeshCataloger interface {
 	//GetWeightedClusterForService returns the weighted cluster for a service
 	GetWeightedClusterForService(service service.MeshService) (service.WeightedCluster, error)
 
-<<<<<<< HEAD
-	//GetWeightedClusterForServicePort returns the weighted cluster for a ServicePort
-	GetWeightedClusterForServicePort(service service.MeshServicePort) (service.WeightedCluster, error)
-
-	// GetIngressRoutesPerHost returns the routes per host associated with an ingress service
-	GetIngressRoutesPerHost(service.MeshService) (map[string][]trafficpolicy.Route, error)
-=======
 	// GetIngressRoutesPerHost returns the HTTP routes per host associated with an ingress service
 	GetIngressRoutesPerHost(service.MeshService) (map[string][]trafficpolicy.HTTPRoute, error)
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 
 	// ListMonitoredNamespaces lists namespaces monitored by the control plane
 	ListMonitoredNamespaces() []string

@@ -24,51 +24,18 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 	// Github Issue #1575
 	proxyServiceName := svcList[0]
 
-<<<<<<< HEAD
-	allTrafficPolicies, err := catalog.ListTrafficPolicies(proxyServiceName)
-	log.Debug().Msgf("EDS svc %s allTrafficPolicies %+v", proxyServiceName, allTrafficPolicies)
-
-=======
 	outboundServices, err := catalog.ListAllowedOutboundServices(proxyServiceName)
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 	if err != nil {
 		log.Error().Err(err).Msgf("Error listing outbound services for proxy %q", proxyServiceName)
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	allServicesEndpoints := make(map[service.MeshServicePort][]endpoint.Endpoint)
-	for _, trafficPolicy := range allTrafficPolicies {
-		isSourceService := trafficPolicy.Source.Equals(proxyServiceName)
-		if isSourceService {
-			destService := trafficPolicy.Destination.GetMeshService()
-			serviceEndpoints, err := catalog.ListEndpointsForService(destService)
-			if err != nil {
-				log.Error().Err(err).Msgf("Failed listing endpoints for proxy %s", proxyServiceName)
-				return nil, err
-			}
-			destServicePort := trafficPolicy.Destination
-			if destServicePort.Port == 0  {
-				allServicesEndpoints[destServicePort] = serviceEndpoints
-				continue
-			}
-			// if port specified, filter based on port
-			filteredEndpoints := make([]endpoint.Endpoint, 0)
-			for _, endpoint := range serviceEndpoints {
-				if int(endpoint.Port) != destServicePort.Port {
-					continue
-				}
-				filteredEndpoints = append(filteredEndpoints, endpoint)
-			}
-			allServicesEndpoints[destServicePort] = filteredEndpoints
-=======
 	outboundServicesEndpoints := make(map[service.MeshService][]endpoint.Endpoint)
 	for _, dstSvc := range outboundServices {
 		endpoints, err := catalog.ListEndpointsForService(dstSvc)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed listing endpoints for service %s", dstSvc)
 			continue
->>>>>>> c614ca2db542271efd6f7b2b106b9d046dc64b90
 		}
 		outboundServicesEndpoints[dstSvc] = endpoints
 	}
