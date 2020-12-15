@@ -1,10 +1,13 @@
 package catalog
 
 import (
+	"context"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
 	v1 "k8s.io/api/core/v1"
+	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/openservicemesh/osm/pkg/certificate"
@@ -69,7 +72,7 @@ func (mc *MeshCatalog) GetGatewaypods(searchName string) ([]string, error) {
 
 	// Add from remote pods too
 	submProvider := mc.GetProvider("Submariner")
-	if submProvider != nil  {
+	if submProvider != nil {
 		svc := service.MeshService{
 			Namespace: "default",
 			Name:      searchName,
@@ -81,16 +84,16 @@ func (mc *MeshCatalog) GetGatewaypods(searchName string) ([]string, error) {
 			searchList = append(searchList, svcName)
 		}
 		/*
-		knownIPs := make(map[string]bool, 0)
-		for _, ep := range eps {
-			ipStr := ep.IP.String()
-			if _, exists := knownIPs[ipStr]; !exists {
-				knownIPs[ipStr] = true
-				svcName := searchName + "-" + ipStr
-				log.Info().Msgf("[GetGatewaypods] adding svcName:%s", svcName)
-				searchList = append(searchList, svcName)
+			knownIPs := make(map[string]bool, 0)
+			for _, ep := range eps {
+				ipStr := ep.IP.String()
+				if _, exists := knownIPs[ipStr]; !exists {
+					knownIPs[ipStr] = true
+					svcName := searchName + "-" + ipStr
+					log.Info().Msgf("[GetGatewaypods] adding svcName:%s", svcName)
+					searchList = append(searchList, svcName)
+				}
 			}
-		}
 		*/
 	} else {
 		log.Info().Msgf("[GetGatewaypods]: Submariner provider is nil")

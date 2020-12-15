@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	mapset "github.com/deckarep/golang-set"
+	"github.com/pkg/errors"
 	target "github.com/servicemeshinterface/smi-sdk-go/pkg/apis/access/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 
@@ -44,40 +45,6 @@ func (mc *MeshCatalog) ListTrafficPolicies(service service.MeshService) ([]traff
 		return nil, err
 	}
 	return allTrafficPolicies, nil
-}
-
-// This function returns the list of connected services.
-// This is a bimodal function:
-//   - it could list services that are allowed to connect to the given service (inbound)
-//   - it could list services that the given service can connect to (outbound)
-// ListAllowedOutboundServices lists the services the given service is allowed outbound connections to.
-func (mc *MeshCatalog) ListAllowedOutboundServices(svc service.MeshService) ([]service.MeshServicePort, error) {
-	allTrafficPolicies, err := mc.ListTrafficPolicies(svc)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed listing traffic routes")
-		return nil, err
-	}
-
-	log.Debug().Msgf("ListAllowedOutboundServices svc:%s trafficpolicies:%+v", svc, allTrafficPolicies)
-
-	allowedServicesSet := mapset.NewSet()
-
-	for _, policy := range allTrafficPolicies {
-		// we are looking for services the given svc can connect to
-		if policy.Source.Equals(svc) {
-			allowedServicesSet.Add(policy.Destination)
-		}
-	}
-
-	// Convert the set of interfaces to a list of namespaced services
-	var allowedServices []service.MeshServicePort
-	for svc := range allowedServicesSet.Iter() {
-		allowedServices = append(allowedServices, svc.(service.MeshServicePort))
-	}
-
-	log.Trace().Msgf("Allowed outbound services from source %q: %+v", svc, allowedServices)
-
-	return allowedServices, nil
 }
 
 // This function returns the list of connected services.
@@ -128,6 +95,11 @@ func (mc *MeshCatalog) getAllowedDirectionalServices(svc service.MeshService, di
 // ListAllowedInboundServices lists the inbound services allowed to connect to the given service.
 func (mc *MeshCatalog) ListAllowedInboundServices(destinationService service.MeshService) ([]service.MeshService, error) {
 	return mc.getAllowedDirectionalServices(destinationService, inbound)
+}
+
+// ListAllowedOutboundServices lists the services the given service is allowed outbound connections to.
+func (mc *MeshCatalog) ListAllowedOutboundServices(sourceService service.MeshService) ([]service.MeshService, error) {
+	return mc.getAllowedDirectionalServices(sourceService, outbound)
 }
 
 //GetWeightedClusterForService returns the weighted cluster for a given service
@@ -222,11 +194,7 @@ func (mc *MeshCatalog) GetResolvableHostnamesForUpstreamService(downstream, upst
 func (mc *MeshCatalog) getServiceHostnames(meshService service.MeshService, sameNamespace bool) ([]string, error) {
 	svc := mc.kubeController.GetService(meshService)
 	if svc == nil {
-		var svc1 corev1.Service
-		svc1.Name = meshService.Name
-		svc1.Namespace = meshService.Namespace
-		svc1.Spec.Ports = make([]corev1.ServicePort, 0)
-		svc = &svc1
+		return nil, errors.Errorf("Error fetching service %q", meshService)
 	}
 
 	hostnames := kubernetes.GetHostnamesForService(svc, sameNamespace)

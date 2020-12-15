@@ -35,7 +35,6 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 		log.Error().Err(err).Msgf("Error listing outbound services for proxy %q", proxyServiceName)
 		return nil, err
 	}
-	log.Debug().Msgf("svc:%s url:%s outboundServices:%+v", proxyServiceName, resp.TypeUrl, outboundServices)
 
 	// Build remote clusters based on allowed outbound services
 	for _, dstService := range outboundServices {
@@ -44,34 +43,28 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 			continue
 		}
 
-		remoteCluster, err := getRemoteServiceCluster(dstService, proxyServiceName.GetMeshServicePort(), cfg)
+		remoteCluster, err := getRemoteServiceCluster(dstService, proxyServiceName, cfg)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to construct service cluster for proxy %s", proxyServiceName)
 			return nil, err
 		}
 
 		if featureflags.IsBackpressureEnabled() {
-			enableBackpressure(catalog, remoteCluster, dstService.GetMeshService())
+			enableBackpressure(catalog, remoteCluster, dstService)
 		}
-		log.Debug().Msgf("remoteName:%s, remoteCluster:%+v", remoteCluster.Name, remoteCluster)
 
 		clusterFactories[remoteCluster.Name] = remoteCluster
 	}
 
 	// Create a local cluster for the service.
 	// The local cluster will be used for incoming traffic.
-	localClusters, err := getLocalServiceCluster(catalog, proxyServiceName)
+	localClusterName := getLocalClusterName(proxyServiceName)
+	localCluster, err := getLocalServiceCluster(catalog, proxyServiceName, localClusterName)
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to get local cluster config for proxy %s", proxyServiceName)
 		return nil, err
 	}
-
-	count := 0
-	for _, localCluster := range localClusters {
-		clusterFactories[localCluster.Name] = localCluster
-		log.Debug().Msgf("local:%s localCluster:%+v", localCluster.Name, localCluster)
-		count++
-	}
+	clusterFactories[localCluster.Name] = localCluster
 
 	if cfg.IsEgressEnabled() {
 		// Add a pass-through cluster for egress
