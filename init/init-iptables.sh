@@ -39,6 +39,7 @@ iptables -t nat -A PROXY_REDIRECT -p tcp --dport "5000" -j ACCEPT # devicedb
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "5432" -j ACCEPT # postgres
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "5556" -j ACCEPT # wsdex
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "5557" -j ACCEPT # wsdex
+iptables -t nat -A PROXY_REDIRECT -p tcp --dport "6379" -j ACCEPT # redis
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "7201" -j ACCEPT # m3db/metricsd
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "7203" -j ACCEPT # m3db/metricsd
 iptables -t nat -A PROXY_REDIRECT -p tcp --dport "7301" -j ACCEPT # m3db/metricsd
@@ -108,6 +109,7 @@ iptables -t nat -A PROXY_INBOUND -p tcp --dport "5000" -j RETURN  # devicedb
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "5432" -j RETURN  # postgres
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "5556" -j RETURN  # wsdex
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "5557" -j RETURN  # wsdex
+iptables -t nat -A PROXY_INBOUND -p tcp --dport "6379" -j RETURN  # redis
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "7201" -j RETURN  # m3db/metricsd
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "7203" -j RETURN  # m3db/metricsd
 iptables -t nat -A PROXY_INBOUND -p tcp --dport "7301" -j RETURN  # m3db/metricsd
