@@ -41,10 +41,12 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
+	"sigs.k8s.io/kind/pkg/apis/config/v1alpha4"
 	"sigs.k8s.io/kind/pkg/cluster"
 	"sigs.k8s.io/kind/pkg/cluster/nodeutils"
 
 	"github.com/openservicemesh/osm/pkg/cli"
+	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/utils"
 )
 
@@ -73,10 +75,14 @@ var _ = AfterSuite(func() {
 })
 
 const (
-	// contant, default name for the Registry Secret
+	// default name for the container registry secret
 	registrySecretName = "acr-creds"
+
 	// test tag prefix, for NS labeling
 	osmTest = "osmTest"
+
+	// osmCABundleName is the name of the secret used to store the CA bundle
+	osmCABundleName = "osm-ca-bundle"
 )
 
 var (
@@ -136,11 +142,7 @@ const (
 // Verifies the instType string flag option is a valid enum type
 func verifyValidInstallType(t InstallType) error {
 	switch t {
-	case SelfInstall:
-		fallthrough
-	case KindCluster:
-		fallthrough
-	case NoInstall:
+	case SelfInstall, KindCluster, NoInstall:
 		return nil
 	default:
 		return errors.Errorf("%s is not a valid OSM install type", string(t))
@@ -149,11 +151,13 @@ func verifyValidInstallType(t InstallType) error {
 
 // OsmTestData stores common state, variables and flags for the test at hand
 type OsmTestData struct {
-	T      GinkgoTInterface // for common test logging
-	TestID uint64           // uint randomized for every test. GinkgoRandomSeed can't be used as is per-suite.
+	T              GinkgoTInterface // for common test logging
+	TestID         uint64           // uint randomized for every test. GinkgoRandomSeed can't be used as is per-suite.
+	TestFolderName string           // Test folder name, when overridden by test flags
 
 	CleanupTest    bool // Cleanup test-related resources once finished
 	WaitForCleanup bool // Forces test to wait for effective deletion of resources upon cleanup
+	IgnoreRestarts bool // Ignore control plane processes restarts, if any
 
 	// OSM install-time variables
 	InstType          InstallType // Install type.
@@ -184,6 +188,8 @@ type OsmTestData struct {
 func registerFlags(td *OsmTestData) {
 	flag.BoolVar(&td.CleanupTest, "cleanupTest", true, "Cleanup test resources when done")
 	flag.BoolVar(&td.WaitForCleanup, "waitForCleanup", true, "Wait for effective deletion of resources")
+	flag.BoolVar(&td.IgnoreRestarts, "ignoreRestarts", false, "When true, will not make tests fail if restarts of control plane processes are observed")
+	flag.StringVar(&td.TestFolderName, "testFolderName", "", "Test folder name")
 
 	flag.StringVar((*string)(&td.InstType), "installType", string(SelfInstall), "Type of install/deployment for OSM")
 
@@ -198,15 +204,20 @@ func registerFlags(td *OsmTestData) {
 	flag.StringVar(&td.OsmImageTag, "osmImageTag", utils.GetEnv("CTR_TAG", defaultImageTag), "OSM image tag")
 	flag.StringVar(&td.OsmNamespace, "OsmNamespace", utils.GetEnv("K8S_NAMESPACE", defaultOsmNamespace), "OSM Namespace")
 
-	flag.BoolVar(&td.EnableNsMetricTag, "EnableMetricsTag", defaultEnableNsMetricTag, "Enable taggic Namespaces for metric collection")
+	flag.BoolVar(&td.EnableNsMetricTag, "EnableMetricsTag", defaultEnableNsMetricTag, "Enable tagging Namespaces for metrics collection")
 }
 
-// GetTestFile prefixes a filename with current test folder (based on current test ID
-// calling this API) and creates the test folder for current test if it doesn't exists.
+// GetTestFile prefixes a filename with current test folder
+// and creates the test folder for current test if it doesn't exists.
 // Only if some part of a test calls this function the test folder will be created,
 // otherwise nothing is created to avoid extra clutter.
 func (td *OsmTestData) GetTestFile(filename string) string {
-	testDir := fmt.Sprintf("test-%d", td.TestID)
+	var testDir string
+	if len(td.TestFolderName) == 0 {
+		testDir = fmt.Sprintf("test-%d", td.TestID)
+	} else {
+		testDir = td.TestFolderName
+	}
 
 	err := os.Mkdir(testDir, 0750)
 
@@ -257,7 +268,25 @@ func (td *OsmTestData) InitTestData(t GinkgoTInterface) error {
 	if (td.InstType == KindCluster) && td.ClusterProvider == nil {
 		td.ClusterProvider = cluster.NewProvider()
 		td.T.Logf("Creating local kind cluster")
-		if err := td.ClusterProvider.Create(td.ClusterName); err != nil {
+		clusterConfig := &v1alpha4.Cluster{
+			Nodes: []v1alpha4.Node{
+				{
+					Role: v1alpha4.ControlPlaneRole,
+					KubeadmConfigPatches: []string{`kind: InitConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    node-labels: "ingress-ready=true"`},
+					ExtraPortMappings: []v1alpha4.PortMapping{
+						{
+							ContainerPort: 80,
+							HostPort:      80,
+							Protocol:      v1alpha4.PortMappingProtocolTCP,
+						},
+					},
+				},
+			},
+		}
+		if err := td.ClusterProvider.Create(td.ClusterName, cluster.CreateWithV1Alpha4Config(clusterConfig)); err != nil {
 			return errors.Wrap(err, "failed to create kind cluster")
 		}
 	}
@@ -321,6 +350,8 @@ type InstallOSMOpts struct {
 	EnablePermissiveMode bool
 	EnvoyLogLevel        string
 	EnableDebugServer    bool
+
+	SetOverrides []string
 }
 
 // GetOSMInstallOpts initializes install options for OSM
@@ -346,13 +377,14 @@ func (td *OsmTestData) GetOSMInstallOpts() InstallOSMOpts {
 		CertmanagerIssuerName:  "osm-ca",
 		EnvoyLogLevel:          defaultEnvoyLogLevel,
 		EnableDebugServer:      defaultEnableDebugServer,
+		SetOverrides:           []string{},
 	}
 }
 
 // HelmInstallOSM installs an osm control plane using the osm chart which lives in charts/osm
 func (td *OsmTestData) HelmInstallOSM(release, namespace string) error {
 	if td.InstType == KindCluster {
-		if err := td.loadOSMImagesIntoKind(); err != nil {
+		if err := td.LoadOSMImagesIntoKind(); err != nil {
 			return err
 		}
 	}
@@ -375,6 +407,42 @@ func (td *OsmTestData) DeleteHelmRelease(name, namespace string) error {
 	if err != nil {
 		td.T.Fatal(err)
 	}
+	return nil
+}
+
+// LoadImagesToKind loads the list of images to the node for Kind clusters
+func (td *OsmTestData) LoadImagesToKind(imageNames []string) error {
+	if td.InstType != KindCluster {
+		td.T.Log("Not a Kind cluster, nothing to load")
+		return nil
+	}
+
+	td.T.Log("Getting image data")
+	docker, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
+	if err != nil {
+		return errors.Wrap(err, "failed to create docker client")
+	}
+	var imageIDs []string
+	for _, name := range imageNames {
+		imageName := fmt.Sprintf("%s/%s:%s", td.CtrRegistryServer, name, td.OsmImageTag)
+		imageIDs = append(imageIDs, imageName)
+	}
+	imageData, err := docker.ImageSave(context.TODO(), imageIDs)
+	if err != nil {
+		return errors.Wrap(err, "failed to get image data")
+	}
+	defer imageData.Close() //nolint: errcheck,gosec
+	nodes, err := td.ClusterProvider.ListNodes(td.ClusterName)
+	if err != nil {
+		return errors.Wrap(err, "failed to list kind nodes")
+	}
+	for _, n := range nodes {
+		td.T.Log("Loading images onto node", n)
+		if err := nodeutils.LoadImageArchive(n, imageData); err != nil {
+			return errors.Wrap(err, "failed to load images")
+		}
+	}
+
 	return nil
 }
 
@@ -412,34 +480,8 @@ func (td *OsmTestData) InstallOSM(instOpts InstallOSMOpts) error {
 	}
 
 	if td.InstType == KindCluster {
-		td.T.Log("Getting image data")
-		imageNames := []string{
-			"osm-controller",
-			"init",
-		}
-		docker, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
-		if err != nil {
-			return errors.Wrap(err, "failed to create docker client")
-		}
-		var imageIDs []string
-		for _, name := range imageNames {
-			imageName := fmt.Sprintf("%s/%s:%s", td.CtrRegistryServer, name, td.OsmImageTag)
-			imageIDs = append(imageIDs, imageName)
-		}
-		imageData, err := docker.ImageSave(context.TODO(), imageIDs)
-		if err != nil {
-			return errors.Wrap(err, "failed to get image data")
-		}
-		defer imageData.Close() //nolint: errcheck,gosec
-		nodes, err := td.ClusterProvider.ListNodes(td.ClusterName)
-		if err != nil {
-			return errors.Wrap(err, "failed to list kind nodes")
-		}
-		for _, n := range nodes {
-			td.T.Log("Loading images onto node", n)
-			if err := nodeutils.LoadImageArchive(n, imageData); err != nil {
-				return errors.Wrap(err, "failed to load images")
-			}
+		if err := td.LoadOSMImagesIntoKind(); err != nil {
+			return errors.Wrap(err, "failed to load OSM images to nodes for Kind cluster")
 		}
 	}
 
@@ -470,6 +512,10 @@ func (td *OsmTestData) InstallOSM(instOpts InstallOSMOpts) error {
 			"--vault-protocol="+instOpts.VaultProtocol,
 			"--vault-role="+instOpts.VaultRole,
 		)
+		// Wait for the vault pod
+		if err := td.WaitForPodsRunningReady(instOpts.ControlPlaneNS, 60*time.Second, 1); err != nil {
+			return errors.Wrap(err, "failed waiting for vault pod to become ready")
+		}
 	case "cert-manager":
 		if err := td.installCertManager(instOpts); err != nil {
 			return err
@@ -496,6 +542,16 @@ func (td *OsmTestData) InstallOSM(instOpts InstallOSMOpts) error {
 	args = append(args, fmt.Sprintf("--enable-fluentbit=%v", instOpts.DeployFluentbit))
 	args = append(args, fmt.Sprintf("--timeout=%v", 90*time.Second))
 
+	if len(instOpts.SetOverrides) > 0 {
+		separator := "="
+		finalLine := "--set"
+		for _, override := range instOpts.SetOverrides {
+			finalLine = finalLine + separator + override
+			separator = ","
+		}
+		args = append(args, finalLine)
+	}
+
 	td.T.Log("Installing OSM")
 	stdout, stderr, err := td.RunLocal(filepath.FromSlash("../../bin/osm"), args)
 	if err != nil {
@@ -503,6 +559,32 @@ func (td *OsmTestData) InstallOSM(instOpts InstallOSMOpts) error {
 		td.T.Logf("stdout:\n%s", stdout)
 		td.T.Logf("stderr:\n%s", stderr)
 		return errors.Wrap(err, "failed to run osm install")
+	}
+
+	return nil
+}
+
+// RestartOSMController restarts the osm-controller pod in the installed controller's namespace
+func (td *OsmTestData) RestartOSMController(instOpts InstallOSMOpts) error {
+	labelSelector := metav1.LabelSelector{MatchLabels: map[string]string{"app": constants.OSMControllerName}}
+	listOptions := metav1.ListOptions{
+		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
+	}
+
+	controllerPods, err := td.Client.CoreV1().Pods(instOpts.ControlPlaneNS).List(context.TODO(), listOptions)
+	if err != nil {
+		return errors.Wrap(err, "error fetching controller pod")
+	}
+	if len(controllerPods.Items) != 1 {
+		return errors.Errorf("expected 1 osm-controller pod, got %d", len(controllerPods.Items))
+	}
+
+	pod := controllerPods.Items[0]
+
+	// Delete the pod and let k8s spin it up again
+	err = td.Client.CoreV1().Pods(instOpts.ControlPlaneNS).Delete(context.TODO(), pod.Name, metav1.DeleteOptions{})
+	if err != nil {
+		return errors.Wrap(err, "erorr deleting osm-controller pod")
 	}
 
 	return nil
@@ -517,37 +599,15 @@ func (td *OsmTestData) GetConfigMap(name, namespace string) (*corev1.ConfigMap, 
 	return configmap, nil
 }
 
-func (td *OsmTestData) loadOSMImagesIntoKind() error {
-	td.T.Log("Getting image data")
+// LoadOSMImagesIntoKind loads the OSM images to the node for Kind clusters
+func (td *OsmTestData) LoadOSMImagesIntoKind() error {
 	imageNames := []string{
 		"osm-controller",
+		"osm-injector",
 		"init",
 	}
-	docker, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
-	if err != nil {
-		return errors.Wrap(err, "failed to create docker client")
-	}
-	var imageIDs []string
-	for _, name := range imageNames {
-		imageName := fmt.Sprintf("%s/%s:%s", td.CtrRegistryServer, name, td.OsmImageTag)
-		imageIDs = append(imageIDs, imageName)
-	}
-	imageData, err := docker.ImageSave(context.TODO(), imageIDs)
-	if err != nil {
-		return errors.Wrap(err, "failed to get image data")
-	}
-	defer imageData.Close() //nolint: errcheck,gosec
-	nodes, err := td.ClusterProvider.ListNodes(td.ClusterName)
-	if err != nil {
-		return errors.Wrap(err, "failed to list kind nodes")
-	}
-	for _, n := range nodes {
-		td.T.Log("Loading images onto node", n)
-		if err := nodeutils.LoadImageArchive(n, imageData); err != nil {
-			return errors.Wrap(err, "failed to load images")
-		}
-	}
-	return nil
+
+	return td.LoadImagesToKind(imageNames)
 }
 
 func (td *OsmTestData) installVault(instOpts InstallOSMOpts) error {
@@ -750,7 +810,7 @@ func (td *OsmTestData) installCertManager(instOpts InstallOSMOpts) error {
 		Spec: v1alpha2.CertificateSpec{
 			IsCA:       true,
 			Duration:   &metav1.Duration{Duration: 90 * 24 * time.Hour},
-			SecretName: "osm-ca-bundle",
+			SecretName: osmCABundleName,
 			CommonName: "osm-system",
 			IssuerRef: cmmeta.ObjectReference{
 				Name:  selfsigned.Name,
@@ -767,7 +827,7 @@ func (td *OsmTestData) installCertManager(instOpts InstallOSMOpts) error {
 		Spec: v1alpha2.IssuerSpec{
 			IssuerConfig: v1alpha2.IssuerConfig{
 				CA: &v1alpha2.CAIssuer{
-					SecretName: "osm-ca-bundle",
+					SecretName: osmCABundleName,
 				},
 			},
 		},
@@ -782,30 +842,53 @@ func (td *OsmTestData) installCertManager(instOpts InstallOSMOpts) error {
 		return errors.Wrap(err, "failed to create cert-manager config")
 	}
 
-	_, err = cmClient.CertmanagerV1alpha2().Certificates(td.OsmNamespace).Create(context.TODO(), cert, metav1.CreateOptions{})
-	if err != nil {
-		return errors.Wrap(err, "failed to create Certificate "+cert.Name)
+	// cert-manager.io webhook can experience connection problems after installation:
+	// https://cert-manager.io/docs/concepts/webhook/#webhook-connection-problems-shortly-after-cert-manager-installation
+	// Retry API errors with some delay in case of failures.
+	if err = Td.RetryFuncOnError(func() error {
+		_, err = cmClient.CertmanagerV1alpha2().Certificates(td.OsmNamespace).Create(context.TODO(), cert, metav1.CreateOptions{})
+		if err != nil {
+			return errors.Wrap(err, "failed to create Certificate "+cert.Name)
+		}
+		return nil
+	}, 5, 5*time.Second); err != nil {
+		return err
 	}
 
-	_, err = cmClient.CertmanagerV1alpha2().Issuers(td.OsmNamespace).Create(context.TODO(), selfsigned, metav1.CreateOptions{})
-	if err != nil {
-		return errors.Wrap(err, "failed to create Issuer "+selfsigned.Name)
+	if err = Td.RetryFuncOnError(func() error {
+		_, err = cmClient.CertmanagerV1alpha2().Issuers(td.OsmNamespace).Create(context.TODO(), selfsigned, metav1.CreateOptions{})
+		if err != nil {
+			return errors.Wrap(err, "failed to create Issuer "+selfsigned.Name)
+		}
+		return nil
+	}, 5, 5*time.Second); err != nil {
+		return err
 	}
 
-	_, err = cmClient.CertmanagerV1alpha2().Issuers(td.OsmNamespace).Create(context.TODO(), ca, metav1.CreateOptions{})
-	if err != nil {
-		return errors.Wrap(err, "failed to create Issuer "+ca.Name)
+	if err = Td.RetryFuncOnError(func() error {
+		_, err = cmClient.CertmanagerV1alpha2().Issuers(td.OsmNamespace).Create(context.TODO(), ca, metav1.CreateOptions{})
+		if err != nil {
+			return errors.Wrap(err, "failed to create Issuer "+ca.Name)
+		}
+		return nil
+	}, 5, 5*time.Second); err != nil {
+		return err
+	}
+
+	// cert-manager.io creates the OSM CA bundle secret which is required by osm-controller. Wait for it to be ready.
+	if err := Td.waitForCABundleSecret(td.OsmNamespace, 90*time.Second); err != nil {
+		return errors.Wrap(err, "error waiting for cert-manager.io to create OSM CA bundle secret")
 	}
 
 	return nil
 }
 
 // AddNsToMesh Adds monitored namespaces to the OSM mesh
-func (td *OsmTestData) AddNsToMesh(sidecardInject bool, ns ...string) error {
+func (td *OsmTestData) AddNsToMesh(shouldInjectSidecar bool, ns ...string) error {
 	td.T.Logf("Adding Namespaces [+%s] to the mesh", ns)
 	for _, namespace := range ns {
 		args := []string{"namespace", "add", namespace}
-		if !sidecardInject {
+		if !shouldInjectSidecar {
 			args = append(args, "--disable-sidecar-injection")
 		}
 
@@ -952,14 +1035,14 @@ func (td *OsmTestData) RunLocal(path string, args []string) (*bytes.Buffer, *byt
 // RunRemote runs command in remote container
 func (td *OsmTestData) RunRemote(
 	ns string, podName string, containerName string,
-	command string) (string, string, error) {
+	command []string) (string, string, error) {
 	var stdin, stdout, stderr bytes.Buffer
 
 	req := td.Client.CoreV1().RESTClient().Post().Resource("pods").Name(podName).
 		Namespace(ns).SubResource("exec")
 
 	option := &corev1.PodExecOptions{
-		Command:   strings.Fields(command),
+		Command:   command,
 		Container: containerName,
 		Stdin:     true,
 		Stdout:    true,
@@ -1025,6 +1108,16 @@ func (td *OsmTestData) WaitForPodsRunningReady(ns string, timeout time.Duration,
 		time.Sleep(time.Second)
 	}
 
+	pods, err := td.Client.CoreV1().Pods(ns).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "failed to list pods")
+	}
+	td.T.Log("Pod Statuses in namespace", ns)
+	for _, pod := range pods.Items {
+		status, _ := json.MarshalIndent(pod.Status, "", "  ")
+		td.T.Logf("Pod %s:\n%s", pod.Name, status)
+	}
+
 	return fmt.Errorf("Not all pods were Running & Ready in NS %s after %v", ns, timeout)
 }
 
@@ -1063,12 +1156,20 @@ const (
 	Suite CleanupType = "suite"
 )
 
-// Cleanup is Used to cleanup resorces once the test is done
+// Cleanup is Used to cleanup resources once the test is done
 func (td *OsmTestData) Cleanup(ct CleanupType) {
 	if td.Client == nil {
 		// Avoid any cleanup (crash) if no test is run;
 		// init doesn't happen and clientsets are nil
 		return
+	}
+
+	// Verify no crashes/restarts of OSM and control plane components were observed during the test
+	// We will not inmediately call Fail() here to not disturb the cleanup process, and instead
+	// call it at the end of cleanup
+	restartSeen, err := td.VerifyComponentRestarts()
+	if err != nil {
+		Td.T.Log("Failed to verify component restarts: %v", err)
 	}
 
 	// The condition enters to cleanup K8s resources if
@@ -1127,6 +1228,10 @@ func (td *OsmTestData) Cleanup(ct CleanupType) {
 			td.ClusterProvider = nil
 		}
 	}
+
+	if restartSeen && !td.IgnoreRestarts {
+		Fail("Unexpected restarts for control plane processes were observed")
+	}
 }
 
 //DockerConfig and other configs are docker-specific container registry secret structures.
@@ -1174,4 +1279,58 @@ func (td *OsmTestData) CreateDockerRegistrySecret(ns string) {
 	if err != nil {
 		td.T.Fatalf("Could not add registry secret")
 	}
+}
+
+// RetryOnErrorFunc is a function type passed to RetryFuncOnError() to execute
+type RetryOnErrorFunc func() error
+
+// RetryFuncOnError runs the given function and retries for the given number of times if an error is encountered
+func (td *OsmTestData) RetryFuncOnError(f RetryOnErrorFunc, retryTimes int, sleepBetweenRetries time.Duration) error {
+	var err error
+
+	for i := 0; i <= retryTimes; i++ {
+		err = f()
+		if err == nil {
+			return nil
+		}
+		time.Sleep(sleepBetweenRetries)
+	}
+	return errors.Wrapf(err, "Error after retrying %d times", retryTimes)
+}
+
+// waitForCABundleSecret waits for the CA bundle secret to be created
+func (td *OsmTestData) waitForCABundleSecret(ns string, timeout time.Duration) error {
+	td.T.Logf("Wait up to %s for OSM CA bundle to be ready in NS [%s]...", timeout, ns)
+	for start := time.Now(); time.Since(start) < timeout; time.Sleep(5 * time.Second) {
+		_, err := td.Client.CoreV1().Secrets(ns).Get(context.TODO(), osmCABundleName, metav1.GetOptions{})
+		if err == nil {
+			return nil
+		}
+		td.T.Logf("OSM CA bundle secret not ready in NS [%s]", ns)
+		continue // retry
+	}
+
+	return fmt.Errorf("CA bundle secret not ready in NS %s after %s", ns, timeout)
+}
+
+// VerifyComponentRestarts ensure no crashes on osm-namespace instances
+func (td *OsmTestData) VerifyComponentRestarts() (bool, error) {
+	list, err := td.Client.CoreV1().Pods(td.OsmNamespace).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		td.T.Errorf("Error listing pods from osm Namespace: %v", err)
+		return false, err
+	}
+
+	restartSeen := false
+	for _, pod := range list.Items {
+		for _, contStatus := range pod.Status.ContainerStatuses {
+			if contStatus.RestartCount > 0 {
+				td.T.Logf("!! Restart observed for control plane pod/cont %s/%s : %d",
+					pod.Name, contStatus.ContainerID, contStatus.RestartCount)
+				restartSeen = true
+			}
+		}
+	}
+
+	return restartSeen, nil
 }

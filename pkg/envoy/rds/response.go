@@ -1,35 +1,37 @@
 package rds
 
 import (
+<<<<<<< HEAD
 	"strings"
 	"fmt"
 
 	set "github.com/deckarep/golang-set"
 	xds_route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+=======
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	xds_discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/golang/protobuf/ptypes"
-	split "github.com/servicemeshinterface/smi-sdk-go/pkg/apis/split/v1alpha2"
 
 	"github.com/openservicemesh/osm/pkg/catalog"
 	"github.com/openservicemesh/osm/pkg/certificate"
 	"github.com/openservicemesh/osm/pkg/configurator"
 	"github.com/openservicemesh/osm/pkg/envoy"
 	"github.com/openservicemesh/osm/pkg/envoy/route"
-	"github.com/openservicemesh/osm/pkg/kubernetes"
-	"github.com/openservicemesh/osm/pkg/service"
 	"github.com/openservicemesh/osm/pkg/trafficpolicy"
 )
 
 // NewResponse creates a new Route Discovery Response.
-func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_discovery.DiscoveryRequest, _ configurator.Configurator, _ certificate.Manager) (*xds_discovery.DiscoveryResponse, error) {
-	svcList, err := catalog.GetServicesFromEnvoyCertificate(proxy.GetCommonName())
+func NewResponse(cataloger catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_discovery.DiscoveryRequest, cfg configurator.Configurator, _ certificate.Manager) (*xds_discovery.DiscoveryResponse, error) {
+	var inboundTrafficPolicies []*trafficpolicy.InboundTrafficPolicy
+	var outboundTrafficPolicies []*trafficpolicy.OutboundTrafficPolicy
+
+	proxyIdentity, err := catalog.GetServiceAccountFromProxyCertificate(proxy.GetCertificateCommonName())
 	if err != nil {
-		log.Error().Err(err).Msgf("Error looking up MeshService for Envoy with CN=%q", proxy.GetCommonName())
+		log.Error().Err(err).Msgf("Error looking up Service Account for Envoy with serial number=%q", proxy.GetCertificateSerialNumber())
 		return nil, err
 	}
-	// Github Issue #1575
-	proxyServiceName := svcList[0]
 
+<<<<<<< HEAD
 
 	allTrafficPolicies, err := catalog.ListTrafficPolicies(proxyServiceName)
 	if err != nil {
@@ -41,14 +43,20 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 	resp := &xds_discovery.DiscoveryResponse{
 		TypeUrl: string(envoy.TypeRDS),
 	}
+=======
+	services, err := cataloger.GetServicesFromEnvoyCertificate(proxy.GetCertificateCommonName())
+	if err != nil {
+		log.Error().Err(err).Msgf("Error looking up services for Envoy with serial number=%q", proxy.GetCertificateSerialNumber())
+		return nil, err
+	}
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
-	allTrafficSplits, _, _, _, _ := catalog.ListSMIPolicies()
-	var routeConfiguration []*xds_route.RouteConfiguration
-	outboundRouteConfig := route.NewRouteConfigurationStub(route.OutboundRouteConfigName)
-	inboundRouteConfig := route.NewRouteConfigurationStub(route.InboundRouteConfigName)
-	outboundAggregatedRoutesByHostnames := make(map[string]map[string]trafficpolicy.RouteWeightedClusters)
-	inboundAggregatedRoutesByHostnames := make(map[string]map[string]trafficpolicy.RouteWeightedClusters)
+	// Build traffic policies from  either SMI Traffic Target and Traffic Split or service discovery
+	// depending on whether permissive mode is enabled or not
+	inboundTrafficPolicies = cataloger.ListInboundTrafficPolicies(proxyIdentity, services)
+	outboundTrafficPolicies = cataloger.ListOutboundTrafficPolicies(proxyIdentity)
 
+<<<<<<< HEAD
 	for _, trafficPolicy := range allTrafficPolicies {
 		isSourceService := trafficPolicy.Source.Equals(proxyServiceName)
 		isDestinationService := trafficPolicy.Destination.GetMeshService().Equals(proxyServiceName)
@@ -58,10 +66,16 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 		if isTrafficSplitService(svc, allTrafficSplits) {
 			continue
 		}
+=======
+	// Get Ingress inbound policies for the proxy
+	for _, svc := range services {
+		ingressInboundPolicies, err := cataloger.GetIngressPoliciesForService(svc)
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 		if err != nil {
-			log.Error().Err(err).Msg("Failed listing domains")
+			log.Error().Err(err).Msgf("Error looking up ingress policies for service=%s", svc.String())
 			return nil, err
 		}
+<<<<<<< HEAD
 		log.Debug().Msgf("RDS hostnames: %+v", hostnames)
 
 		// multiple targets exist per service
@@ -102,9 +116,18 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 	/* do not include ingress routes for now as iptables should take care of it
 	if err = updateRoutesForIngress(proxyServiceName, catalog, inboundAggregatedRoutesByHostnames); err != nil {
 		return nil, err
+=======
+		inboundTrafficPolicies = trafficpolicy.MergeInboundPolicies(true, inboundTrafficPolicies, ingressInboundPolicies...)
+	}
+
+	routeConfiguration := route.BuildRouteConfiguration(inboundTrafficPolicies, outboundTrafficPolicies, proxy)
+	resp := &xds_discovery.DiscoveryResponse{
+		TypeUrl: string(envoy.TypeRDS),
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	}
 	*/
 
+<<<<<<< HEAD
 	route.UpdateRouteConfiguration(catalog, outboundAggregatedRoutesByHostnames, outboundRouteConfig, route.OutboundRoute)
 	route.UpdateRouteConfiguration(catalog, inboundAggregatedRoutesByHostnames, inboundRouteConfig, route.InboundRoute)
 	routeConfiguration = append(routeConfiguration, inboundRouteConfig)
@@ -112,6 +135,8 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 
 	log.Debug().Msgf("RDS proxy: %+v routeConfiguration: %+v", proxy, routeConfiguration)
 
+=======
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	for _, config := range routeConfiguration {
 		marshalledRouteConfig, err := ptypes.MarshalAny(config)
 		if err != nil {
@@ -120,18 +145,8 @@ func NewResponse(catalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_disco
 		}
 		resp.Resources = append(resp.Resources, marshalledRouteConfig)
 	}
-	return resp, nil
-}
 
-func isTrafficSplitService(svc service.MeshService, allTrafficSplits []*split.TrafficSplit) bool {
-	for _, split := range allTrafficSplits {
-		if split.Namespace == svc.Namespace && split.Spec.Service == svc.Name {
-			return true
-		}
-	}
-	return false
-}
-
+<<<<<<< HEAD
 func aggregateRoutesByHost(routesPerHost map[string]map[string]trafficpolicy.RouteWeightedClusters, routePolicy trafficpolicy.HTTPRouteMatch, weightedCluster service.WeightedCluster, hostname string, targetPort int) {
 	host := kubernetes.GetServiceFromHostname(hostname)
 	if targetPort != 0 {
@@ -168,6 +183,9 @@ func createRoutePolicyWeightedClusters(routePolicy trafficpolicy.HTTPRouteMatch,
 		WeightedClusters: set.NewSet(weightedCluster),
 		Hostnames:        set.NewSet(hostname),
 	}
+=======
+	return resp, nil
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 }
 
 // return only those hostnames whose name ends with ":<port>"

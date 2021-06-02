@@ -1,18 +1,15 @@
 package catalog
 
 import (
-	"time"
-
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/openservicemesh/osm/pkg/announcements"
 	"github.com/openservicemesh/osm/pkg/certificate"
 	"github.com/openservicemesh/osm/pkg/configurator"
 	"github.com/openservicemesh/osm/pkg/endpoint"
 	"github.com/openservicemesh/osm/pkg/ingress"
 	k8s "github.com/openservicemesh/osm/pkg/kubernetes"
-	"github.com/openservicemesh/osm/pkg/kubernetes/events"
 	"github.com/openservicemesh/osm/pkg/smi"
+<<<<<<< HEAD
 	"github.com/openservicemesh/osm/pkg/witesand"
 )
 
@@ -20,6 +17,9 @@ const (
 	// this is catalog's tick rate for ticker, which triggers global proxy updates
 	// 0 disables the ticker
 	updateAtLeastEvery = 0 * time.Second
+=======
+	"github.com/openservicemesh/osm/pkg/ticker"
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 )
 
 // NewMeshCatalog creates a new service catalog
@@ -47,6 +47,8 @@ func NewMeshCatalog(kubeController k8s.Controller, kubeClient kubernetes.Interfa
 	mc.witesandHttpServerAndClient()
 
 	go mc.dispatcher()
+	ticker.InitTicker(cfg)
+
 	return &mc
 }
 
@@ -54,6 +56,7 @@ func NewMeshCatalog(kubeController k8s.Controller, kubeClient kubernetes.Interfa
 func (mc *MeshCatalog) GetSMISpec() smi.MeshSpec {
 	return mc.meshSpec
 }
+<<<<<<< HEAD
 
 func (mc *MeshCatalog) GetWitesandCataloger() witesand.WitesandCataloger {
 	return mc.witesandCatalog
@@ -100,3 +103,5 @@ func (mc *MeshCatalog) GetProvider(ident string) endpoint.Provider {
 	}
 	return nil
 }
+=======
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d

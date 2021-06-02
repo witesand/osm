@@ -3,7 +3,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jaeger
+  namespace: {{ include "osm.namespace" . }}
   labels:
+    {{- include "osm.labels" . | nindent 4 }}
     app: jaeger
 spec:
   replicas: 1
@@ -13,6 +15,7 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "osm.labels" . | nindent 8 }}
         app: jaeger
     spec:
       containers:

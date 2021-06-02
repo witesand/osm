@@ -8,16 +8,25 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/openservicemesh/osm/pkg/service"
 	"github.com/openservicemesh/osm/pkg/tests"
 )
 
 var _ = Describe("Test Envoy tools", func() {
+	Context("Test GetLocalClusterNameForServiceCluster", func() {
+		It("", func() {
+			clusterName := "-cluster-name-"
+			actual := GetLocalClusterNameForServiceCluster(clusterName)
+			expected := "-cluster-name--local"
+			Expect(actual).To(Equal(expected))
+		})
+	})
+
 	Context("Test GetAddress()", func() {
 		It("should return address", func() {
 			addr := "blah"
 			port := uint32(95346)
 			actual := GetAddress(addr, port)
+
 			expected := &core.Address{
 				Address: &core.Address_SocketAddress{
 					SocketAddress: &core.SocketAddress{
@@ -34,14 +43,11 @@ var _ = Describe("Test Envoy tools", func() {
 		})
 	})
 
-	Context("Test CertName interface", func() {
+	Context("Test UnmarshalSDSCert()", func() {
 		It("Interface marshals and unmarshals preserving the exact same data", func() {
 			InitialObj := SDSCert{
 				CertType: ServiceCertType,
-				MeshService: service.MeshService{
-					Namespace: "test-namespace",
-					Name:      "test-service",
-				},
+				Name:     "test-namespace/test-service",
 			}
 
 			// Marshal/stringify it
@@ -53,30 +59,26 @@ var _ = Describe("Test Envoy tools", func() {
 			// First and final object must be equal
 			Expect(*finalObj).To(Equal(InitialObj))
 		})
-	})
 
-	Context("Test getRequestedCertType()", func() {
 		It("returns service cert", func() {
 			actual, err := UnmarshalSDSCert("service-cert:namespace-test/blahBlahBlahCert")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actual.CertType).To(Equal(ServiceCertType))
-			Expect(actual.MeshService.Namespace).To(Equal("namespace-test"))
-			Expect(actual.MeshService.Name).To(Equal("blahBlahBlahCert"))
+			Expect(actual.Name).To(Equal("namespace-test/blahBlahBlahCert"))
 		})
 		It("returns root cert for mTLS", func() {
 			actual, err := UnmarshalSDSCert("root-cert-for-mtls-outbound:namespace-test/blahBlahBlahCert")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actual.CertType).To(Equal(RootCertTypeForMTLSOutbound))
-			Expect(actual.MeshService.Namespace).To(Equal("namespace-test"))
-			Expect(actual.MeshService.Name).To(Equal("blahBlahBlahCert"))
+			Expect(actual.Name).To(Equal("namespace-test/blahBlahBlahCert"))
+
 		})
 
 		It("returns root cert for non-mTLS", func() {
 			actual, err := UnmarshalSDSCert("root-cert-https:namespace-test/blahBlahBlahCert")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actual.CertType).To(Equal(RootCertTypeForHTTPS))
-			Expect(actual.MeshService.Namespace).To(Equal("namespace-test"))
-			Expect(actual.MeshService.Name).To(Equal("blahBlahBlahCert"))
+			Expect(actual.Name).To(Equal("namespace-test/blahBlahBlahCert"))
 		})
 
 		It("returns an error (invalid formatting)", func() {
@@ -91,30 +93,6 @@ var _ = Describe("Test Envoy tools", func() {
 
 		It("returns an error (missing cert type)", func() {
 			_, err := UnmarshalSDSCert("blahBlahBlahCert/service")
-			Expect(err).To(HaveOccurred())
-		})
-
-		It("returns an error (service is not namespaced)", func() {
-			_, err := UnmarshalSDSCert("root-cert-https:blahBlahBlahCert")
-			Expect(err).To(HaveOccurred())
-		})
-
-		It("returns an error (invalid namespace formatting)", func() {
-			_, err := UnmarshalSDSCert("root-cert-https:blah/BlahBl/ahCert")
-			Expect(err).To(HaveOccurred())
-		})
-		It("returns an error (empty left-side namespace)", func() {
-			_, err := UnmarshalSDSCert("root-cert-https:/ahCert")
-			Expect(err).To(HaveOccurred())
-		})
-
-		It("returns an error (empty cert type)", func() {
-			_, err := UnmarshalSDSCert(":ns/svc")
-			Expect(err).To(HaveOccurred())
-		})
-
-		It("returns an error (empty slice on right/wrong number of slices)", func() {
-			_, err := UnmarshalSDSCert("root-cert-https:aaa/ahCert:")
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -152,10 +130,7 @@ var _ = Describe("Test Envoy tools", func() {
 					ValidationContextType: &auth.CommonTlsContext_ValidationContextSdsSecretConfig{
 						ValidationContextSdsSecretConfig: &auth.SdsSecretConfig{
 							Name: SDSCert{
-								MeshService: service.MeshService{
-									Namespace: "default",
-									Name:      "bookstore-v1",
-								},
+								Name:     "default/bookstore-v1",
 								CertType: RootCertTypeForMTLSInbound,
 							}.String(),
 							SdsConfig: &core.ConfigSource{
@@ -195,7 +170,7 @@ var _ = Describe("Test Envoy tools", func() {
 	Context("Test GetUpstreamTLSContext()", func() {
 		It("should return TLS context", func() {
 			sni := "bookstore-v1.default.svc.cluster.local"
-			tlsContext := GetUpstreamTLSContext(tests.BookbuyerService, tests.BookstoreV1Service)
+			tlsContext := GetUpstreamTLSContext(tests.BookbuyerServiceAccount, tests.BookstoreV1Service)
 
 			expectedTLSContext := &auth.UpstreamTlsContext{
 				CommonTlsContext: &auth.CommonTlsContext{
@@ -244,7 +219,7 @@ var _ = Describe("Test Envoy tools", func() {
 
 	Context("Test GetUpstreamTLSContext()", func() {
 		It("creates correct UpstreamTlsContext.Sni field", func() {
-			tlsContext := GetUpstreamTLSContext(tests.BookbuyerService, tests.BookstoreV1Service)
+			tlsContext := GetUpstreamTLSContext(tests.BookbuyerServiceAccount, tests.BookstoreV1Service)
 			// To show the actual string for human comprehension
 			Expect(tlsContext.Sni).To(Equal(tests.BookstoreV1Service.ServerName()))
 		})
@@ -253,12 +228,12 @@ var _ = Describe("Test Envoy tools", func() {
 	Context("Test getCommonTLSContext()", func() {
 		It("returns proper auth.CommonTlsContext for outbound mTLS", func() {
 			tlsSDSCert := SDSCert{
-				MeshService: tests.BookbuyerService,
-				CertType:    ServiceCertType,
+				Name:     "default/bookbuyer",
+				CertType: ServiceCertType,
 			}
 			peerValidationSDSCert := SDSCert{
-				MeshService: tests.BookstoreV1Service,
-				CertType:    RootCertTypeForMTLSOutbound,
+				Name:     "default/bookstore-v1",
+				CertType: RootCertTypeForMTLSOutbound,
 			}
 
 			actual := getCommonTLSContext(tlsSDSCert, peerValidationSDSCert)
@@ -283,12 +258,12 @@ var _ = Describe("Test Envoy tools", func() {
 
 		It("returns proper auth.CommonTlsContext for inbound mTLS", func() {
 			tlsSDSCert := SDSCert{
-				MeshService: tests.BookstoreV1Service,
-				CertType:    ServiceCertType,
+				Name:     "default/bookstore-v1",
+				CertType: ServiceCertType,
 			}
 			peerValidationSDSCert := SDSCert{
-				MeshService: tests.BookstoreV1Service,
-				CertType:    RootCertTypeForMTLSInbound,
+				Name:     "default/bookstore-v1",
+				CertType: RootCertTypeForMTLSInbound,
 			}
 
 			actual := getCommonTLSContext(tlsSDSCert, peerValidationSDSCert)
@@ -313,12 +288,12 @@ var _ = Describe("Test Envoy tools", func() {
 
 		It("returns proper auth.CommonTlsContext for non-mTLS (HTTPS)", func() {
 			tlsSDSCert := SDSCert{
-				MeshService: tests.BookstoreV1Service,
-				CertType:    ServiceCertType,
+				Name:     "default/bookstore-v1",
+				CertType: ServiceCertType,
 			}
 			peerValidationSDSCert := SDSCert{
-				MeshService: tests.BookstoreV1Service,
-				CertType:    RootCertTypeForHTTPS,
+				Name:     "default/bookstore-v1",
+				CertType: RootCertTypeForHTTPS,
 			}
 
 			actual := getCommonTLSContext(tlsSDSCert, peerValidationSDSCert)
@@ -344,15 +319,15 @@ var _ = Describe("Test Envoy tools", func() {
 
 	Context("Test GetEnvoyServiceNodeID()", func() {
 		It("", func() {
-			actual := GetEnvoyServiceNodeID("-nodeID-")
-			expected := "$(POD_UID)/$(POD_NAMESPACE)/$(POD_IP)/$(SERVICE_ACCOUNT)/-nodeID-"
+			actual := GetEnvoyServiceNodeID("-nodeID-", "-workload-kind-", "-workload-name-")
+			expected := "$(POD_UID)/$(POD_NAMESPACE)/$(POD_IP)/$(SERVICE_ACCOUNT)/-nodeID-/$(POD_NAME)/-workload-kind-/-workload-name-"
 			Expect(actual).To(Equal(expected))
 		})
 	})
 
 	Context("Test ParseEnvoyServiceNodeID()", func() {
 		It("", func() {
-			serviceNodeID := GetEnvoyServiceNodeID("-nodeID-")
+			serviceNodeID := GetEnvoyServiceNodeID("-nodeID-", "-workload-kind-", "-workload-name-")
 			meta, err := ParseEnvoyServiceNodeID(serviceNodeID)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(meta.UID).To(Equal("$(POD_UID)"))
@@ -360,6 +335,23 @@ var _ = Describe("Test Envoy tools", func() {
 			Expect(meta.IP).To(Equal("$(POD_IP)"))
 			Expect(meta.ServiceAccount).To(Equal("$(SERVICE_ACCOUNT)"))
 			Expect(meta.EnvoyNodeID).To(Equal("-nodeID-"))
+			Expect(meta.Name).To(Equal("$(POD_NAME)"))
+			Expect(meta.WorkloadKind).To(Equal("-workload-kind-"))
+			Expect(meta.WorkloadName).To(Equal("-workload-name-"))
+		})
+
+		It("handles when not all fields are defined", func() {
+			serviceNodeID := "$(POD_UID)/$(POD_NAMESPACE)/$(POD_IP)/$(SERVICE_ACCOUNT)/-nodeID-"
+			meta, err := ParseEnvoyServiceNodeID(serviceNodeID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(meta.UID).To(Equal("$(POD_UID)"))
+			Expect(meta.Namespace).To(Equal("$(POD_NAMESPACE)"))
+			Expect(meta.IP).To(Equal("$(POD_IP)"))
+			Expect(meta.ServiceAccount).To(Equal("$(SERVICE_ACCOUNT)"))
+			Expect(meta.EnvoyNodeID).To(Equal("-nodeID-"))
+			Expect(meta.Name).To(Equal(""))
+			Expect(meta.WorkloadKind).To(Equal(""))
+			Expect(meta.WorkloadName).To(Equal(""))
 		})
 	})
 })

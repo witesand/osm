@@ -1,5 +1,7 @@
+// Package service models an instance of a service managed by OSM controller and utility routines associated with it.
 package service
 
+<<<<<<< HEAD
 import (
 	"fmt"
 	"reflect"
@@ -8,15 +10,15 @@ import (
 
 	"github.com/google/uuid"
 )
+=======
+import "fmt"
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 const (
 	// namespaceNameSeparator used upon marshalling/unmarshalling MeshService to a string
 	// or viceversa
 	namespaceNameSeparator = "/"
 )
-
-// SyntheticServiceSuffix is a random string appended to the name of the synthetic service created for each K8s service account
-var SyntheticServiceSuffix = uuid.New().String()
 
 // MeshService is the struct defining a service (Kubernetes or otherwise) within a service mesh.
 type MeshService struct {
@@ -27,6 +29,7 @@ type MeshService struct {
 	Name string
 }
 
+<<<<<<< HEAD
 func (ms MeshService) String() string {
 	return strings.Join([]string{ms.Namespace, namespaceNameSeparator, ms.Name}, "")
 }
@@ -126,23 +129,22 @@ func UnmarshalMeshServicePort(str string) (*MeshServicePort, error) {
 	}, nil
 }
 
+=======
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 // K8sServiceAccount is a type for a namespaced service account
 type K8sServiceAccount struct {
 	Namespace string
 	Name      string
 }
 
+// String returns the string representation of the service account object
 func (sa K8sServiceAccount) String() string {
-	return strings.Join([]string{sa.Namespace, namespaceNameSeparator, sa.Name}, "")
+	return fmt.Sprintf("%s%s%s", sa.Namespace, namespaceNameSeparator, sa.Name)
 }
 
-// GetSyntheticService creates a MeshService for the given K8s Service Account,
-// which has a unique name and is in lieu of an existing Kubernetes service.
-func (sa K8sServiceAccount) GetSyntheticService() MeshService {
-	return MeshService{
-		Namespace: sa.Namespace,
-		Name:      fmt.Sprintf("%s.%s.osm.synthetic-%s", sa.Name, sa.Namespace, SyntheticServiceSuffix),
-	}
+// IsEmpty returns true if the given service account object is empty
+func (sa K8sServiceAccount) IsEmpty() bool {
+	return (K8sServiceAccount{}) == sa
 }
 
 // ClusterName is a type for a service name
@@ -151,13 +153,6 @@ type ClusterName string
 // String returns the given ClusterName type as a string
 func (c ClusterName) String() string {
 	return string(c)
-}
-
-//WeightedService is a struct of a service name, its weight and its root service
-type WeightedService struct {
-	Service     MeshService `json:"service_name:omitempty"`
-	Weight      int         `json:"weight:omitempty"`
-	RootService string      `json:"root_service:omitempty"`
 }
 
 // WeightedCluster is a struct of a cluster and is weight that is backing a service

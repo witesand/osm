@@ -8,7 +8,12 @@ import (
 )
 
 const (
+<<<<<<< HEAD
 	localClusterDomain = "cluster.local"
+=======
+	clusterDomain      = "cluster.local"
+	defaultAppProtocol = "http"
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 )
 
 // GetHostnamesForService returns a list of hostnames over which the service can be accessed within the local cluster.
@@ -56,4 +61,23 @@ func GetServiceFromHostname(host string) string {
 	// For services that are not namespaced the service name contains the port as well
 	// Ex. service:port
 	return strings.Split(service, ":")[0]
+}
+
+// GetAppProtocolFromPortName returns the port's application protocol from its name, 'defaultAppProtocol' if not specified.
+func GetAppProtocolFromPortName(portName string) string {
+	portName = strings.ToLower(portName)
+
+	switch {
+	case strings.HasPrefix(portName, "http-"):
+		return "http"
+
+	case strings.HasPrefix(portName, "tcp-"):
+		return "tcp"
+
+	case strings.HasPrefix(portName, "grpc-"):
+		return "grpc"
+
+	default:
+		return defaultAppProtocol
+	}
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/envoy"
+<<<<<<< HEAD
 	"github.com/openservicemesh/osm/pkg/envoy/route"
 	"github.com/openservicemesh/osm/pkg/kubernetes"
 	"github.com/openservicemesh/osm/pkg/service"
@@ -17,10 +18,19 @@ import (
 
 const (
 	outboundMeshFilterChainName   = "outbound-mesh-filter-chain"
+=======
+)
+
+const (
+	inboundListenerName           = "inbound-listener"
+	outboundListenerName          = "outbound-listener"
+	prometheusListenerName        = "inbound-prometheus-listener"
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	outboundEgressFilterChainName = "outbound-egress-filter-chain"
 	singleIpv4Mask                = 32
 )
 
+<<<<<<< HEAD
 func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshService) (*xds_listener.Listener, error) {
 	/* WITESAND_DISABLE
 	 * We do not want enumerate each and every (service)endpoint
@@ -42,8 +52,12 @@ func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshServi
 		log.Error().Err(err).Msgf("Error marshalling HttpConnectionManager object")
 		return nil, err
 	}
+=======
+func (lb *listenerBuilder) newOutboundListener() (*xds_listener.Listener, error) {
+	serviceFilterChains := lb.getOutboundFilterChainPerUpstream()
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
-	return &xds_listener.Listener{
+	listener := &xds_listener.Listener{
 		Name:             outboundListenerName,
 		Address:          envoy.GetAddress(constants.WildcardIPAddr, constants.EnvoyOutboundListenerPort),
 		TrafficDirection: xds_core.TrafficDirection_OUTBOUND,
@@ -66,13 +80,30 @@ func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshServi
 				// to its original destination.
 				Name: wellknown.OriginalDestination,
 			},
-			{
-				// The HttpInspector ListenerFilter is used to inspect plaintext traffic
-				// for HTTP protocols.
-				Name: wellknown.HttpInspector,
-			},
 		},
-	}, nil
+	}
+
+	// Create filter chain for egress if egress is enabled
+	// This filter chain matches any traffic not filtered by allow rules, it will be treated as egress
+	// traffic when enabled
+	if lb.cfg.IsEgressEnabled() {
+		egressFilterChain, err := buildEgressFilterChain()
+		if err != nil {
+			log.Error().Err(err).Msgf("Error getting filter chain for Egress")
+			return nil, err
+		}
+		listener.DefaultFilterChain = egressFilterChain
+	}
+
+	if len(listener.FilterChains) == 0 && listener.DefaultFilterChain == nil {
+		// Programming a listener with no filter chains is an error.
+		// It is possible for the outbound listener to have no filter chains if
+		// there are no allowed upstreams for this proxy and egress is disabled.
+		// In this case, return a nil filter chain so that it doesn't get programmed.
+		return nil, nil
+	}
+
+	return listener, nil
 }
 
 func newInboundListener() *xds_listener.Listener {
@@ -144,6 +175,7 @@ func buildEgressFilterChain() (*xds_listener.FilterChain, error) {
 		},
 	}, nil
 }
+<<<<<<< HEAD
 
 func (lb *listenerBuilder) getOutboundFilterChains(downstreamSvc []service.MeshService) ([]*xds_listener.FilterChain, error) {
 	var filterChains []*xds_listener.FilterChain
@@ -204,3 +236,5 @@ func (lb *listenerBuilder) getOutboundFilterChains(downstreamSvc []service.MeshS
 
 	return filterChains, nil
 }
+=======
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
