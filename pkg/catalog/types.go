@@ -55,12 +55,12 @@ type MeshCatalog struct {
 	// Maintain a mapping of pod UID to CN of the Envoy on the given pod
 	podUIDToCN sync.Map
 
-<<<<<<< HEAD
-	witesandCatalog   *witesand.WitesandCatalog
-=======
+//<<<<<<< HEAD
+//	witesandCatalog   *witesand.WitesandCatalog
+//=======
 	// Maintain a mapping of pod UID to certificate SerialNumber of the Envoy on the given pod
 	podUIDToCertificateSerialNumber sync.Map
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 }
 
 // MeshCataloger is the mechanism by which the Service Mesh controller discovers all Envoy proxies connected to the catalog.
@@ -71,19 +71,19 @@ type MeshCataloger interface {
 	// ListInboundTrafficPolicies returns all inbound traffic policies related to the given service account and inbound services
 	ListInboundTrafficPolicies(service.K8sServiceAccount, []service.MeshService) []*trafficpolicy.InboundTrafficPolicy
 
-<<<<<<< HEAD
-	// ListAllowedInboundServices lists the inbound services allowed to connect to the given service.
-	ListAllowedInboundServices(service.MeshServicePort) ([]service.MeshService, error)
-
-	// ListAllowedOutboundServices lists the services the given service is allowed outbound connections to.
-	ListAllowedOutboundServices(service.MeshService) ([]service.MeshServicePort, error)
-=======
+//<<<<<<< HEAD
+//	// ListAllowedInboundServices lists the inbound services allowed to connect to the given service.
+//	ListAllowedInboundServices(service.MeshServicePort) ([]service.MeshService, error)
+//
+//	// ListAllowedOutboundServices lists the services the given service is allowed outbound connections to.
+//	ListAllowedOutboundServices(service.MeshService) ([]service.MeshServicePort, error)
+//=======
 	// ListOutboundTrafficPolicies returns all outbound traffic policies related to the given service account
 	ListOutboundTrafficPolicies(service.K8sServiceAccount) []*trafficpolicy.OutboundTrafficPolicy
 
 	// ListAllowedOutboundServicesForIdentity list the services the given service account is allowed to initiate outbound connections to
 	ListAllowedOutboundServicesForIdentity(service.K8sServiceAccount) []service.MeshService
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	// ListAllowedInboundServiceAccounts lists the downstream service accounts that can connect to the given service account
 	ListAllowedInboundServiceAccounts(service.K8sServiceAccount) ([]service.K8sServiceAccount, error)
@@ -100,13 +100,13 @@ type MeshCataloger interface {
 	// ListEndpointsForService returns the list of individual instance endpoint backing a service
 	ListEndpointsForService(service.MeshService) ([]endpoint.Endpoint, error)
 
-<<<<<<< HEAD
-	// ListLocalClusterEndpoints returns the list of endpoints for this kubernetes cluster
-	ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
-=======
+//<<<<<<< HEAD
+//	// ListLocalClusterEndpoints returns the list of endpoints for this kubernetes cluster
+//	ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
+//=======
 	// ListAllowedEndpointsForService returns the list of endpoints backing a service and its allowed service accounts
 	ListAllowedEndpointsForService(service.K8sServiceAccount, service.MeshService) ([]endpoint.Endpoint, error)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	// GetResolvableServiceEndpoints returns the resolvable set of endpoint over which a service is accessible using its FQDN.
 	// These are the endpoint destinations we'd expect client applications sends the traffic towards to, when attempting to
@@ -129,36 +129,36 @@ type MeshCataloger interface {
 	// GetServicesForServiceAccount returns a list of services corresponding to a service account
 	GetServicesForServiceAccount(service.K8sServiceAccount) ([]service.MeshService, error)
 
-<<<<<<< HEAD
-	// GetResolvableHostnamesForUpstreamService returns the hostnames over which an upstream service is accessible from a downstream service
-	GetResolvableHostnamesForUpstreamService(downstream, upstream service.MeshService) ([]string, error)
-
-	//GetWeightedClusterForService returns the weighted cluster for a service
-	GetWeightedClusterForService(service service.MeshService) (service.WeightedCluster, error)
-
-	//GetWeightedClusterForServicePort returns the weighted cluster for a ServicePort
-	GetWeightedClusterForServicePort(service service.MeshServicePort) (service.WeightedCluster, error)
-
-	// GetIngressRoutesPerHost returns the HTTP route matches per host associated with an ingress service
-	GetIngressRoutesPerHost(service.MeshService) (map[string][]trafficpolicy.HTTPRouteMatch, error)
-=======
+//<<<<<<< HEAD
+//	// GetResolvableHostnamesForUpstreamService returns the hostnames over which an upstream service is accessible from a downstream service
+//	GetResolvableHostnamesForUpstreamService(downstream, upstream service.MeshService) ([]string, error)
+//
+//	//GetWeightedClusterForService returns the weighted cluster for a service
+//	GetWeightedClusterForService(service service.MeshService) (service.WeightedCluster, error)
+//
+//	//GetWeightedClusterForServicePort returns the weighted cluster for a ServicePort
+//	GetWeightedClusterForServicePort(service service.MeshServicePort) (service.WeightedCluster, error)
+//
+//	// GetIngressRoutesPerHost returns the HTTP route matches per host associated with an ingress service
+//	GetIngressRoutesPerHost(service.MeshService) (map[string][]trafficpolicy.HTTPRouteMatch, error)
+//=======
 	// GetIngressPoliciesForService returns the inbound traffic policies associated with an ingress service
 	GetIngressPoliciesForService(service.MeshService) ([]*trafficpolicy.InboundTrafficPolicy, error)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	// ListMonitoredNamespaces lists namespaces monitored by the control plane
 	ListMonitoredNamespaces() []string
 
-<<<<<<< HEAD
-	// GetProvider returns provider given providerName
-	GetProvider(ident string) endpoint.Provider
-
-	// GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol
-	GetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
-
-	GetWitesandCataloger() witesand.WitesandCataloger
-}
-=======
+//<<<<<<< HEAD
+//	// GetProvider returns provider given providerName
+//	GetProvider(ident string) endpoint.Provider
+//
+//	// GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol
+//	GetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
+//
+//	GetWitesandCataloger() witesand.WitesandCataloger
+//}
+//=======
 	// GetTargetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol.
 	// The ports returned are the actual ports on which the application exposes the service derived from the service's endpoints,
 	// ie. 'spec.ports[].targetPort' instead of 'spec.ports[].port' for a Kubernetes service.
@@ -168,7 +168,7 @@ type MeshCataloger interface {
 	// where the ports returned are the ones used by downstream clients in their requests. This can be different from the ports
 	// actually exposed by the application binary, ie. 'spec.ports[].port' instead of 'spec.ports[].targetPort' for a Kubernetes service.
 	GetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	// ListInboundTrafficTargetsWithRoutes returns a list traffic target objects composed of its routes for the given destination service account
 	ListInboundTrafficTargetsWithRoutes(service.K8sServiceAccount) ([]trafficpolicy.TrafficTargetWithRoutes, error)

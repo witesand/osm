@@ -31,41 +31,6 @@ func GetKubernetesEventHandlers(informerName, providerName string, shouldObserve
 		shouldObserve = func(obj interface{}) bool { return true }
 	}
 
-<<<<<<< HEAD
-	sendAnnouncement := func(eventType a.AnnouncementType, obj interface{}) {
-		if emitLogs {
-			log.Trace().Msgf("[%s][%s] %s event: %+v", providerName, informerName, eventType, obj)
-		}
-
-		if announce == nil {
-			return
-		}
-
-		ann := a.Announcement{
-			Type: eventType,
-		}
-
-		// getObjID is a function which has enough context to establish a
-		// ReferenceObjectID from the object for which this event occurred.
-		// For example the ReferenceObjectID for a Pod would be the Pod's UID.
-		// The getObjID function is optional;
-		if getObjID != nil {
-			ann.ReferencedObjectID = getObjID(obj)
-		}
-
-		select {
-		case announce <- ann:
-			// Channel post succeeded
-		default:
-			// Since pubsub introduction, there's a chance we start seeing full channels which
-			// will slowly become unused in favour of pub-sub subscriptions.
-			// We are making sure here ResourceEventHandlerFuncs never locks due to a push on a full channel.
-			//log.Trace().Msgf("Channel for provider %s is full, dropping channel notify %s ", providerName, eventType)
-		}
-	}
-
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	return cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if !shouldObserve(obj) {

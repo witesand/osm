@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"ws/osm/pkg/catalog"
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/google/uuid"
@@ -55,12 +56,12 @@ const (
 	injectorServiceName = "osm-injector"
 )
 
-<<<<<<< HEAD
-// NewWebhook starts a new web server handling requests from the injector MutatingWebhookConfiguration
-func NewWebhook(config Config, kubeClient kubernetes.Interface, certManager certificate.Manager, meshCatalog catalog.MeshCataloger, kubeController k8s.Controller, meshName, osmControllerName, osmNamespace, webhookConfigName string, stop <-chan struct{}, cfg configurator.Configurator) error {
-	cn := certificate.CommonName(fmt.Sprintf("%s.%s.svc", osmControllerName, osmNamespace))
-	cert, err := certManager.IssueCertificate(cn, constants.XDSCertificateValidityPeriod)
-=======
+//<<<<<<< HEAD
+//// NewWebhook starts a new web server handling requests from the injector MutatingWebhookConfiguration
+//func NewWebhook(config Config, kubeClient kubernetes.Interface, certManager certificate.Manager, meshCatalog catalog.MeshCataloger, kubeController k8s.Controller, meshName, osmControllerName, osmNamespace, webhookConfigName string, stop <-chan struct{}, cfg configurator.Configurator) error {
+//	cn := certificate.CommonName(fmt.Sprintf("%s.%s.svc", osmControllerName, osmNamespace))
+//	cert, err := certManager.IssueCertificate(cn, constants.XDSCertificateValidityPeriod)
+//=======
 // NewMutatingWebhook starts a new web server handling requests from the injector MutatingWebhookConfiguration
 func NewMutatingWebhook(config Config, kubeClient kubernetes.Interface, certManager certificate.Manager, kubeController k8s.Controller, meshName, osmNamespace, webhookConfigName string, stop <-chan struct{}, cfg configurator.Configurator) error {
 	// This is a certificate issued for the webhook handler
@@ -69,7 +70,7 @@ func NewMutatingWebhook(config Config, kubeClient kubernetes.Interface, certMana
 	webhookHandlerCert, err := certManager.IssueCertificate(
 		certificate.CommonName(fmt.Sprintf("%s.%s.svc", injectorServiceName, osmNamespace)),
 		constants.XDSCertificateValidityPeriod)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	if err != nil {
 		return errors.Errorf("Error issuing certificate for the mutating webhook: %+v", err)
 	}
@@ -240,10 +241,10 @@ func (wh *mutatingWebhook) mutate(req *v1beta1.AdmissionRequest, proxyUUID uuid.
 		log.Error().Err(err).Msgf("Error unmarshaling request to pod with UUID %s in namespace %s", proxyUUID, req.Namespace)
 		return webhook.AdmissionError(err)
 	}
-<<<<<<< HEAD
-	//log.Trace().Msgf("Mutation request: (new object: %v) (old object: %v)", string(req.Object.Raw), string(req.OldObject.Raw))
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//<<<<<<< HEAD
+//	//log.Trace().Msgf("Mutation request: (new object: %v) (old object: %v)", string(req.Object.Raw), string(req.OldObject.Raw))
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	// Start building the response
 	resp := &v1beta1.AdmissionResponse{

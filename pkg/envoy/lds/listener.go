@@ -7,55 +7,58 @@ import (
 	xds_tcp_proxy "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/tcp_proxy/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
+	"ws/osm/pkg/envoy/route"
+	"ws/osm/pkg/kubernetes"
+	"ws/osm/pkg/service"
 
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/envoy"
-<<<<<<< HEAD
-	"github.com/openservicemesh/osm/pkg/envoy/route"
-	"github.com/openservicemesh/osm/pkg/kubernetes"
-	"github.com/openservicemesh/osm/pkg/service"
-)
-
-const (
-	outboundMeshFilterChainName   = "outbound-mesh-filter-chain"
-=======
+//<<<<<<< HEAD
+//	"github.com/openservicemesh/osm/pkg/envoy/route"
+//	"github.com/openservicemesh/osm/pkg/kubernetes"
+//	"github.com/openservicemesh/osm/pkg/service"
+//)
+//
+//const (
+//	outboundMeshFilterChainName   = "outbound-mesh-filter-chain"
+//=======
 )
 
 const (
 	inboundListenerName           = "inbound-listener"
 	outboundListenerName          = "outbound-listener"
 	prometheusListenerName        = "inbound-prometheus-listener"
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	outboundEgressFilterChainName = "outbound-egress-filter-chain"
 	singleIpv4Mask                = 32
 )
 
-<<<<<<< HEAD
-func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshService) (*xds_listener.Listener, error) {
-	/* WITESAND_DISABLE
-	 * We do not want enumerate each and every (service)endpoint
-	serviceFilterChains, err := lb.getOutboundFilterChains(downstreamSvc)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting filter chains for outbound listener")
-		return nil, err
-	}
-
-	if len(serviceFilterChains) == 0 {
-		log.Info().Msgf("No filterchains for outbound services. Not programming Outbound listener.")
-		return nil, nil
-	}
-	*/
-	connManager := getHTTPConnectionManager(route.OutboundRouteConfigName, lb.cfg)
-
-	marshalledConnManager, err := ptypes.MarshalAny(connManager)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error marshalling HttpConnectionManager object")
-		return nil, err
-	}
-=======
+//<<<<<<< HEAD
+//func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshService) (*xds_listener.Listener, error) {
+//	/* WITESAND_DISABLE
+//	 * We do not want enumerate each and every (service)endpoint
+//	serviceFilterChains, err := lb.getOutboundFilterChains(downstreamSvc)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error getting filter chains for outbound listener")
+//		return nil, err
+//	}
+//
+//	if len(serviceFilterChains) == 0 {
+//		log.Info().Msgf("No filterchains for outbound services. Not programming Outbound listener.")
+//		return nil, nil
+//	}
+//	*/
+//	connManager := getHTTPConnectionManager(route.OutboundRouteConfigName, lb.cfg)
+//
+//	marshalledConnManager, err := ptypes.MarshalAny(connManager)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error marshalling HttpConnectionManager object")
+//		return nil, err
+//	}
+//=======
 func (lb *listenerBuilder) newOutboundListener() (*xds_listener.Listener, error) {
 	serviceFilterChains := lb.getOutboundFilterChainPerUpstream()
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	listener := &xds_listener.Listener{
 		Name:             outboundListenerName,
@@ -175,66 +178,66 @@ func buildEgressFilterChain() (*xds_listener.FilterChain, error) {
 		},
 	}, nil
 }
-<<<<<<< HEAD
-
-func (lb *listenerBuilder) getOutboundFilterChains(downstreamSvc []service.MeshService) ([]*xds_listener.FilterChain, error) {
-	var filterChains []*xds_listener.FilterChain
-	var dstServicesSet map[service.MeshService]struct{} = make(map[service.MeshService]struct{}) // Set, avoid dups
-
-	// Assuming single service in pod till #1682, #1575 get addressed
-	outboundSvc, err := lb.meshCatalog.ListAllowedOutboundServices(downstreamSvc[0])
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting allowed outbound services for %q", downstreamSvc[0].String())
-		return nil, err
-	}
-
-	// Transform into set, when listing apex services we might face repetitions
-	for _, meshSvc := range outboundSvc {
-		dstServicesSet[meshSvc.GetMeshService()] = struct{}{}
-	}
-
-	// Getting apex services referring to the outbound services
-	// We get possible apexes which could traffic split to any of the possible
-	// outbound services
-	splitServices := lb.meshCatalog.GetSMISpec().ListTrafficSplitServices()
-	for _, svc := range splitServices {
-		for _, outSvc := range outboundSvc {
-			if svc.Service == outSvc.GetMeshService() {
-				rootServiceName := kubernetes.GetServiceFromHostname(svc.RootService)
-				rootMeshService := service.MeshService{
-					Namespace: outSvc.Namespace,
-					Name:      rootServiceName,
-				}
-
-				// Add this root service into the set
-				dstServicesSet[rootMeshService] = struct{}{}
-			}
-		}
-	}
-
-	// Iterate all destination services
-	for upstream := range dstServicesSet {
-		// Construct HTTP filter chain
-		if httpFilterChain, err := lb.getOutboundHTTPFilterChainForService(upstream); err != nil {
-			log.Error().Err(err).Msgf("Error constructing outbount HTTP filter chain for upstream service %q", upstream)
-		} else {
-			filterChains = append(filterChains, httpFilterChain)
-		}
-	}
-
-	// This filterchain matches any traffic not filtered by allow rules, it will be treated as egress
-	// traffic when enabled
-	if lb.cfg.IsEgressEnabled() {
-		egressFilterChgain, err := buildEgressFilterChain()
-		if err != nil {
-			log.Error().Err(err).Msgf("Error getting filter chain for Egress")
-			return nil, err
-		}
-
-		filterChains = append(filterChains, egressFilterChgain)
-	}
-
-	return filterChains, nil
-}
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//<<<<<<< HEAD
+//
+//func (lb *listenerBuilder) getOutboundFilterChains(downstreamSvc []service.MeshService) ([]*xds_listener.FilterChain, error) {
+//	var filterChains []*xds_listener.FilterChain
+//	var dstServicesSet map[service.MeshService]struct{} = make(map[service.MeshService]struct{}) // Set, avoid dups
+//
+//	// Assuming single service in pod till #1682, #1575 get addressed
+//	outboundSvc, err := lb.meshCatalog.ListAllowedOutboundServices(downstreamSvc[0])
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error getting allowed outbound services for %q", downstreamSvc[0].String())
+//		return nil, err
+//	}
+//
+//	// Transform into set, when listing apex services we might face repetitions
+//	for _, meshSvc := range outboundSvc {
+//		dstServicesSet[meshSvc.GetMeshService()] = struct{}{}
+//	}
+//
+//	// Getting apex services referring to the outbound services
+//	// We get possible apexes which could traffic split to any of the possible
+//	// outbound services
+//	splitServices := lb.meshCatalog.GetSMISpec().ListTrafficSplitServices()
+//	for _, svc := range splitServices {
+//		for _, outSvc := range outboundSvc {
+//			if svc.Service == outSvc.GetMeshService() {
+//				rootServiceName := kubernetes.GetServiceFromHostname(svc.RootService)
+//				rootMeshService := service.MeshService{
+//					Namespace: outSvc.Namespace,
+//					Name:      rootServiceName,
+//				}
+//
+//				// Add this root service into the set
+//				dstServicesSet[rootMeshService] = struct{}{}
+//			}
+//		}
+//	}
+//
+//	// Iterate all destination services
+//	for upstream := range dstServicesSet {
+//		// Construct HTTP filter chain
+//		if httpFilterChain, err := lb.getOutboundHTTPFilterChainForService(upstream); err != nil {
+//			log.Error().Err(err).Msgf("Error constructing outbount HTTP filter chain for upstream service %q", upstream)
+//		} else {
+//			filterChains = append(filterChains, httpFilterChain)
+//		}
+//	}
+//
+//	// This filterchain matches any traffic not filtered by allow rules, it will be treated as egress
+//	// traffic when enabled
+//	if lb.cfg.IsEgressEnabled() {
+//		egressFilterChgain, err := buildEgressFilterChain()
+//		if err != nil {
+//			log.Error().Err(err).Msgf("Error getting filter chain for Egress")
+//			return nil, err
+//		}
+//
+//		filterChains = append(filterChains, egressFilterChgain)
+//	}
+//
+//	return filterChains, nil
+//}
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d

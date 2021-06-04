@@ -76,24 +76,24 @@ func (s *Server) sendAllResponses(proxy *envoy.Proxy, server *xds_discovery.Aggr
 func (s *Server) sendSDSResponse(proxy *envoy.Proxy, server *xds_discovery.AggregatedDiscoveryService_StreamAggregatedResourcesServer, cfg configurator.Configurator) {
 	request := makeRequestForAllSecrets(proxy, s.catalog)
 
-<<<<<<< HEAD
-	// There is an SDS validation cert corresponding to each upstream service
-	upstreamServices, err := meshCatalog.ListAllowedOutboundServices(serviceForProxy)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error listing outbound services for proxy %q", serviceForProxy)
-		return nil
-	}
-	for _, upstream := range upstreamServices {
-		upstreamRootCertResource := envoy.SDSCert{
-			MeshService: upstream.GetMeshService(),
-			CertType:    envoy.RootCertTypeForMTLSOutbound,
-		}.String()
-		discoveryRequest.ResourceNames = append(discoveryRequest.ResourceNames, upstreamRootCertResource)
-=======
+//<<<<<<< HEAD
+//	// There is an SDS validation cert corresponding to each upstream service
+//	upstreamServices, err := meshCatalog.ListAllowedOutboundServices(serviceForProxy)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error listing outbound services for proxy %q", serviceForProxy)
+//		return nil
+//	}
+//	for _, upstream := range upstreamServices {
+//		upstreamRootCertResource := envoy.SDSCert{
+//			MeshService: upstream.GetMeshService(),
+//			CertType:    envoy.RootCertTypeForMTLSOutbound,
+//		}.String()
+//		discoveryRequest.ResourceNames = append(discoveryRequest.ResourceNames, upstreamRootCertResource)
+//=======
 	if err := s.sendTypeResponse(envoy.TypeSDS, proxy, server, request, cfg); err != nil {
 		log.Error().Err(err).Msgf("Failed to create and send %s update to Proxy %s",
 			envoy.TypeSDS, proxy.GetCertificateCommonName())
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	}
 }
 
@@ -125,16 +125,16 @@ func (s *Server) newAggregatedDiscoveryResponse(proxy *envoy.Proxy, request *xds
 	response.Nonce = proxy.SetNewNonce(typeURL)
 	response.VersionInfo = strconv.FormatUint(proxy.IncrementLastSentVersion(typeURL), 10)
 
-<<<<<<< HEAD
-	//if envoy.TypeURI(request.TypeUrl) == envoy.TypeSDS {
-	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s", response.TypeUrl, response.VersionInfo)
-	//} else {
-	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s; %+v", response.TypeUrl, response.VersionInfo, response)
-	//}
-=======
+//<<<<<<< HEAD
+//	//if envoy.TypeURI(request.TypeUrl) == envoy.TypeSDS {
+//	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s", response.TypeUrl, response.VersionInfo)
+//	//} else {
+//	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s; %+v", response.TypeUrl, response.VersionInfo, response)
+//	//}
+//=======
 	// NOTE: Never log entire 'response' - will contain secrets!
 	log.Trace().Msgf("Constructed %s response: VersionInfo=%s", response.TypeUrl, response.VersionInfo)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	return response, nil
 }

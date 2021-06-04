@@ -1,13 +1,10 @@
 package catalog
 
 import (
-<<<<<<< HEAD
-=======
 	"reflect"
 	"strings"
 
 	mapset "github.com/deckarep/golang-set"
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	"github.com/pkg/errors"
 	"reflect"
 
@@ -60,23 +57,23 @@ func (mc *MeshCatalog) getApexServicesForBackendService(targetService service.Me
 func (mc *MeshCatalog) GetServicesForServiceAccount(sa service.K8sServiceAccount) ([]service.MeshService, error) {
 	var services []service.MeshService
 	for _, provider := range mc.endpointsProviders {
-<<<<<<< HEAD
-		if providerServices, err := provider.GetServicesForServiceAccount(sa); err != nil {
-			log.Warn().Msgf("Error getting K8s Services linked to Service Account %s from provider %s: %s", provider.GetID(), sa, err)
-		} else {
-			var svcs []string
-			for _, svc := range providerServices {
-				svcs = append(svcs, svc.String())
-			}
-
-			//log.Trace().Msgf("Found K8s Services %s linked to Service Account %s from endpoint provider %s", strings.Join(svcs, ","), sa, provider.GetID())
-			services = append(services, providerServices...)
-=======
+//<<<<<<< HEAD
+//		if providerServices, err := provider.GetServicesForServiceAccount(sa); err != nil {
+//			log.Warn().Msgf("Error getting K8s Services linked to Service Account %s from provider %s: %s", provider.GetID(), sa, err)
+//		} else {
+//			var svcs []string
+//			for _, svc := range providerServices {
+//				svcs = append(svcs, svc.String())
+//			}
+//
+//			//log.Trace().Msgf("Found K8s Services %s linked to Service Account %s from endpoint provider %s", strings.Join(svcs, ","), sa, provider.GetID())
+//			services = append(services, providerServices...)
+//=======
 		providerServices, err := provider.GetServicesForServiceAccount(sa)
 		if err != nil {
 			log.Error().Err(err).Msgf("Error getting K8s Services linked to Service Account %s from provider %s", sa, provider.GetID())
 			continue
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 		}
 		var svcs []string
 		for _, svc := range providerServices {

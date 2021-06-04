@@ -45,32 +45,32 @@ type Config struct {
 	SidecarImage string
 }
 
-<<<<<<< HEAD
-// JSONPatchOperation defines a Kubernetes JSON Patch operation
-type JSONPatchOperation struct {
-	Op    string      `json:"op"`
-	Path  string      `json:"path"`
-	Value interface{} `json:"value,omitempty"`
-}
-
-// InitContainer is the type used to represent information about the init container
-type InitContainer struct {
-	Name  string
-	Image string
-	CIDR1 string
-	CIDR2 string
-}
-
-// EnvoySidecarData is the type used to represent information about the Envoy sidecar
-type EnvoySidecarData struct {
-	Name           string
-	Image          string
-	EnvoyNodeID    string
-	EnvoyClusterID string
-}
-
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//<<<<<<< HEAD
+//// JSONPatchOperation defines a Kubernetes JSON Patch operation
+//type JSONPatchOperation struct {
+//	Op    string      `json:"op"`
+//	Path  string      `json:"path"`
+//	Value interface{} `json:"value,omitempty"`
+//}
+//
+//// InitContainer is the type used to represent information about the init container
+//type InitContainer struct {
+//	Name  string
+//	Image string
+//	CIDR1 string
+//	CIDR2 string
+//}
+//
+//// EnvoySidecarData is the type used to represent information about the Envoy sidecar
+//type EnvoySidecarData struct {
+//	Name           string
+//	Image          string
+//	EnvoyNodeID    string
+//	EnvoyClusterID string
+//}
+//
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 // Context needed to compose the Envoy bootstrap YAML.
 type envoyBootstrapConfigMeta struct {
 	EnvoyAdminPort int

@@ -51,16 +51,16 @@ const (
 	httpHostHeader = "host"
 )
 
-<<<<<<< HEAD:pkg/envoy/route/config.go
-//UpdateRouteConfiguration consrtucts the Envoy construct necessary for TrafficTarget implementation
-func UpdateRouteConfiguration(catalog catalog.MeshCataloger, domainRoutesMap map[string]map[string]trafficpolicy.RouteWeightedClusters, routeConfig *xds_route.RouteConfiguration, direction Direction) {
-	//log.Trace().Msgf("[RDS] Updating Route Configuration")
-	var virtualHostPrefix string
-=======
+//<<<<<<< HEAD:pkg/envoy/route/config.go
+////UpdateRouteConfiguration consrtucts the Envoy construct necessary for TrafficTarget implementation
+//func UpdateRouteConfiguration(catalog catalog.MeshCataloger, domainRoutesMap map[string]map[string]trafficpolicy.RouteWeightedClusters, routeConfig *xds_route.RouteConfiguration, direction Direction) {
+//	//log.Trace().Msgf("[RDS] Updating Route Configuration")
+//	var virtualHostPrefix string
+//=======
 // BuildRouteConfiguration constructs the Envoy constructs ([]*xds_route.RouteConfiguration) for implementing inbound and outbound routes
 func BuildRouteConfiguration(inbound []*trafficpolicy.InboundTrafficPolicy, outbound []*trafficpolicy.OutboundTrafficPolicy, proxy *envoy.Proxy) []*xds_route.RouteConfiguration {
 	routeConfiguration := []*xds_route.RouteConfiguration{}
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
 
 	if len(inbound) > 0 {
 		inboundRouteConfig := NewRouteConfigurationStub(InboundRouteConfigName)
@@ -86,25 +86,25 @@ func BuildRouteConfiguration(inbound []*trafficpolicy.InboundTrafficPolicy, outb
 	if len(outbound) > 0 {
 		outboundRouteConfig := NewRouteConfigurationStub(OutboundRouteConfigName)
 
-<<<<<<< HEAD:pkg/envoy/route/config.go
-	for host, routePolicyWeightedClustersMap := range domainRoutesMap {
-		wsOutboundHost := isWitesandOutboundHost(catalog, host, direction)
-		domains := getDistinctDomains(routePolicyWeightedClustersMap)
-		virtualHost := createVirtualHostStub(virtualHostPrefix, host, domains)
-		if wsOutboundHost {
-			virtualHost.Routes = createWSOutboundRoutes(routePolicyWeightedClustersMap, direction)
-		} else {
-			virtualHost.Routes = createRoutes(routePolicyWeightedClustersMap, direction)
-		}
-		routeConfig.VirtualHosts = append(routeConfig.VirtualHosts, virtualHost)
-=======
+//<<<<<<< HEAD:pkg/envoy/route/config.go
+//	for host, routePolicyWeightedClustersMap := range domainRoutesMap {
+//		wsOutboundHost := isWitesandOutboundHost(catalog, host, direction)
+//		domains := getDistinctDomains(routePolicyWeightedClustersMap)
+//		virtualHost := createVirtualHostStub(virtualHostPrefix, host, domains)
+//		if wsOutboundHost {
+//			virtualHost.Routes = createWSOutboundRoutes(routePolicyWeightedClustersMap, direction)
+//		} else {
+//			virtualHost.Routes = createRoutes(routePolicyWeightedClustersMap, direction)
+//		}
+//		routeConfig.VirtualHosts = append(routeConfig.VirtualHosts, virtualHost)
+//=======
 		for _, out := range outbound {
 			virtualHost := buildVirtualHostStub(outboundVirtualHost, out.Name, out.Hostnames)
 			virtualHost.Routes = buildOutboundRoutes(out.Routes)
 			outboundRouteConfig.VirtualHosts = append(outboundRouteConfig.VirtualHosts, virtualHost)
 		}
 		routeConfiguration = append(routeConfiguration, outboundRouteConfig)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
 	}
 
 	return routeConfiguration
@@ -132,59 +132,59 @@ func buildVirtualHostStub(namePrefix string, host string, domains []string) *xds
 	return &virtualHost
 }
 
-<<<<<<< HEAD:pkg/envoy/route/config.go
-func createWSOutboundRoutes(routePolicyWeightedClustersMap map[string]trafficpolicy.RouteWeightedClusters, direction Direction) []*xds_route.Route {
-	var routes []*xds_route.Route
-	emptyHeaders := make(map[string]string)
-	route := getWSEdgePodRoute(constants.RegexMatchAll, constants.WildcardHTTPMethod, emptyHeaders)
-	routes = append(routes, route)
-	return routes
-}
-
-func getWSEdgePodRoute(pathRegex string, method string, headersMap map[string]string) *xds_route.Route {
-	t := &xds_route.RouteAction_HashPolicy_Header_{
-		&xds_route.RouteAction_HashPolicy_Header{
-			HeaderName:   witesand.WSHashHeader,
-			RegexRewrite: nil,
-		},
-	}
-
-	r := &xds_route.RouteAction_HashPolicy{
-		PolicySpecifier: t,
-		Terminal:        false,
-	}
-
-	// disable the timeouts, without this synchronous calls timeout
-	routeTimeout := duration.Duration{Seconds: 0}
-
-	route := xds_route.Route{
-		Match: &xds_route.RouteMatch{
-			PathSpecifier: &xds_route.RouteMatch_SafeRegex{
-				SafeRegex: &xds_matcher.RegexMatcher{
-					EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
-					Regex:      pathRegex,
-				},
-			},
-			Headers: getHeadersForRoute(method, headersMap),
-		},
-		Action: &xds_route.Route_Route{
-			Route: &xds_route.RouteAction{
-				ClusterSpecifier: &xds_route.RouteAction_ClusterHeader{
-					ClusterHeader: witesand.WSClusterHeader,
-				},
-				HashPolicy: []*xds_route.RouteAction_HashPolicy{r},
-				Timeout: &routeTimeout,
-			},
-		},
-	}
-	return &route
-}
-
-func createRoutes(routePolicyWeightedClustersMap map[string]trafficpolicy.RouteWeightedClusters, direction Direction) []*xds_route.Route {
-=======
+//<<<<<<< HEAD:pkg/envoy/route/config.go
+//func createWSOutboundRoutes(routePolicyWeightedClustersMap map[string]trafficpolicy.RouteWeightedClusters, direction Direction) []*xds_route.Route {
+//	var routes []*xds_route.Route
+//	emptyHeaders := make(map[string]string)
+//	route := getWSEdgePodRoute(constants.RegexMatchAll, constants.WildcardHTTPMethod, emptyHeaders)
+//	routes = append(routes, route)
+//	return routes
+//}
+//
+//func getWSEdgePodRoute(pathRegex string, method string, headersMap map[string]string) *xds_route.Route {
+//	t := &xds_route.RouteAction_HashPolicy_Header_{
+//		&xds_route.RouteAction_HashPolicy_Header{
+//			HeaderName:   witesand.WSHashHeader,
+//			RegexRewrite: nil,
+//		},
+//	}
+//
+//	r := &xds_route.RouteAction_HashPolicy{
+//		PolicySpecifier: t,
+//		Terminal:        false,
+//	}
+//
+//	// disable the timeouts, without this synchronous calls timeout
+//	routeTimeout := duration.Duration{Seconds: 0}
+//
+//	route := xds_route.Route{
+//		Match: &xds_route.RouteMatch{
+//			PathSpecifier: &xds_route.RouteMatch_SafeRegex{
+//				SafeRegex: &xds_matcher.RegexMatcher{
+//					EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
+//					Regex:      pathRegex,
+//				},
+//			},
+//			Headers: getHeadersForRoute(method, headersMap),
+//		},
+//		Action: &xds_route.Route_Route{
+//			Route: &xds_route.RouteAction{
+//				ClusterSpecifier: &xds_route.RouteAction_ClusterHeader{
+//					ClusterHeader: witesand.WSClusterHeader,
+//				},
+//				HashPolicy: []*xds_route.RouteAction_HashPolicy{r},
+//				Timeout: &routeTimeout,
+//			},
+//		},
+//	}
+//	return &route
+//}
+//
+//func createRoutes(routePolicyWeightedClustersMap map[string]trafficpolicy.RouteWeightedClusters, direction Direction) []*xds_route.Route {
+//=======
 // buildInboundRoutes takes a route information from the given inbound traffic policy and returns a list of xds routes
 func buildInboundRoutes(rules []*trafficpolicy.Rule) []*xds_route.Route {
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
 	var routes []*xds_route.Route
 	for _, rule := range rules {
 		// For a given route path, sanitize the methods in case there
@@ -209,24 +209,24 @@ func buildInboundRoutes(rules []*trafficpolicy.Rule) []*xds_route.Route {
 	return routes
 }
 
-<<<<<<< HEAD:pkg/envoy/route/config.go
-func getRoute(pathRegex string, method string, headersMap map[string]string, weightedClusters set.Set, totalClustersWeight int, direction Direction) *xds_route.Route {
-	t := &xds_route.RouteAction_HashPolicy_Header_{
-		&xds_route.RouteAction_HashPolicy_Header{
-			HeaderName:   witesand.WSHashHeader,
-			RegexRewrite: nil,
-		},
-	}
-
-	r := &xds_route.RouteAction_HashPolicy{
-		PolicySpecifier: t,
-		Terminal:        false,
-	}
-
-	// disable the timeouts, without this synchronous calls timeout
-	routeTimeout := duration.Duration{Seconds: 0}
-
-=======
+//<<<<<<< HEAD:pkg/envoy/route/config.go
+//func getRoute(pathRegex string, method string, headersMap map[string]string, weightedClusters set.Set, totalClustersWeight int, direction Direction) *xds_route.Route {
+//	t := &xds_route.RouteAction_HashPolicy_Header_{
+//		&xds_route.RouteAction_HashPolicy_Header{
+//			HeaderName:   witesand.WSHashHeader,
+//			RegexRewrite: nil,
+//		},
+//	}
+//
+//	r := &xds_route.RouteAction_HashPolicy{
+//		PolicySpecifier: t,
+//		Terminal:        false,
+//	}
+//
+//	// disable the timeouts, without this synchronous calls timeout
+//	routeTimeout := duration.Duration{Seconds: 0}
+//
+//=======
 func buildOutboundRoutes(outRoutes []*trafficpolicy.RouteWeightedClusters) []*xds_route.Route {
 	var routes []*xds_route.Route
 	for _, outRoute := range outRoutes {
@@ -237,7 +237,7 @@ func buildOutboundRoutes(outRoutes []*trafficpolicy.RouteWeightedClusters) []*xd
 }
 
 func buildRoute(pathRegex, method string, headersMap map[string]string, weightedClusters set.Set, totalWeight int, direction Direction) *xds_route.Route {
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
 	route := xds_route.Route{
 		Match: &xds_route.RouteMatch{
 			PathSpecifier: &xds_route.RouteMatch_SafeRegex{
@@ -261,48 +261,48 @@ func buildRoute(pathRegex, method string, headersMap map[string]string, weighted
 	return &route
 }
 
-<<<<<<< HEAD:pkg/envoy/route/config.go
-func getHeadersForRoute(method string, headersMap map[string]string) []*xds_route.HeaderMatcher {
-	var headers []*xds_route.HeaderMatcher
-
-	// add methods header
-	methodsHeader := xds_route.HeaderMatcher{
-		Name: MethodHeaderKey,
-		HeaderMatchSpecifier: &xds_route.HeaderMatcher_SafeRegexMatch{
-			SafeRegexMatch: &xds_matcher.RegexMatcher{
-				EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
-				Regex:      getRegexForMethod(method),
-			},
-		},
-	}
-	headers = append(headers, &methodsHeader)
-
-	// add all other custom headers
-	for headerKey, headerValue := range headersMap {
-		// omit the host header as we have already configured this
-		if headerKey == httpHostHeader {
-			continue
-		}
-		header := xds_route.HeaderMatcher{
-			Name: headerKey,
-			HeaderMatchSpecifier: &xds_route.HeaderMatcher_SafeRegexMatch{
-				SafeRegexMatch: &xds_matcher.RegexMatcher{
-					EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
-					Regex:      headerValue,
-				},
-			},
-		}
-		headers = append(headers, &header)
-	}
-
-	log.Debug().Msgf("[getHeadersForRoute] headers=%+v \n", headers)
-	return headers
-}
-
-func getWeightedCluster(weightedClusters set.Set, totalClustersWeight int, direction Direction) *xds_route.WeightedCluster {
-=======
+//<<<<<<< HEAD:pkg/envoy/route/config.go
+//func getHeadersForRoute(method string, headersMap map[string]string) []*xds_route.HeaderMatcher {
+//	var headers []*xds_route.HeaderMatcher
+//
+//	// add methods header
+//	methodsHeader := xds_route.HeaderMatcher{
+//		Name: MethodHeaderKey,
+//		HeaderMatchSpecifier: &xds_route.HeaderMatcher_SafeRegexMatch{
+//			SafeRegexMatch: &xds_matcher.RegexMatcher{
+//				EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
+//				Regex:      getRegexForMethod(method),
+//			},
+//		},
+//	}
+//	headers = append(headers, &methodsHeader)
+//
+//	// add all other custom headers
+//	for headerKey, headerValue := range headersMap {
+//		// omit the host header as we have already configured this
+//		if headerKey == httpHostHeader {
+//			continue
+//		}
+//		header := xds_route.HeaderMatcher{
+//			Name: headerKey,
+//			HeaderMatchSpecifier: &xds_route.HeaderMatcher_SafeRegexMatch{
+//				SafeRegexMatch: &xds_matcher.RegexMatcher{
+//					EngineType: &xds_matcher.RegexMatcher_GoogleRe2{GoogleRe2: &xds_matcher.RegexMatcher_GoogleRE2{}},
+//					Regex:      headerValue,
+//				},
+//			},
+//		}
+//		headers = append(headers, &header)
+//	}
+//
+//	log.Debug().Msgf("[getHeadersForRoute] headers=%+v \n", headers)
+//	return headers
+//}
+//
+//func getWeightedCluster(weightedClusters set.Set, totalClustersWeight int, direction Direction) *xds_route.WeightedCluster {
+//=======
 func buildWeightedCluster(weightedClusters set.Set, totalWeight int, direction Direction) *xds_route.WeightedCluster {
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d:pkg/envoy/route/route_config.go
 	var wc xds_route.WeightedCluster
 	var total int
 	for clusterInterface := range weightedClusters.Iter() {

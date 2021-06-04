@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"ws/osm/pkg/certificate"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
@@ -52,22 +53,22 @@ const (
 )
 
 var (
-<<<<<<< HEAD
-	verbosity            string
-	meshName             string // An ID that uniquely identifies an OSM instance
-	enableRemoteCluster  bool
-	clusterId            string
-	kubeConfigFile       string
-	osmControllerName    string
-	osmNamespace         string
-	webhookConfigName    string
-	caBundleSecretName   string
-	osmConfigMapName     string
-	metricsAddr          string
-	enableLeaderElection bool
-
-	injectorConfig injector.Config
-=======
+//<<<<<<< HEAD
+//	verbosity            string
+//	meshName             string // An ID that uniquely identifies an OSM instance
+//	enableRemoteCluster  bool
+//	clusterId            string
+//	kubeConfigFile       string
+//	osmControllerName    string
+//	osmNamespace         string
+//	webhookConfigName    string
+//	caBundleSecretName   string
+//	osmConfigMapName     string
+//	metricsAddr          string
+//	enableLeaderElection bool
+//
+//	injectorConfig injector.Config
+//=======
 	verbosity          string
 	meshName           string // An ID that uniquely identifies an OSM instance
 	kubeConfigFile     string
@@ -81,7 +82,7 @@ var (
 	tresorOptions      providers.TresorOptions
 	vaultOptions       providers.VaultOptions
 	certManagerOptions providers.CertManagerOptions
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	remoteProvider             *remote.Client
 	witesandCatalog            *witesand.WitesandCatalog
@@ -246,15 +247,15 @@ func main() {
 		witesandCatalog,
 		endpointsProviders...)
 
-<<<<<<< HEAD
-	// Create the sidecar-injector webhook
-	if err := injector.NewWebhook(injectorConfig, kubeClient, certManager, meshCatalog, kubernetesClient, meshName, osmControllerName, osmNamespace, webhookConfigName, stop, cfg); err != nil {
-		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating sidecar injector webhook")
-=======
+//<<<<<<< HEAD
+//	// Create the sidecar-injector webhook
+//	if err := injector.NewWebhook(injectorConfig, kubeClient, certManager, meshCatalog, kubernetesClient, meshName, osmControllerName, osmNamespace, webhookConfigName, stop, cfg); err != nil {
+//		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating sidecar injector webhook")
+//=======
 	// Create the configMap validating webhook
 	if err := configurator.NewValidatingWebhook(kubeClient, certManager, osmNamespace, webhookConfigName, stop); err != nil {
 		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating osm-config validating webhook")
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	}
 
 	m = meshCatalog
@@ -354,50 +355,50 @@ func getOSMControllerPod(kubeClient kubernetes.Interface) (*corev1.Pod, error) {
 
 	return pod, nil
 }
-<<<<<<< HEAD
-
-//Setting up k8s controller manager to reconcile OSM resources
-func createControllerManagerForOSMResources(certManager certificate.Manager) error {
-	log.Info().Msg("Setting up controller manager to reconcile OSM resources")
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		LeaderElection:     enableLeaderElection,
-		Namespace:          osmNamespace,
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("Error starting up controller manager")
-		return err
-	}
-
-	log.Info().Msg("Successfully setup controller for resource reconciliation")
-	log.Info().Msg("Setting up mutatingWebhookConfiguration reconciler")
-
-	// controller logic is implemented by reconciler
-	// Adding a reconciler for OSM's mutatingwehbookconfiguration
-	if err = (&reconciler.MutatingWebhookConfigrationReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		OsmWebhook:   fmt.Sprintf("osm-webhook-%s", meshName),
-		OsmNamespace: osmNamespace,
-		CertManager:  certManager,
-
-		OsmControllerName: osmControllerName,
-	}).SetupWithManager(mgr); err != nil {
-		log.Error().Err(err).Msg("Error creating reconcile controller for MutatingWebhookConfiguration")
-		return err
-	}
-
-	log.Info().Msg("starting manager")
-	go func() {
-		// mgr.Start() below will block until stopped
-		// See: https://github.com/kubernetes-sigs/controller-runtime/blob/release-0.6/pkg/manager/internal.go#L507-L514
-		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-			log.Error().Err(err).Msg("problem running manager")
-		}
-	}()
-
-	return nil
-}
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//<<<<<<< HEAD
+//
+////Setting up k8s controller manager to reconcile OSM resources
+//func createControllerManagerForOSMResources(certManager certificate.Manager) error {
+//	log.Info().Msg("Setting up controller manager to reconcile OSM resources")
+//	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+//		Scheme:             scheme,
+//		MetricsBindAddress: metricsAddr,
+//		LeaderElection:     enableLeaderElection,
+//		Namespace:          osmNamespace,
+//	})
+//	if err != nil {
+//		log.Error().Err(err).Msg("Error starting up controller manager")
+//		return err
+//	}
+//
+//	log.Info().Msg("Successfully setup controller for resource reconciliation")
+//	log.Info().Msg("Setting up mutatingWebhookConfiguration reconciler")
+//
+//	// controller logic is implemented by reconciler
+//	// Adding a reconciler for OSM's mutatingwehbookconfiguration
+//	if err = (&reconciler.MutatingWebhookConfigrationReconciler{
+//		Client:       mgr.GetClient(),
+//		Scheme:       mgr.GetScheme(),
+//		OsmWebhook:   fmt.Sprintf("osm-webhook-%s", meshName),
+//		OsmNamespace: osmNamespace,
+//		CertManager:  certManager,
+//
+//		OsmControllerName: osmControllerName,
+//	}).SetupWithManager(mgr); err != nil {
+//		log.Error().Err(err).Msg("Error creating reconcile controller for MutatingWebhookConfiguration")
+//		return err
+//	}
+//
+//	log.Info().Msg("starting manager")
+//	go func() {
+//		// mgr.Start() below will block until stopped
+//		// See: https://github.com/kubernetes-sigs/controller-runtime/blob/release-0.6/pkg/manager/internal.go#L507-L514
+//		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+//			log.Error().Err(err).Msg("problem running manager")
+//		}
+//	}()
+//
+//	return nil
+//}
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d

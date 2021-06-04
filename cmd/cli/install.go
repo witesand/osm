@@ -54,35 +54,6 @@ well as for adding a Kubernetes Namespace to the list of Namespaces a control
 plane should watch for sidecar injection of Envoy proxies.
 `
 const (
-<<<<<<< HEAD
-	defaultCertificateManager             = "tresor"
-	defaultCertManagerIssuerGroup         = "cert-manager.io"
-	defaultCertManagerIssuerKind          = "Issuer"
-	defaultCertManagerIssuerName          = "osm-ca"
-	defaultChartPath                      = ""
-	defaultContainerRegistry              = "openservicemesh"
-	defaultContainerRegistrySecret        = ""
-	defaultMeshName                       = "osm"
-	defaultOsmImagePullPolicy             = "IfNotPresent"
-	defaultOsmImageTag                    = "v0.6.0"
-	defaultPrometheusRetentionTime        = constants.PrometheusDefaultRetentionTime
-	defaultVaultHost                      = ""
-	defaultVaultProtocol                  = "http"
-	defaultVaultToken                     = ""
-	defaultVaultRole                      = "openservicemesh"
-	defaultEnvoyLogLevel                  = "error"
-	defaultServiceCertValidityDuration    = "24h"
-	defaultEnableDebugServer              = false
-	defaultEnableEgress                   = false
-	defaultEnablePermissiveTrafficPolicy  = false
-	defaultEnableBackpressureExperimental = false
-	defaultDeployPrometheus               = false
-	defaultEnablePrometheusScraping       = true
-	defaultDeployGrafana                  = false
-	defaultEnableFluentbit                = false
-	defaultDeployJaeger                   = true
-	defaultEnforceSingleMesh              = false
-=======
 	defaultCertificateManager            = "tresor"
 	defaultCertManagerIssuerGroup        = "cert-manager.io"
 	defaultCertManagerIssuerKind         = "Issuer"
@@ -109,7 +80,6 @@ const (
 	defaultEnableFluentbit               = false
 	defaultDeployJaeger                  = false
 	defaultEnforceSingleMesh             = false
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 )
 
 // chartTGZSource is a base64-encoded, gzipped tarball of the default Helm chart.

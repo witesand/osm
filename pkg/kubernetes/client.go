@@ -88,18 +88,18 @@ func (c *Client) initServicesMonitor() {
 	informerFactory := informers.NewSharedInformerFactory(c.kubeClient, DefaultKubeEventResyncInterval)
 	c.informers[Services] = informerFactory.Core().V1().Services().Informer()
 
-<<<<<<< HEAD
-	// Function to filter Services by Namespace
-	shouldObserve := func(obj interface{}) bool {
-		ns := reflect.ValueOf(obj).Elem().FieldByName("ObjectMeta").FieldByName("Namespace").String()
-		return c.IsMonitoredNamespace(ns)
-	}
-
-	// Announcement channel for Services
-	c.announcements[Services] = make(chan announcements.Announcement, 10)
-
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//<<<<<<< HEAD
+//	// Function to filter Services by Namespace
+//	shouldObserve := func(obj interface{}) bool {
+//		ns := reflect.ValueOf(obj).Elem().FieldByName("ObjectMeta").FieldByName("Namespace").String()
+//		return c.IsMonitoredNamespace(ns)
+//	}
+//
+//	// Announcement channel for Services
+//	c.announcements[Services] = make(chan announcements.Announcement, 10)
+//
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	svcEventTypes := EventTypes{
 		Add:    announcements.ServiceAdded,
 		Update: announcements.ServiceUpdated,

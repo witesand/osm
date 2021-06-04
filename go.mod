@@ -4,13 +4,7 @@ go 1.15
 
 require (
 	github.com/AlekSi/gocov-xml v0.0.0-20190121064608-3a14fb1c4737
-<<<<<<< HEAD
-	github.com/Azure/azure-sdk-for-go v34.0.0+incompatible
-	github.com/Azure/go-autorest/autorest v0.11.1
-	github.com/Azure/go-autorest/autorest/azure/auth v0.1.0
-=======
 	github.com/Azure/go-autorest/autorest v0.10.0 // indirect
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	github.com/Azure/go-autorest/autorest/to v0.3.0
 	github.com/axw/gocov v1.0.0
 	github.com/cskr/pubsub v1.0.2
@@ -28,13 +22,8 @@ require (
 	github.com/hashicorp/go-version v1.1.0
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/jetstack/cert-manager v0.16.1
-<<<<<<< HEAD
-	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
-	github.com/jstemmer/go-junit-report v0.9.1
-=======
 	github.com/jinzhu/copier v0.2.4
 	github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	github.com/matm/gocov-html v0.0.0-20200509184451-71874e2e203b
 	github.com/mitchellh/gox v1.0.1
 	github.com/norwoodj/helm-docs v1.4.0

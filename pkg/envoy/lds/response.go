@@ -65,31 +65,31 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 
 	// --- INBOUND -------------------
 	inboundListener := newInboundListener()
-<<<<<<< HEAD
-	// --- INBOUND: mesh filter chain
-	inboundMeshFilterChains, err := lb.getInboundInMeshFilterChain(proxyServiceName)
-	if  err == nil {
-		inboundListener.FilterChains = append(inboundListener.FilterChains, inboundMeshFilterChains)
-	} else {
-		log.Error().Err(err).Msgf("Error making inbound listener config for proxy %s", proxyServiceName)
-	}
-
-	// --- INGRESS -------------------
-	// Apply an ingress filter chain if there are any ingress routes
-        /* Ingress rules are taken care by iptables, having them here
-           causes duplicates without TLS configuration.
-
-	if ingressRoutesPerHost, err := meshCatalog.GetIngressRoutesPerHost(proxyServiceName); err != nil {
-		log.Error().Err(err).Msgf("Error getting ingress routes per host for service %s", proxyServiceName)
-	} else {
-		thereAreIngressRoutes := len(ingressRoutesPerHost) > 0
-
-		if thereAreIngressRoutes {
-			log.Info().Msgf("Found k8s Ingress for MeshService %s, applying necessary filters", proxyServiceName)
-			// This proxy is fronting a service that is a backend for an ingress, add a FilterChain for it
-			ingressFilterChains := lb.getIngressFilterChains(proxyServiceName)
-			inboundListener.FilterChains = append(inboundListener.FilterChains, ingressFilterChains...)
-=======
+//<<<<<<< HEAD
+//	// --- INBOUND: mesh filter chain
+//	inboundMeshFilterChains, err := lb.getInboundInMeshFilterChain(proxyServiceName)
+//	if  err == nil {
+//		inboundListener.FilterChains = append(inboundListener.FilterChains, inboundMeshFilterChains)
+//	} else {
+//		log.Error().Err(err).Msgf("Error making inbound listener config for proxy %s", proxyServiceName)
+//	}
+//
+//	// --- INGRESS -------------------
+//	// Apply an ingress filter chain if there are any ingress routes
+//        /* Ingress rules are taken care by iptables, having them here
+//           causes duplicates without TLS configuration.
+//
+//	if ingressRoutesPerHost, err := meshCatalog.GetIngressRoutesPerHost(proxyServiceName); err != nil {
+//		log.Error().Err(err).Msgf("Error getting ingress routes per host for service %s", proxyServiceName)
+//	} else {
+//		thereAreIngressRoutes := len(ingressRoutesPerHost) > 0
+//
+//		if thereAreIngressRoutes {
+//			log.Info().Msgf("Found k8s Ingress for MeshService %s, applying necessary filters", proxyServiceName)
+//			// This proxy is fronting a service that is a backend for an ingress, add a FilterChain for it
+//			ingressFilterChains := lb.getIngressFilterChains(proxyServiceName)
+//			inboundListener.FilterChains = append(inboundListener.FilterChains, ingressFilterChains...)
+//=======
 	// Create inbound filter chains per service behind proxy
 	for _, proxyService := range svcList {
 		// Create in-mesh filter chains
@@ -99,7 +99,7 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 		// Create ingress filter chains if there are any ingress routes
 		if ingressInboundPolicies, err := meshCatalog.GetIngressPoliciesForService(proxyService); err != nil {
 			log.Error().Err(err).Msgf("Error getting ingress inbound traffic policies for service %s", proxyService)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 		} else {
 			thereAreIngressRoutes := len(ingressInboundPolicies) > 0
 			if thereAreIngressRoutes {

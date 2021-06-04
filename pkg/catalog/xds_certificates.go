@@ -28,17 +28,17 @@ func (mc *MeshCatalog) GetServicesFromEnvoyCertificate(cn certificate.CommonName
 	}
 
 	if len(services) == 0 {
-<<<<<<< HEAD
-		return makeSyntheticServiceForPod(pod, cn), nil
-		/* WITESAND BEGIN */
-		/*
-		log.Error().Msgf("No services found for connected proxy ID %s", cn)
-		return nil, errNoServicesFoundForCertificate
-		*/
-		/* WITESAND END */
-=======
+//<<<<<<< HEAD
+//		return makeSyntheticServiceForPod(pod, cn), nil
+//		/* WITESAND BEGIN */
+//		/*
+//		log.Error().Msgf("No services found for connected proxy ID %s", cn)
+//		return nil, errNoServicesFoundForCertificate
+//		*/
+//		/* WITESAND END */
+//=======
 		return nil, nil
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	}
 
 	meshServices := kubernetesServicesToMeshServices(services)
@@ -135,10 +135,6 @@ func listServicesForPod(pod *v1.Pod, kubeController k8s.Controller) ([]v1.Servic
 			continue
 		}
 		svcRawSelector := svc.Spec.Selector
-<<<<<<< HEAD
-=======
-		// service has no selectors, we do not need to match against the pod label
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 		if len(svcRawSelector) == 0 {
 			continue
 		}

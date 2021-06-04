@@ -8,16 +8,9 @@ OpenServiceMesh:
   image:
     # -- `osm-controller` image registry
     registry: openservicemesh
-<<<<<<< HEAD
     pullPolicy: Always
-    tag: v0.6.0
-=======
-    # -- `osm-controller` pod PullPolicy
-    pullPolicy: IfNotPresent
     # -- `osm-controller` image tag
     tag: v0.8.4
-  # -- `osm-controller` image pull secret
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
   imagePullSecrets: []
   # -- Envoy sidecar image
   sidecarImage: envoyproxy/envoy-alpine:v1.17.3

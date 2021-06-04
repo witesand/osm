@@ -43,34 +43,32 @@ func (wh *mutatingWebhook) createPatch(pod *corev1.Pod, req *v1beta1.AdmissionRe
 		return nil, err
 	}
 
-	// Create volume for envoy TLS secret
-	pod.Spec.Volumes = append(pod.Spec.Volumes, getVolumeSpec(envoyBootstrapConfigName)...)
+	//// Create volume for envoy TLS secret
+	//pod.Spec.Volumes = append(pod.Spec.Volumes, getVolumeSpec(envoyBootstrapConfigName)...)
+	//
+	//// Add the Init Container
+	//cidrRanges := wh.configurator.GetMeshCIDRRanges()
+	//initContainerData := InitContainer{
+	//	Name:  constants.InitContainerName,
+	//	Image: wh.config.InitContainerImage,
+	//	CIDR1: cidrRanges[0],
+	//	CIDR2: cidrRanges[1],
+	//}
+	//initContainerSpec, err := getInitContainerSpec(&initContainerData)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//patches = append(patches, addContainer(
+	//	pod.Spec.InitContainers,
+	//	[]corev1.Container{initContainerSpec},
+	//	initContainersBasePath)...,
+	//)
+	//
+	//// envoyNodeID and envoyClusterID are required for Envoy proxy to start.
+	//envoyNodeID := pod.Spec.ServiceAccountName
 
-	// Add the Init Container
-<<<<<<< HEAD
-	cidrRanges := wh.configurator.GetMeshCIDRRanges()
-	initContainerData := InitContainer{
-		Name:  constants.InitContainerName,
-		Image: wh.config.InitContainerImage,
-		CIDR1: cidrRanges[0],
-		CIDR2: cidrRanges[1],
-	}
-	initContainerSpec, err := getInitContainerSpec(&initContainerData)
-	if err != nil {
-		return nil, err
-	}
-	patches = append(patches, addContainer(
-		pod.Spec.InitContainers,
-		[]corev1.Container{initContainerSpec},
-		initContainersBasePath)...,
-	)
-
-	// envoyNodeID and envoyClusterID are required for Envoy proxy to start.
-	envoyNodeID := pod.Spec.ServiceAccountName
-=======
 	initContainer := getInitContainerSpec(constants.InitContainerName, wh.config.InitContainerImage, wh.configurator.GetOutboundIPRangeExclusionList(), wh.configurator.IsPrivilegedInitContainer())
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, initContainer)
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 
 	// Add the Envoy sidecar
 	sidecar := getEnvoySidecarContainerSpec(pod, wh.config.SidecarImage, wh.configurator, originalHealthProbes)

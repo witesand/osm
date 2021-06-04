@@ -7,6 +7,7 @@ import (
 	xds_hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	dpb "github.com/golang/protobuf/ptypes/duration"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
 	_ "github.com/golang/protobuf/ptypes/wrappers"
 
@@ -33,20 +34,20 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 	connManager := &xds_hcm.HttpConnectionManager{
 		StatPrefix: statPrefix,
 		CodecType:  xds_hcm.HttpConnectionManager_AUTO,
-<<<<<<< HEAD
-		HttpFilters: []*xds_hcm.HttpFilter{{
-			Name: wellknown.Router,
-		}},
-		StreamIdleTimeout: &dpb.Duration{Seconds:1200},
-
-=======
+//<<<<<<< HEAD
+//		HttpFilters: []*xds_hcm.HttpFilter{{
+//			Name: wellknown.Router,
+//		}},
+//		StreamIdleTimeout: &dpb.Duration{Seconds:1200},
+//
+//=======
 		HttpFilters: []*xds_hcm.HttpFilter{
 			{
 				// HTTP RBAC filter
 				Name: wellknown.HTTPRoleBasedAccessControl,
 			},
 		},
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 		RouteSpecifier: &xds_hcm.HttpConnectionManager_Rds{
 			Rds: &xds_hcm.Rds{
 				ConfigSource:    envoy.GetADSConfigSource(),
@@ -56,9 +57,9 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 		AccessLog: envoy.GetAccessLog(),
 	}
 
-<<<<<<< HEAD
-	/* WITESAND START COMMENTED 
-=======
+//<<<<<<< HEAD
+//	/* WITESAND START COMMENTED
+//=======
 	// TODO Outgoing External Auth
 	incomingExtAuthCfg := cfg.GetInboundExternalAuthConfig()
 	if direction == incoming && incomingExtAuthCfg.Enable {
@@ -70,7 +71,7 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 		Name: wellknown.Router,
 	})
 
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	if cfg.IsTracingEnabled() {
 		connManager.GenerateRequestId = &wrappers.BoolValue{
 			Value: true,
@@ -84,7 +85,7 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 
 		connManager.Tracing = tracing
 	}
-	* WITESAND END COMMENTED */
+	/* WITESAND END COMMENTED */
 
 	if featureflags.IsWASMStatsEnabled() {
 		statsFilter, err := getStatsWASMFilter()

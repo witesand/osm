@@ -3,11 +3,11 @@ package configurator
 import (
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
-	"net"
-	"sort"
-=======
->>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
+//<<<<<<< HEAD
+//	"net"
+//	"sort"
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	"strings"
 	"time"
 
