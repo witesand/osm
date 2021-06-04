@@ -13,7 +13,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/jinzhu/copier"
 
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/service"
@@ -22,14 +21,11 @@ import (
 // SDSCertType is a type of a certificate requested by an Envoy proxy via SDS.
 type SDSCertType string
 
-// SDSDirection is a type to identify TLS certificate connectivity direction.
-type SDSDirection bool
-
 // SDSCert is only used to interface the naming and related functions to Marshal/Unmarshal a resource name,
 // this avoids having sprintf/parsing logic all over the place
 type SDSCert struct {
-	// MeshService is a service within the mesh
-	MeshService service.MeshService
+	// Name is the name of the SDS secret for the certificate
+	Name string
 
 	// CertType is the certificate type
 	CertType SDSCertType
@@ -39,6 +35,7 @@ func (ct SDSCertType) String() string {
 	return string(ct)
 }
 
+// SDSCertType enums
 const (
 	// ServiceCertType is the prefix for the service certificate resource name. Example: "service-cert:webservice"
 	ServiceCertType SDSCertType = "service-cert"
@@ -51,13 +48,9 @@ const (
 
 	// RootCertTypeForHTTPS is the prefix for the HTTPS root certificate resource name. Example: "root-cert-https:webservice"
 	RootCertTypeForHTTPS SDSCertType = "root-cert-https"
+)
 
-	// Outbound refers to Envoy upstream connectivity direction for TLS certs
-	Outbound SDSDirection = true
-
-	// Inbound refers to Envoy downstream connectivity direction for TLS certs
-	Inbound SDSDirection = false
-
+const (
 	// Separator is the separator between the prefix and the name of the certificate.
 	Separator = ":"
 
@@ -83,7 +76,6 @@ var ALPNInMesh = []string{"osm"}
 // UnmarshalSDSCert parses and returns Certificate type and a service given a
 // correctly formatted string, otherwise returns error
 func UnmarshalSDSCert(str string) (*SDSCert, error) {
-	var svc *service.MeshService
 	var ret SDSCert
 
 	// Check separators, ignore empty string fields
@@ -105,15 +97,7 @@ func UnmarshalSDSCert(str string) (*SDSCert, error) {
 		return nil, errInvalidCertFormat
 	}
 
-	// Check valid namespace'd service name
-	svc, err := service.UnmarshalMeshService(slices[1])
-	if err != nil {
-		return nil, err
-	}
-	err = copier.Copy(&ret.MeshService, &svc)
-	if err != nil {
-		return nil, err
-	}
+	ret.Name = slices[1]
 
 	return &ret, nil
 }
@@ -124,7 +108,7 @@ func (sdsc SDSCert) String() string {
 	return fmt.Sprintf("%s%s%s",
 		sdsc.CertType.String(),
 		Separator,
-		sdsc.MeshService.String())
+		sdsc.Name)
 }
 
 // GetAddress creates an Envoy Address struct.
@@ -233,8 +217,8 @@ func getCommonTLSContext(tlsSDSCert, peerValidationSDSCert SDSCert) *xds_auth.Co
 // GetDownstreamTLSContext creates a downstream Envoy TLS Context
 func GetDownstreamTLSContext(upstreamSvc service.MeshService, mTLS bool) *xds_auth.DownstreamTlsContext {
 	upstreamSDSCert := SDSCert{
-		MeshService: upstreamSvc,
-		CertType:    ServiceCertType,
+		Name:     upstreamSvc.String(),
+		CertType: ServiceCertType,
 	}
 
 	var downstreamPeerValidationCertType SDSCertType
@@ -247,12 +231,12 @@ func GetDownstreamTLSContext(upstreamSvc service.MeshService, mTLS bool) *xds_au
 	}
 	// The downstream peer validation SDS cert points to a cert with the name 'upstreamSvc' only
 	// because we use a single DownstreamTlsContext for all inbound traffic to the given 'upstreamSvc'.
-	// This single DownstreamTlsContext is used to validate all allowed inbound SANs with the
+	// This single DownstreamTlsContext is used to validate all allowed inbound SANs. The
 	// 'RootCertTypeForMTLSInbound' cert type used for in-mesh downstreams, while 'RootCertTypeForHTTPS'
 	// cert type is used for non-mesh downstreams such as ingress.
 	downstreamPeerValidationSDSCert := SDSCert{
-		MeshService: upstreamSvc,
-		CertType:    downstreamPeerValidationCertType,
+		Name:     upstreamSvc.String(),
+		CertType: downstreamPeerValidationCertType,
 	}
 
 	tlsConfig := &xds_auth.DownstreamTlsContext{
@@ -263,15 +247,15 @@ func GetDownstreamTLSContext(upstreamSvc service.MeshService, mTLS bool) *xds_au
 	return tlsConfig
 }
 
-// GetUpstreamTLSContext creates an upstream Envoy TLS Context for the given downstream and upstream service pair
-func GetUpstreamTLSContext(downstreamSvc, upstreamSvc service.MeshService) *xds_auth.UpstreamTlsContext {
+// GetUpstreamTLSContext creates an upstream Envoy TLS Context for the given downstream identity and upstream service pair
+func GetUpstreamTLSContext(downstreamIdentity service.K8sServiceAccount, upstreamSvc service.MeshService) *xds_auth.UpstreamTlsContext {
 	downstreamSDSCert := SDSCert{
-		MeshService: downstreamSvc,
-		CertType:    ServiceCertType,
+		Name:     downstreamIdentity.String(),
+		CertType: ServiceCertType,
 	}
 	upstreamPeerValidationSDSCert := SDSCert{
-		MeshService: upstreamSvc,
-		CertType:    RootCertTypeForMTLSOutbound,
+		Name:     upstreamSvc.String(),
+		CertType: RootCertTypeForMTLSOutbound,
 	}
 	commonTLSContext := getCommonTLSContext(downstreamSDSCert, upstreamPeerValidationSDSCert)
 
@@ -299,13 +283,16 @@ func GetADSConfigSource() *xds_core.ConfigSource {
 }
 
 // GetEnvoyServiceNodeID creates the string for Envoy's "--service-node" CLI argument for the Kubernetes sidecar container Command/Args
-func GetEnvoyServiceNodeID(nodeID string) string {
+func GetEnvoyServiceNodeID(nodeID, workloadKind, workloadName string) string {
 	items := []string{
 		"$(POD_UID)",
 		"$(POD_NAMESPACE)",
 		"$(POD_IP)",
 		"$(SERVICE_ACCOUNT)",
 		nodeID,
+		"$(POD_NAME)",
+		workloadKind,
+		workloadName,
 	}
 
 	return strings.Join(items, constants.EnvoyServiceNodeSeparator)
@@ -315,17 +302,25 @@ func GetEnvoyServiceNodeID(nodeID string) string {
 func ParseEnvoyServiceNodeID(serviceNodeID string) (*PodMetadata, error) {
 	chunks := strings.Split(serviceNodeID, constants.EnvoyServiceNodeSeparator)
 
-	if len(chunks) != 5 {
+	if len(chunks) < 5 {
 		return nil, errors.New("invalid envoy service node id format")
 	}
 
-	return &PodMetadata{
+	meta := &PodMetadata{
 		UID:            chunks[0],
 		Namespace:      chunks[1],
 		IP:             chunks[2],
 		ServiceAccount: chunks[3],
 		EnvoyNodeID:    chunks[4],
-	}, nil
+	}
+
+	if len(chunks) >= 8 {
+		meta.Name = chunks[5]
+		meta.WorkloadKind = chunks[6]
+		meta.WorkloadName = chunks[7]
+	}
+
+	return meta, nil
 }
 
 // GetLocalClusterNameForService returns the name of the local cluster for the given service.

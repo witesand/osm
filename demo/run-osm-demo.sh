@@ -29,12 +29,14 @@ CTR_TAG="${CTR_TAG:-$(git rev-parse HEAD)}"
 IMAGE_PULL_POLICY="${IMAGE_PULL_POLICY:-Always}"
 ENABLE_DEBUG_SERVER="${ENABLE_DEBUG_SERVER:-true}"
 ENABLE_EGRESS="${ENABLE_EGRESS:-false}"
-DEPLOY_GRAFANA="${DEPLOY_GRAFANA:-true}"
+DEPLOY_GRAFANA="${DEPLOY_GRAFANA:-false}"
+DEPLOY_JAEGER="${DEPLOY_JAEGER:-false}"
 ENABLE_FLUENTBIT="${ENABLE_FLUENTBIT:-false}"
-DEPLOY_PROMETHEUS="${DEPLOY_PROMETHEUS:-true}"
+DEPLOY_PROMETHEUS="${DEPLOY_PROMETHEUS:-false}"
 ENABLE_PROMETHEUS_SCRAPING="${ENABLE_PROMETHEUS_SCRAPING:-true}"
 DEPLOY_WITH_SAME_SA="${DEPLOY_WITH_SAME_SA:-false}"
 ENVOY_LOG_LEVEL="${ENVOY_LOG_LEVEL:-debug}"
+DEPLOY_ON_OPENSHIFT="${DEPLOY_ON_OPENSHIFT:-false}"
 
 # For any additional installation arguments. Used heavily in CI.
 optionalInstallArgs=$*
@@ -77,6 +79,10 @@ if [ "$CERT_MANAGER" = "cert-manager" ]; then
     ./demo/deploy-cert-manager.sh
 fi
 
+if [ "$DEPLOY_ON_OPENSHIFT" = true ] ; then
+    optionalInstallArgs+=" --set=OpenServiceMesh.enablePrivilegedInitContainer=true"
+fi
+
 make docker-push
 ./scripts/create-container-registry-creds.sh "$K8S_NAMESPACE"
 
@@ -98,6 +104,7 @@ if [ "$CERT_MANAGER" = "vault" ]; then
       --enable-debug-server="$ENABLE_DEBUG_SERVER" \
       --enable-egress="$ENABLE_EGRESS" \
       --deploy-grafana="$DEPLOY_GRAFANA" \
+      --deploy-jaeger="$DEPLOY_JAEGER" \
       --enable-fluentbit="$ENABLE_FLUENTBIT" \
       --deploy-prometheus="$DEPLOY_PROMETHEUS" \
       --enable-prometheus-scraping="$ENABLE_PROMETHEUS_SCRAPING" \
@@ -117,6 +124,7 @@ else
       --enable-debug-server="$ENABLE_DEBUG_SERVER"\
       --enable-egress="$ENABLE_EGRESS" \
       --deploy-grafana="$DEPLOY_GRAFANA" \
+      --deploy-jaeger="$DEPLOY_JAEGER" \
       --enable-fluentbit="$ENABLE_FLUENTBIT" \
       --deploy-prometheus="$DEPLOY_PROMETHEUS" \
       --enable-prometheus-scraping="$ENABLE_PROMETHEUS_SCRAPING" \

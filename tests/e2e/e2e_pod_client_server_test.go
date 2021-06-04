@@ -18,15 +18,20 @@ import (
 var _ = OSMDescribe("Test HTTP traffic from 1 pod client -> 1 pod server",
 	OSMDescribeInfo{
 		Tier:   1,
-		Bucket: 1,
+		Bucket: 4,
 	},
 	func() {
-		Context("SimpleClientServer with a Kubernetes Service for the Source", func() {
-			testTraffic(true)
+		Context("Test traffic flowing from client to server with a Kubernetes Service for the Source: HTTP", func() {
+			withSourceKubernetesService := true
+			testTraffic(withSourceKubernetesService)
 		})
 
-		Context("SimpleClientServer without a Kubernetes Service for the Source", func() {
-			testTraffic(false)
+		Context("Test traffic flowing from client to server without a Kubernetes Service for the Source: HTTP", func() {
+			// Prior iterations of OSM required that a source pod belong to a Kubernetes service
+			// for the Envoy proxy to be configured for outbound traffic to some remote server.
+			// This test ensures we test this scenario: client Pod is not associated w/ a service.
+			withSourceKubernetesService := false
+			testTraffic(withSourceKubernetesService)
 		})
 	})
 
@@ -57,9 +62,9 @@ func testTraffic(withSourceKubernetesService bool) {
 
 			_, err := Td.CreateServiceAccount(destName, &svcAccDef)
 			Expect(err).NotTo(HaveOccurred())
-			dstPod, err := Td.CreatePod(destName, podDef)
+			_, err = Td.CreatePod(destName, podDef)
 			Expect(err).NotTo(HaveOccurred())
-			_, err = Td.CreateService(destName, svcDef)
+			dstSvc, err := Td.CreateService(destName, svcDef)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Expect it to be up and running in it's receiver namespace
@@ -93,7 +98,7 @@ func testTraffic(withSourceKubernetesService bool) {
 				SourcePod:       srcPod.Name,
 				SourceContainer: sourceName,
 
-				Destination: fmt.Sprintf("%s.%s", dstPod.Name, dstPod.Namespace),
+				Destination: fmt.Sprintf("%s.%s", dstSvc.Name, dstSvc.Namespace),
 			}
 
 			srcToDestStr := fmt.Sprintf("%s -> %s",
@@ -116,8 +121,8 @@ func testTraffic(withSourceKubernetesService bool) {
 			Expect(cond).To(BeTrue(), "Failed testing HTTP traffic from source pod %s Kubernetes Service to a destination", sourceService)
 
 			By("Deleting SMI policies")
-			Expect(Td.SmiClients.AccessClient.AccessV1alpha2().TrafficTargets(sourceName).Delete(context.TODO(), trafficTarget.Name, metav1.DeleteOptions{})).To(Succeed())
-			Expect(Td.SmiClients.SpecClient.SpecsV1alpha3().HTTPRouteGroups(sourceName).Delete(context.TODO(), httpRG.Name, metav1.DeleteOptions{})).To(Succeed())
+			Expect(Td.SmiClients.AccessClient.AccessV1alpha3().TrafficTargets(sourceName).Delete(context.TODO(), trafficTarget.Name, metav1.DeleteOptions{})).To(Succeed())
+			Expect(Td.SmiClients.SpecClient.SpecsV1alpha4().HTTPRouteGroups(sourceName).Delete(context.TODO(), httpRG.Name, metav1.DeleteOptions{})).To(Succeed())
 
 			// Expect client not to reach server
 			cond = Td.WaitForRepeatedSuccess(func() bool {
@@ -141,9 +146,8 @@ func setupSource(sourceName string, withKubernetesService bool) *v1.Pod {
 	svcAccDef, podDef, svcDef := Td.SimplePodApp(SimplePodAppDef{
 		Name:      sourceName,
 		Namespace: sourceName,
-		Command:   []string{"/bin/bash", "-c", "--"},
-		Args:      []string{"while true; do sleep 30; done;"},
-		Image:     "songrgg/alpine-debug",
+		Command:   []string{"sleep", "365d"},
+		Image:     "curlimages/curl",
 		Ports:     []int{80},
 	})
 

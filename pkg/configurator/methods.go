@@ -3,12 +3,14 @@ package configurator
 import (
 	"encoding/json"
 	"fmt"
-	"net"
-	"sort"
+//<<<<<<< HEAD
+//	"net"
+//	"sort"
+//=======
+//>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 	"strings"
 	"time"
 
-	"github.com/openservicemesh/osm/pkg/announcements"
 	"github.com/openservicemesh/osm/pkg/constants"
 )
 
@@ -150,13 +152,55 @@ func (c *Client) GetServiceCertValidityPeriod() time.Duration {
 	return validityDuration
 }
 
-// Subscribe returns a channel subscribed to the announcement types passed by the given parameter
-func (c *Client) Subscribe(aTypes ...announcements.AnnouncementType) chan interface{} {
-	// Cast of array of T types, even when T types are equivalent, is forbidden
-	subTypes := []string{}
-	for _, v := range aTypes {
-		subTypes = append(subTypes, string(v))
+// GetOutboundIPRangeExclusionList returns the list of IP ranges of the form x.x.x.x/y to exclude from outbound sidecar interception
+func (c *Client) GetOutboundIPRangeExclusionList() []string {
+	ipRangesStr := c.getConfigMap().OutboundIPRangeExclusionList
+	if ipRangesStr == "" {
+		return nil
 	}
 
-	return c.pSub.Sub(subTypes...)
+	exclusionList := strings.Split(ipRangesStr, ",")
+	for i := range exclusionList {
+		exclusionList[i] = strings.TrimSpace(exclusionList[i])
+	}
+
+	return exclusionList
+}
+
+// IsPrivilegedInitContainer returns whether init containers should be privileged
+func (c *Client) IsPrivilegedInitContainer() bool {
+	return c.getConfigMap().EnablePrivilegedInitContainer
+}
+
+// GetConfigResyncInterval returns the duration for resync interval.
+// If error or non-parsable value, returns 0 duration
+func (c *Client) GetConfigResyncInterval() time.Duration {
+	resyncDuration := c.getConfigMap().ConfigResyncInterval
+	duration, err := time.ParseDuration(resyncDuration)
+	if err != nil {
+		log.Debug().Err(err).Msgf("Error parsing config resync interval: %s", duration)
+		return time.Duration(0)
+	}
+	return duration
+}
+
+// GetInboundExternalAuthConfig returns the External Authentication configuration for incoming traffic, if any
+func (c *Client) GetInboundExternalAuthConfig() ExternAuthConfig {
+	extAuthRet := ExternAuthConfig{}
+	cfgMap := c.getConfigMap()
+
+	extAuthRet.Enable = cfgMap.InboundExternAuthzEnable
+	extAuthRet.Address = cfgMap.InboundExternAuthzAddress
+	extAuthRet.Port = uint16(cfgMap.InboundExternAuthzPort)
+	extAuthRet.StatPrefix = cfgMap.InboundExternAuthzStatPrefix
+	extAuthRet.FailureModeAllow = cfgMap.InboundExternAuthzFailureModeAllow
+
+	duration, err := time.ParseDuration(cfgMap.InboundExternAuthzTimeout)
+	if err != nil {
+		log.Debug().Err(err).Msgf("ExternAuthzTimeout: Not a valid duration %s. defaulting to 1s.", duration)
+		duration = 1 * time.Second
+	}
+	extAuthRet.AuthzTimeout = duration
+
+	return extAuthRet
 }

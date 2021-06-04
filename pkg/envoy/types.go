@@ -1,3 +1,5 @@
+// Package envoy implements utility routines related to Envoy proxy, and models an instance of a proxy
+// to be able to generate XDS configurations for it.
 package envoy
 
 import (
@@ -28,6 +30,15 @@ var ValidURI = map[string]TypeURI{
 	string(TypeEDS):                TypeEDS,
 	string(TypeUpstreamTLSContext): TypeUpstreamTLSContext,
 	string(TypeZipkinConfig):       TypeZipkinConfig,
+}
+
+// XDSShortURINames are shortened versions of the URI types
+var XDSShortURINames = map[TypeURI]string{
+	TypeSDS: "SDS",
+	TypeCDS: "CDS",
+	TypeLDS: "LDS",
+	TypeRDS: "RDS",
+	TypeEDS: "EDS",
 }
 
 const (

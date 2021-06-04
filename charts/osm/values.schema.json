@@ -20,7 +20,6 @@
                 "caBundleSecretName",
                 "enableDebugServer",
                 "enablePermissiveTrafficPolicy",
-                "enableBackpressureExperimental",
                 "enableEgress",
                 "deployPrometheus",
                 "enablePrometheusScraping",
@@ -32,9 +31,10 @@
                 "envoyLogLevel",
                 "enforceSingleMesh",
                 "deployJaeger",
-                "tracing", 
-                "webhookConfigNamePrefix", 
-                "connectVault"
+                "tracing",
+                "webhookConfigNamePrefix",
+                "osmcontroller",
+                "enablePrivilegedInitContainer"
             ],
             "properties": {
                 "replicaCount": {
@@ -45,6 +45,87 @@
                     "examples": [
                         1
                     ]
+                },
+                "osmcontroller": {
+                    "$id": "#/properties/OpenServiceMesh/properties/osmcontroller",
+                    "type": "object",
+                    "title": "The osmcontroller schema",
+                    "description": "The details of the osmcontroller.",
+                    "required": [
+                        "resource"
+                    ],
+                    "properties": {
+                        "resource": {
+                            "$id": "#/properties/OpenServiceMesh/properties/osmcontroller/properties/resource",
+                            "type": "object",
+                            "title": "The resource schema",
+                            "description": "The resources used by the osmcontroller.",
+                            "required": [
+                                "limits",
+                                "requests"
+                            ],
+                            "properties": {
+                                "limits": {
+                                    "$id": "#/properties/OpenServiceMesh/properties/osmcontrollers/properties/resource/properties/limits",
+                                    "type": "object",
+                                    "title": "The resource limits schema",
+                                    "description": "The resources limits for the osmcontroller.",
+                                    "required": [
+                                        "cpu",
+                                        "memory"
+                                    ],
+                                    "properties": {
+                                        "cpu": {
+                                            "$id": "#/properties/OpenServiceMesh/properties/osmcontrollers/properties/resource/properties/limits/properties/cpu",
+                                            "type": "string",
+                                            "title": "The resource limits cpu schema",
+                                            "description": "The resources limits cpu for the osmcontroller."
+                                        },
+                                        "memory": {
+                                            "$id": "#/properties/OpenServiceMesh/properties/image/properties/memory",
+                                            "type": "string",
+                                            "title": "The resource limits memory schema",
+                                            "description": "The resources limits cpu for the osmcontroller."
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "$id": "#/properties/OpenServiceMesh/properties/osmcontroller/properties/resource/properties/requests",
+                                    "type": "object",
+                                    "title": "The resource requests schema",
+                                    "description": "The resources requests for the osmcontroller.",
+                                    "required": [
+                                        "cpu",
+                                        "memory"
+                                    ],
+                                    "properties": {
+                                        "cpu": {
+                                            "$id": "#/properties/OpenServiceMesh/properties/osmcontroller/properties/resource/properties/requests/properties/cpu",
+                                            "type": "string",
+                                            "title": "The resource requests cpu schema",
+                                            "description": "The resources requests cpu for the osmcontroller."
+                                        },
+                                        "memory": {
+                                            "$id": "#/properties/OpenServiceMesh/properties/osmcontroller/properties/resource/properties/requests/properties/memory",
+                                            "type": "string",
+                                            "title": "The resource requests memory schema",
+                                            "description": "The resources requests memory for the osmcontroller."
+                                        }
+                                    }
+                                },
+                                "podLabels": {
+                                    "$id": "#/properties/OpenServiceMesh/properties/osmcontroller/properties/podLabels",
+                                    "type": "array",
+                                    "title": "The podLabels schema",
+                                    "description": "Labels for the osmcontroller pod.",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": true
                 },
                 "image": {
                     "$id": "#/properties/OpenServiceMesh/properties/image",
@@ -101,7 +182,7 @@
                     "title": "The sidecarImage schema",
                     "description": "The proxy side car image to run.",
                     "examples": [
-                        "envoyproxy/envoy-alpine:v1.15.0"
+                        "envoyproxy/envoy-alpine:v1.17.3"
                     ]
                 },
                 "certificateManager": {
@@ -146,15 +227,6 @@
                     "type": "boolean",
                     "title": "The enablePermissiveTrafficPolicy schema",
                     "description": "Indicates whether permissive traffic policy should be enabled or not.",
-                    "examples": [
-                        false
-                    ]
-                },
-                "enableBackpressureExperimental": {
-                    "$id": "#/properties/OpenServiceMesh/properties/enableBackpressureExperimental",
-                    "type": "boolean",
-                    "title": "The enableBackpressureExperimental schema",
-                    "description": "Indicates whether the experimental backpressure policy should be enabled or not.",
                     "examples": [
                         false
                     ]
@@ -379,7 +451,7 @@
                         }
                     },
                     "additionalProperties": true
-                }, 
+                },
                 "webhookConfigNamePrefix": {
                     "$id": "#/properties/OpenServiceMesh/properties/webhookConfigNamePrefix",
                     "type": "string",
@@ -389,13 +461,31 @@
                         ""
                     ]
                 },
-                "connectVault": {
-                    "$id": "#/properties/OpenServiceMesh/properties/connectVault",
+                "enableWASMStatsExperimental": {
+                    "$id": "#/properties/OpenServiceMesh/properties/enableWASMStatsExperimental",
                     "type": "boolean",
-                    "title": "Connect to vault for cert manager",
-                    "description": "Specifies whether OSM deployment needs vault connection for cert-manager support",
+                    "title": "Enable WASM Stats",
+                    "description": "Enable extra Envoy statistics generated by a custom WASM extension",
                     "examples": [
-                        true
+                        false
+                    ]
+                },
+                "osmNamespace": {
+                    "$id": "#/properties/OpenServiceMesh/properties/osmNamespace",
+                    "type": "string",
+                    "title": "The namespace of the OSM control plane components",
+                    "description": "Indicates the namespace in which the OSM control plane components will be installed",
+                    "examples": [
+                        "osm-system"
+                    ]
+                },
+                "enablePrivilegedInitContainer": {
+                    "$id": "#/properties/OpenServiceMesh/properties/enablePrivilegedInitContainer",
+                    "type": "boolean",
+                    "title": "The enablePrivilegedInitContainer schema",
+                    "description": "Indicates whether the init container for pods in the mesh should be privileged",
+                    "examples": [
+                        false
                     ]
                 }
             },

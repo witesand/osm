@@ -1,9 +1,11 @@
+// Package trafficpolicy defines the types to represent traffic policies internally in the OSM control plane, and
+// utility routines to process them.
 package trafficpolicy
 
 import (
 	set "github.com/deckarep/golang-set"
 
-	"github.com/openservicemesh/osm/pkg/service"
+	"github.com/openservicemesh/osm/pkg/identity"
 )
 
 // TrafficSpecName is the namespaced name of the SMI TrafficSpec
@@ -19,19 +21,24 @@ type HTTPRouteMatch struct {
 	Headers   map[string]string `json:"headers:omitempty"`
 }
 
+<<<<<<< HEAD
 // TrafficTarget is a struct to represent a traffic policy between a source and destination along with its routes
 type TrafficTarget struct {
 	Name             string                  `json:"name:omitempty"`
 	Destination      service.MeshServicePort `json:"destination:omitempty"`
 	Source           service.MeshService     `json:"source:omitempty"`
 	HTTPRouteMatches []HTTPRouteMatch        `json:"http_route_matches:omitempty"`
+=======
+// TCPRouteMatch is a struct to represent a TCP route matching based on ports
+type TCPRouteMatch struct {
+	Ports []int `json:"ports:omitempty"`
+>>>>>>> 3d923b3f2d72006f6cdaad056938c492c364196d
 }
 
 // RouteWeightedClusters is a struct of an HTTPRoute, associated weighted clusters and the domains
 type RouteWeightedClusters struct {
 	HTTPRouteMatch   HTTPRouteMatch `json:"http_route_match:omitempty"`
 	WeightedClusters set.Set        `json:"weighted_clusters:omitempty"`
-	Hostnames        set.Set        `json:"hostnames:omitempty"` // TODO remove hostnames as part of #2034
 }
 
 // InboundTrafficPolicy is a struct that associates incoming traffic on a set of Hostnames with a list of Rules
@@ -52,4 +59,12 @@ type OutboundTrafficPolicy struct {
 	Name      string                   `json:"name:omitempty"`
 	Hostnames []string                 `json:"hostnames"`
 	Routes    []*RouteWeightedClusters `json:"routes:omitempty"`
+}
+
+// TrafficTargetWithRoutes is a struct to represent an SMI TrafficTarget resource composed of its associated routes
+type TrafficTargetWithRoutes struct {
+	Name            string                     `json:"name:omitempty"`
+	Destination     identity.ServiceIdentity   `json:"destination:omitempty"`
+	Sources         []identity.ServiceIdentity `json:"sources:omitempty"`
+	TCPRouteMatches []TCPRouteMatch            `json:"tcp_route_matches:omitempty"`
 }
