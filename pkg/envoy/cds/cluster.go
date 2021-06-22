@@ -23,7 +23,7 @@ import (
 const (
 	// clusterConnectTimeout is the timeout duration used by Envoy to timeout connections to the cluster
 	clusterConnectTimeout = 1 * time.Second
-	MaxConnectionThreshold = 1024*5
+	MaxConnectionThreshold = 1024*15 //15k
 )
 
 // getUpstreamServiceCluster returns an Envoy Cluster corresponding to the given upstream service
