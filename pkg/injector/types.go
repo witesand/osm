@@ -39,36 +39,36 @@ type mutatingWebhook struct {
 type Config struct {
 	// ListenPort defines the port on which the sidecar injector listens
 	ListenPort int
-<<<<<<< HEAD
-
-	InitContainerImage string
-
-	SidecarImage string
-}
-
-// JSONPatchOperation defines a Kubernetes JSON Patch operation
-type JSONPatchOperation struct {
-	Op    string      `json:"op"`
-	Path  string      `json:"path"`
-	Value interface{} `json:"value,omitempty"`
-}
-
-// InitContainer is the type used to represent information about the init container
-type InitContainer struct {
-	Name  string
-	Image string
-	CIDR1 string
-	CIDR2 string
-}
-
-// EnvoySidecarData is the type used to represent information about the Envoy sidecar
-type EnvoySidecarData struct {
-	Name           string
-	Image          string
-	EnvoyNodeID    string
-	EnvoyClusterID string
-=======
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//<<<<<<< HEAD
+//
+//	InitContainerImage string
+//
+//	SidecarImage string
+//}
+//
+//// JSONPatchOperation defines a Kubernetes JSON Patch operation
+//type JSONPatchOperation struct {
+//	Op    string      `json:"op"`
+//	Path  string      `json:"path"`
+//	Value interface{} `json:"value,omitempty"`
+//}
+//
+//// InitContainer is the type used to represent information about the init container
+//type InitContainer struct {
+//	Name  string
+//	Image string
+//	CIDR1 string
+//	CIDR2 string
+//}
+//
+//// EnvoySidecarData is the type used to represent information about the Envoy sidecar
+//type EnvoySidecarData struct {
+//	Name           string
+//	Image          string
+//	EnvoyNodeID    string
+//	EnvoyClusterID string
+//=======
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 }
 
 // Context needed to compose the Envoy bootstrap YAML.

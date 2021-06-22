@@ -1,15 +1,11 @@
 package catalog
 
 import (
-<<<<<<< HEAD
-=======
 	"reflect"
 	"strings"
 
 	mapset "github.com/deckarep/golang-set"
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	"github.com/pkg/errors"
-	"reflect"
 
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/identity"
@@ -18,18 +14,18 @@ import (
 	"github.com/openservicemesh/osm/pkg/utils"
 )
 
-<<<<<<< HEAD
-// GetServicesForServiceAccount returns a list of services corresponding to a service account
-func (mc *MeshCatalog) GetServicesForServiceAccount(sa service.K8sServiceAccount) ([]service.MeshService, error) {
-	var services []service.MeshService
-	for _, provider := range mc.endpointsProviders {
-		if providerServices, err := provider.GetServicesForServiceAccount(sa); err != nil {
-			//log.Warn().Msgf("Error getting K8s Services linked to Service Account %s from provider %s: %s", provider.GetID(), sa, err)
-		} else {
-			var svcs []string
-			for _, svc := range providerServices {
-				svcs = append(svcs, svc.String())
-=======
+//<<<<<<< HEAD
+//// GetServicesForServiceAccount returns a list of services corresponding to a service account
+//func (mc *MeshCatalog) GetServicesForServiceAccount(sa service.K8sServiceAccount) ([]service.MeshService, error) {
+//	var services []service.MeshService
+//	for _, provider := range mc.endpointsProviders {
+//		if providerServices, err := provider.GetServicesForServiceAccount(sa); err != nil {
+//			//log.Warn().Msgf("Error getting K8s Services linked to Service Account %s from provider %s: %s", provider.GetID(), sa, err)
+//		} else {
+//			var svcs []string
+//			for _, svc := range providerServices {
+//				svcs = append(svcs, svc.String())
+//=======
 // isTrafficSplitBackendService returns true if the given service is a backend service in any traffic split
 func (mc *MeshCatalog) isTrafficSplitBackendService(svc service.MeshService) bool {
 	for _, split := range mc.meshSpec.ListTrafficSplits() {
@@ -74,7 +70,7 @@ func (mc *MeshCatalog) getApexServicesForBackendService(targetService service.Me
 				}
 				apexSet.Add(meshService)
 				break
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 			}
 		}
 	}
@@ -86,10 +82,10 @@ func (mc *MeshCatalog) getApexServicesForBackendService(targetService service.Me
 	return apexList
 }
 
-<<<<<<< HEAD
-			//log.Trace().Msgf("Found K8s Services %s linked to Service Account %s from endpoint provider %s", strings.Join(svcs, ","), sa, provider.GetID())
-			services = append(services, providerServices...)
-=======
+//<<<<<<< HEAD
+//			//log.Trace().Msgf("Found K8s Services %s linked to Service Account %s from endpoint provider %s", strings.Join(svcs, ","), sa, provider.GetID())
+//			services = append(services, providerServices...)
+//=======
 // getServicesForServiceAccount returns a list of services corresponding to a service account
 func (mc *MeshCatalog) getServicesForServiceAccount(sa identity.K8sServiceAccount) ([]service.MeshService, error) {
 	var services []service.MeshService
@@ -98,7 +94,7 @@ func (mc *MeshCatalog) getServicesForServiceAccount(sa identity.K8sServiceAccoun
 		if err != nil {
 			log.Error().Err(err).Msgf("Error getting K8s Services linked to Service Account %s from provider %s", sa, provider.GetID())
 			continue
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 		}
 		var svcs []string
 		for _, svc := range providerServices {

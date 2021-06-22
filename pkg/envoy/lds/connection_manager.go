@@ -2,6 +2,7 @@ package lds
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
 	envoy_config_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	envoy_config_core_v3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -37,20 +38,20 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 	connManager := &xds_hcm.HttpConnectionManager{
 		StatPrefix: fmt.Sprintf("%s.%s", meshHTTPConnManagerStatPrefix, routeName),
 		CodecType:  xds_hcm.HttpConnectionManager_AUTO,
-<<<<<<< HEAD
-		HttpFilters: []*xds_hcm.HttpFilter{{
-			Name: wellknown.Router,
-		}},
-		StreamIdleTimeout: &dpb.Duration{Seconds:1200},
-
-=======
+//<<<<<<< HEAD
+//		HttpFilters: []*xds_hcm.HttpFilter{{
+//			Name: wellknown.Router,
+//		}},
+//		StreamIdleTimeout: &dpb.Duration{Seconds:1200},
+//
+//=======
 		HttpFilters: []*xds_hcm.HttpFilter{
 			{
 				// HTTP RBAC filter
 				Name: wellknown.HTTPRoleBasedAccessControl,
 			},
 		},
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 		RouteSpecifier: &xds_hcm.HttpConnectionManager_Rds{
 			Rds: &xds_hcm.Rds{
 				ConfigSource:    envoy.GetADSConfigSource(),
@@ -60,9 +61,9 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 		AccessLog: envoy.GetAccessLog(),
 	}
 
-<<<<<<< HEAD
-	/* WITESAND START COMMENTED 
-=======
+//<<<<<<< HEAD
+//	/* WITESAND START COMMENTED
+//=======
 	if direction == inbound {
 		incomingExtAuthCfg := cfg.GetInboundExternalAuthConfig()
 		if incomingExtAuthCfg.Enable {
@@ -75,7 +76,7 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 		Name: wellknown.Router,
 	})
 
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if cfg.IsTracingEnabled() {
 		connManager.GenerateRequestId = &wrappers.BoolValue{
 			Value: true,

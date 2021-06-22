@@ -36,18 +36,18 @@ type HTTPRouteMatch struct {
 	Headers       map[string]string `json:"headers:omitempty"`
 }
 
-<<<<<<< HEAD
-// TrafficTarget is a struct to represent a traffic policy between a source and destination along with its routes
-type TrafficTarget struct {
-	Name             string                  `json:"name:omitempty"`
-	Destination      service.MeshServicePort `json:"destination:omitempty"`
-	Source           service.MeshService     `json:"source:omitempty"`
-	HTTPRouteMatches []HTTPRouteMatch        `json:"http_route_matches:omitempty"`
-=======
+//<<<<<<< HEAD
+//// TrafficTarget is a struct to represent a traffic policy between a source and destination along with its routes
+//type TrafficTarget struct {
+//	Name             string                  `json:"name:omitempty"`
+//	Destination      service.MeshServicePort `json:"destination:omitempty"`
+//	Source           service.MeshService     `json:"source:omitempty"`
+//	HTTPRouteMatches []HTTPRouteMatch        `json:"http_route_matches:omitempty"`
+//=======
 // TCPRouteMatch is a struct to represent a TCP route matching based on ports
 type TCPRouteMatch struct {
 	Ports []int `json:"ports:omitempty"`
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 }
 
 // RouteWeightedClusters is a struct of an HTTPRoute, associated weighted clusters and the domains

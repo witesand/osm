@@ -32,14 +32,14 @@ func getIngressTransportProtocol(forHTTPS bool) string {
 	return ""
 }
 
-<<<<<<< HEAD
-func newIngressHTTPFilterChain(cfg configurator.Configurator, svc service.MeshService, svcPort uint32) *xds_listener.FilterChain {
-	/* WITESAND_TLS_DISABLE
-	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(svc, false))
-=======
+//<<<<<<< HEAD
+//func newIngressHTTPFilterChain(cfg configurator.Configurator, svc service.MeshService, svcPort uint32) *xds_listener.FilterChain {
+//	/* WITESAND_TLS_DISABLE
+//	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(svc, false))
+//=======
 func (lb *listenerBuilder) newIngressHTTPFilterChain(cfg configurator.Configurator, svc service.MeshService, svcPort uint32) *xds_listener.FilterChain {
 	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(lb.serviceIdentity, false /* TLS */))
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if err != nil {
 		log.Error().Err(err).Msgf("Error marshalling DownstreamTLSContext object for proxy %s", svc)
 		return nil

@@ -4,6 +4,8 @@ package reconciler
 
 import (
 	"context"
+	"fmt"
+	"ws/osm/pkg/certificate"
 
 	"github.com/pkg/errors"
 	"k8s.io/api/admissionregistration/v1beta1"
@@ -12,12 +14,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-<<<<<<< HEAD:pkg/reconciler/mutatingwebhook/reconcile.go
-	"github.com/openservicemesh/osm/pkg/certificate"
-=======
+//<<<<<<< HEAD:pkg/reconciler/mutatingwebhook/reconcile.go
+//	"github.com/openservicemesh/osm/pkg/certificate"
+//=======
 	"github.com/openservicemesh/osm/pkg/certificate/providers"
 	"github.com/openservicemesh/osm/pkg/constants"
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/reconciler/reconciler.go
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/reconciler/reconciler.go
 	"github.com/openservicemesh/osm/pkg/injector"
 	"github.com/openservicemesh/osm/pkg/logger"
 )
@@ -31,12 +33,12 @@ type MutatingWebhookConfigurationReconciler struct {
 	Scheme       *runtime.Scheme
 	OsmWebhook   string
 	OsmNamespace string
-<<<<<<< HEAD:pkg/reconciler/mutatingwebhook/reconcile.go
-	CertManager  certificate.Manager
-
-	OsmControllerName string
-=======
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/reconciler/reconciler.go
+//<<<<<<< HEAD:pkg/reconciler/mutatingwebhook/reconcile.go
+//	CertManager  certificate.Manager
+//
+//	OsmControllerName string
+//=======
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/reconciler/reconciler.go
 }
 
 // Reconcile is the reconciliation method for OSM MutatingWebhookConfiguration.
@@ -59,12 +61,12 @@ func (r *MutatingWebhookConfigurationReconciler) Reconcile(req ctrl.Request) (ct
 				if webhook.Name == injector.MutatingWebhookName && webhook.ClientConfig.CABundle == nil {
 					log.Trace().Msgf("CA bundle missing for webhook : %s ", req.Name)
 					shouldUpdate = true
-<<<<<<< HEAD:pkg/reconciler/mutatingwebhook/reconcile.go
-					cn := certificate.CommonName(fmt.Sprintf("%s.%s.svc", r.OsmControllerName, r.OsmNamespace))
-					cert, err := r.CertManager.GetCertificate(cn)
-=======
+//<<<<<<< HEAD:pkg/reconciler/mutatingwebhook/reconcile.go
+//					cn := certificate.CommonName(fmt.Sprintf("%s.%s.svc", r.OsmControllerName, r.OsmNamespace))
+//					cert, err := r.CertManager.GetCertificate(cn)
+//=======
 					webhookHandlerCert, err := providers.GetCertFromKubernetes(r.OsmNamespace, constants.WebhookCertificateSecretName, r.KubeClient)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/reconciler/reconciler.go
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/reconciler/reconciler.go
 					if err != nil {
 						return ctrl.Result{}, errors.Errorf("Error fetching injector webhook certificate from k8s secret: %s", err)
 					}

@@ -8,12 +8,7 @@ import (
 	xds_cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	xds_core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	xds_endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-<<<<<<< HEAD
-	_ "github.com/envoyproxy/go-control-plane/pkg/wellknown"
-
-=======
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pkg/errors"
@@ -34,12 +29,12 @@ const (
 )
 
 // getUpstreamServiceCluster returns an Envoy Cluster corresponding to the given upstream service
-<<<<<<< HEAD
-func getUpstreamServiceCluster(upstreamSvc, downstreamSvc service.MeshServicePort, cfg configurator.Configurator) (*xds_cluster.Cluster, error) {
-=======
+//<<<<<<< HEAD
+//func getUpstreamServiceCluster(upstreamSvc, downstreamSvc service.MeshServicePort, cfg configurator.Configurator) (*xds_cluster.Cluster, error) {
+//=======
 // Note: ServiceIdentity must be in the format "name.namespace" [https://github.com/openservicemesh/osm/issues/3188]
 func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upstreamSvc service.MeshService, cfg configurator.Configurator) (*xds_cluster.Cluster, error) {
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	clusterName := upstreamSvc.String()
 	/* WITESAND_TLS_DISABLE
 	marshalledUpstreamTLSContext, err := ptypes.MarshalAny(
@@ -64,16 +59,16 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 				TypedConfig: marshalledUpstreamTLSContext,
 			},
 		},
-<<<<<<< HEAD
-		*/
-		ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
-		Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
-		CircuitBreakers: &xds_cluster.CircuitBreakers{
-			Thresholds:   makeWSThresholds(),
-		},
-=======
+//<<<<<<< HEAD
+//		*/
+//		ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
+//		Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
+//		CircuitBreakers: &xds_cluster.CircuitBreakers{
+//			Thresholds:   makeWSThresholds(),
+//		},
+//=======
 		TypedExtensionProtocolOptions: HTTP2ProtocolOptions,
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	}
 
 	if cfg.IsPermissiveTrafficPolicyMode() {
@@ -90,29 +85,29 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 	return remoteCluster, nil
 }
 
-<<<<<<< HEAD
-// getOutboundPassthroughCluster returns an Envoy cluster that is used for outbound passthrough traffic
-func getOutboundPassthroughCluster() *xds_cluster.Cluster {
-	return &xds_cluster.Cluster{
-		Name:           envoy.OutboundPassthroughCluster,
-		ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
-		ClusterDiscoveryType: &xds_cluster.Cluster_Type{
-			Type: xds_cluster.Cluster_ORIGINAL_DST,
-		},
-		LbPolicy:             xds_cluster.Cluster_CLUSTER_PROVIDED,
-		ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
-		Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
-		CircuitBreakers: &xds_cluster.CircuitBreakers{
-			Thresholds:   makeWSThresholds(),
-		},
-	}
-}
-
-// getLocalServiceCluster returns an Envoy Cluster corresponding to the local service
-func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName service.MeshService) ([]*xds_cluster.Cluster, error) {
-	xdsClusters := make([]*xds_cluster.Cluster, 0)
-	endpoints, err := catalog.ListEndpointsForService(proxyServiceName)
-=======
+//<<<<<<< HEAD
+//// getOutboundPassthroughCluster returns an Envoy cluster that is used for outbound passthrough traffic
+//func getOutboundPassthroughCluster() *xds_cluster.Cluster {
+//	return &xds_cluster.Cluster{
+//		Name:           envoy.OutboundPassthroughCluster,
+//		ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
+//		ClusterDiscoveryType: &xds_cluster.Cluster_Type{
+//			Type: xds_cluster.Cluster_ORIGINAL_DST,
+//		},
+//		LbPolicy:             xds_cluster.Cluster_CLUSTER_PROVIDED,
+//		ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
+//		Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
+//		CircuitBreakers: &xds_cluster.CircuitBreakers{
+//			Thresholds:   makeWSThresholds(),
+//		},
+//	}
+//}
+//
+//// getLocalServiceCluster returns an Envoy Cluster corresponding to the local service
+//func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName service.MeshService) ([]*xds_cluster.Cluster, error) {
+//	xdsClusters := make([]*xds_cluster.Cluster, 0)
+//	endpoints, err := catalog.ListEndpointsForService(proxyServiceName)
+//=======
 // getLocalServiceCluster returns an Envoy Cluster corresponding to the local service
 func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName service.MeshService, clusterName string) (*xds_cluster.Cluster, error) {
 	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
@@ -142,47 +137,47 @@ func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName serv
 	}
 
 	ports, err := catalog.GetTargetPortToProtocolMappingForService(proxyServiceName)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to get ports for service %s", proxyServiceName)
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	for _, ep := range endpoints {
-		// final newClusterName shuould be something like "bookstore/bookstore-v1/80-local"
-		clusterName := fmt.Sprintf("%s/%d", proxyServiceName, ep.Port)
-		newClusterName := envoy.GetLocalClusterNameForServiceCluster(clusterName)
-		log.Debug().Msgf("clusterName:%s newClusterName", proxyServiceName, newClusterName)
-		xdsCluster := &xds_cluster.Cluster{
-			// The name must match the domain being cURLed in the demo
-			Name:           newClusterName,
-			AltStatName:    newClusterName,
-			ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
-			LbPolicy:       xds_cluster.Cluster_RING_HASH,
-			RespectDnsTtl:  true,
-			ClusterDiscoveryType: &xds_cluster.Cluster_Type{
-				Type: xds_cluster.Cluster_STRICT_DNS,
-			},
-			DnsRefreshRate:  ptypes.DurationProto(time.Second * 30),
-			DnsLookupFamily: xds_cluster.Cluster_V4_ONLY,
-			LoadAssignment: &xds_endpoint.ClusterLoadAssignment{
-				// NOTE: results.MeshService is the top level service that is cURLed.
-				ClusterName: newClusterName,
-				Endpoints:   []*xds_endpoint.LocalityLbEndpoints{
-					// Filled based on discovered endpoints for the service
-				},
-			},
-			ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
-			Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
-			CircuitBreakers: &xds_cluster.CircuitBreakers{
-				Thresholds:   makeWSThresholds(),
-			},
-		}
-
-=======
+//<<<<<<< HEAD
+//	for _, ep := range endpoints {
+//		// final newClusterName shuould be something like "bookstore/bookstore-v1/80-local"
+//		clusterName := fmt.Sprintf("%s/%d", proxyServiceName, ep.Port)
+//		newClusterName := envoy.GetLocalClusterNameForServiceCluster(clusterName)
+//		log.Debug().Msgf("clusterName:%s newClusterName", proxyServiceName, newClusterName)
+//		xdsCluster := &xds_cluster.Cluster{
+//			// The name must match the domain being cURLed in the demo
+//			Name:           newClusterName,
+//			AltStatName:    newClusterName,
+//			ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
+//			LbPolicy:       xds_cluster.Cluster_RING_HASH,
+//			RespectDnsTtl:  true,
+//			ClusterDiscoveryType: &xds_cluster.Cluster_Type{
+//				Type: xds_cluster.Cluster_STRICT_DNS,
+//			},
+//			DnsRefreshRate:  ptypes.DurationProto(time.Second * 30),
+//			DnsLookupFamily: xds_cluster.Cluster_V4_ONLY,
+//			LoadAssignment: &xds_endpoint.ClusterLoadAssignment{
+//				// NOTE: results.MeshService is the top level service that is cURLed.
+//				ClusterName: newClusterName,
+//				Endpoints:   []*xds_endpoint.LocalityLbEndpoints{
+//					// Filled based on discovered endpoints for the service
+//				},
+//			},
+//			ProtocolSelection:    xds_cluster.Cluster_USE_DOWNSTREAM_PROTOCOL,
+//			Http2ProtocolOptions: &xds_core.Http2ProtocolOptions{},
+//			CircuitBreakers: &xds_cluster.CircuitBreakers{
+//				Thresholds:   makeWSThresholds(),
+//			},
+//		}
+//
+//=======
 	for port := range ports {
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 		localityEndpoint := &xds_endpoint.LocalityLbEndpoints{
 			Locality: &xds_core.Locality{
 				Zone: "zone",

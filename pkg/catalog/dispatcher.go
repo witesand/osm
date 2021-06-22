@@ -65,27 +65,27 @@ func (mc *MeshCatalog) dispatcher() {
 	for {
 		select {
 		case message := <-subChannel:
-<<<<<<< HEAD
-
-			// New message from pubsub
-			psubMessage, castOk := message.(events.PubSubMessage)
-			if !castOk {
-				log.Error().Msgf("[ dispatchertrack Error casting PubSubMessage: %v", psubMessage)
-=======
+//<<<<<<< HEAD
+//
+//			// New message from pubsub
+//			psubMessage, castOk := message.(events.PubSubMessage)
+//			if !castOk {
+//				log.Error().Msgf("[ dispatchertrack Error casting PubSubMessage: %v", psubMessage)
+//=======
 			psubMessage, ok := message.(events.PubSubMessage)
 			if !ok {
 				log.Error().Msgf("Error casting PubSubMessage: %v", psubMessage)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 				continue
 			}
 
 			// Identify if this is an actual delta, or just resync
 			delta := isDeltaUpdate(psubMessage)
-<<<<<<< HEAD
-			//log.Info().Msgf("dispatchertrack [Pubsub] %s - delta: %v", psubMessage.AnnouncementType.String(), delta)
-=======
+//<<<<<<< HEAD
+//			//log.Info().Msgf("dispatchertrack [Pubsub] %s - delta: %v", psubMessage.AnnouncementType.String(), delta)
+//=======
 			log.Debug().Msgf("[Pubsub] %s - delta: %v", psubMessage.AnnouncementType, delta)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 			// Schedule an envoy broadcast update if we either:
 			// - detected a config delta
@@ -107,11 +107,7 @@ func (mc *MeshCatalog) dispatcher() {
 
 		// A select-fallthrough doesn't exist, we are copying some code here
 		case <-chanMovingDeadline:
-<<<<<<< HEAD
 			log.Info().Msgf("dispatchertrack [Moving deadline trigger] Broadcast envoy update")
-=======
-			log.Info().Msgf("Moving deadline trigger - Broadcast envoy update")
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 			events.GetPubSubInstance().Publish(events.PubSubMessage{
 				AnnouncementType: a.ProxyBroadcast,
 			})
@@ -122,11 +118,7 @@ func (mc *MeshCatalog) dispatcher() {
 			chanMaxDeadline = make(<-chan time.Time)
 
 		case <-chanMaxDeadline:
-<<<<<<< HEAD
 			log.Info().Msgf(" dispatchertrack [Max deadline trigger] Broadcast envoy update")
-=======
-			log.Info().Msgf("Max deadline trigger - Broadcast envoy update")
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 			events.GetPubSubInstance().Publish(events.PubSubMessage{
 				AnnouncementType: a.ProxyBroadcast,
 			})

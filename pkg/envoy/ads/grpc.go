@@ -20,11 +20,7 @@ func receive(requests chan xds_discovery.DiscoveryRequest, server *xds_discovery
 		request, recvErr := (*server).Recv()
 		if recvErr != nil {
 			if status.Code(recvErr) == codes.Canceled || recvErr == io.EOF {
-<<<<<<< HEAD
 				log.Error().Msgf("[grpc] Connection terminated DiscoveryRequest from Envoy with CN %s; err=%+v", proxy.GetCommonName(), recvErr)
-=======
-				log.Debug().Err(recvErr).Msgf("[grpc] Connection terminated")
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 				return
 			}
 			log.Error().Err(recvErr).Msgf("[grpc] Connection error")

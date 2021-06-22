@@ -54,30 +54,30 @@ func (wh *mutatingWebhook) createPatch(pod *corev1.Pod, req *admissionv1.Admissi
 	// Create volume for envoy TLS secret
 	pod.Spec.Volumes = append(pod.Spec.Volumes, getVolumeSpec(envoyBootstrapConfigName)...)
 
-<<<<<<< HEAD
-	// Add the Init Container
-	cidrRanges := wh.configurator.GetMeshCIDRRanges()
-	initContainerData := InitContainer{
-		Name:  constants.InitContainerName,
-		Image: wh.config.InitContainerImage,
-		CIDR1: cidrRanges[0],
-		CIDR2: cidrRanges[1],
-	}
-	initContainerSpec, err := getInitContainerSpec(&initContainerData)
-	if err != nil {
-		return nil, err
-	}
-	patches = append(patches, addContainer(
-		pod.Spec.InitContainers,
-		[]corev1.Container{initContainerSpec},
-		initContainersBasePath)...,
-	)
-=======
+//<<<<<<< HEAD
+//	// Add the Init Container
+//	cidrRanges := wh.configurator.GetMeshCIDRRanges()
+//	initContainerData := InitContainer{
+//		Name:  constants.InitContainerName,
+//		Image: wh.config.InitContainerImage,
+//		CIDR1: cidrRanges[0],
+//		CIDR2: cidrRanges[1],
+//	}
+//	initContainerSpec, err := getInitContainerSpec(&initContainerData)
+//	if err != nil {
+//		return nil, err
+//	}
+//	patches = append(patches, addContainer(
+//		pod.Spec.InitContainers,
+//		[]corev1.Container{initContainerSpec},
+//		initContainersBasePath)...,
+//	)
+//=======
 	// Build outbound port exclusion list
 	podOutboundPortExclusionList, _ := wh.getPortExclusionListForPod(pod, namespace, outboundPortExclusionListAnnotation)
 	globalOutboundPortExclusionList := wh.configurator.GetOutboundPortExclusionList()
 	outboundPortExclusionList := mergePortExclusionLists(podOutboundPortExclusionList, globalOutboundPortExclusionList)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// Build inbound port exclusion list
 	podInboundPortExclusionList, _ := wh.getPortExclusionListForPod(pod, namespace, inboundPortExclusionListAnnotation)

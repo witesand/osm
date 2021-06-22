@@ -55,70 +55,70 @@ func getEnvoyConfigYAML(config envoyBootstrapConfigMeta, cfg configurator.Config
 				"resource_api_version": "V3",
 			},
 		},
-<<<<<<< HEAD
-
-		"static_resources": map[string]interface{}{
-			"clusters": []map[string]interface{}{
-				{
-					"name":                   config.XDSClusterName,
-					"connect_timeout":        "0.25s",
-					"dns_refresh_rate":       "30s",
-					"type":                   "LOGICAL_DNS",
-					"http2_protocol_options": map[string]string{},
-					"transport_socket": map[string]interface{}{
-						"name": "envoy.transport_sockets.tls",
-						"typed_config": map[string]interface{}{
-							"@type": "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext",
-							"common_tls_context": map[string]interface{}{
-								"alpn_protocols": []string{
-									"h2",
-								},
-								"validation_context": map[string]interface{}{
-									"trusted_ca": map[string]interface{}{
-										"inline_bytes": config.RootCert,
-									},
-								},
-								"tls_params": map[string]interface{}{
-									"tls_minimum_protocol_version": "TLSv1_2",
-									"tls_maximum_protocol_version": "TLSv1_3",
-								},
-								"tls_certificates": []map[string]interface{}{
-									{
-										"certificate_chain": map[string]interface{}{
-											"inline_bytes": config.Cert,
-										},
-										"private_key": map[string]interface{}{
-											"inline_bytes": config.Key,
-										},
-									},
-								},
-							},
-						},
-					},
-					"load_assignment": map[string]interface{}{
-						"cluster_name": config.XDSClusterName,
-						"endpoints": []map[string]interface{}{
-							{
-								"lb_endpoints": []map[string]interface{}{
-									{
-										"endpoint": map[string]interface{}{
-											"address": map[string]interface{}{
-												"socket_address": map[string]interface{}{
-													"address":    config.XDSHost,
-													"port_value": config.XDSPort,
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-=======
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//<<<<<<< HEAD
+//
+//		"static_resources": map[string]interface{}{
+//			"clusters": []map[string]interface{}{
+//				{
+//					"name":                   config.XDSClusterName,
+//					"connect_timeout":        "0.25s",
+//					"dns_refresh_rate":       "30s",
+//					"type":                   "LOGICAL_DNS",
+//					"http2_protocol_options": map[string]string{},
+//					"transport_socket": map[string]interface{}{
+//						"name": "envoy.transport_sockets.tls",
+//						"typed_config": map[string]interface{}{
+//							"@type": "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext",
+//							"common_tls_context": map[string]interface{}{
+//								"alpn_protocols": []string{
+//									"h2",
+//								},
+//								"validation_context": map[string]interface{}{
+//									"trusted_ca": map[string]interface{}{
+//										"inline_bytes": config.RootCert,
+//									},
+//								},
+//								"tls_params": map[string]interface{}{
+//									"tls_minimum_protocol_version": "TLSv1_2",
+//									"tls_maximum_protocol_version": "TLSv1_3",
+//								},
+//								"tls_certificates": []map[string]interface{}{
+//									{
+//										"certificate_chain": map[string]interface{}{
+//											"inline_bytes": config.Cert,
+//										},
+//										"private_key": map[string]interface{}{
+//											"inline_bytes": config.Key,
+//										},
+//									},
+//								},
+//							},
+//						},
+//					},
+//					"load_assignment": map[string]interface{}{
+//						"cluster_name": config.XDSClusterName,
+//						"endpoints": []map[string]interface{}{
+//							{
+//								"lb_endpoints": []map[string]interface{}{
+//									{
+//										"endpoint": map[string]interface{}{
+//											"address": map[string]interface{}{
+//												"socket_address": map[string]interface{}{
+//													"address":    config.XDSHost,
+//													"port_value": config.XDSPort,
+//												},
+//											},
+//										},
+//									},
+//								},
+//							},
+//						},
+//					},
+//				},
+//			},
+//		},
+//=======
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	}
 
 	m["static_resources"] = getStaticResources(config)
@@ -180,17 +180,17 @@ func (wh *mutatingWebhook) createEnvoyBootstrapConfig(name, namespace, osmNamesp
 		Cert:     base64.StdEncoding.EncodeToString(cert.GetCertificateChain()),
 		Key:      base64.StdEncoding.EncodeToString(cert.GetPrivateKey()),
 
-<<<<<<< HEAD
-		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", wh.osmControllerName, osmNamespace),
-		XDSPort: constants.OSMControllerPort,
-=======
+//<<<<<<< HEAD
+//		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", wh.osmControllerName, osmNamespace),
+//		XDSPort: constants.OSMControllerPort,
+//=======
 		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", constants.OSMControllerName, osmNamespace),
 		XDSPort: constants.ADSServerPort,
 
 		// OriginalHealthProbes stores the path and port for liveness, readiness, and startup health probes as initially
 		// defined on the Pod Spec.
 		OriginalHealthProbes: originalHealthProbes,
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	}
 	yamlContent, err := getEnvoyConfigYAML(configMeta, wh.configurator)
 	if err != nil {

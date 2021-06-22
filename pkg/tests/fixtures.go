@@ -4,6 +4,7 @@ package tests
 import (
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"net"
 
 	access "github.com/servicemeshinterface/smi-sdk-go/pkg/apis/access/v1alpha3"
@@ -225,7 +226,6 @@ var (
 		Port: endpoint.Port(ServicePort),
 	}
 
-<<<<<<< HEAD
 	// BookstoreV1TrafficPolicy is a traffic policy SMI object.
 	BookstoreV1TrafficPolicy = trafficpolicy.TrafficTarget{
 		Name:        fmt.Sprintf("%s:default/bookbuyer->default/bookstore-v1", TrafficTargetName),
@@ -295,8 +295,6 @@ var (
 		},
 	}
 
-=======
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	// TrafficSplit is a traffic split SMI object.
 	TrafficSplit = v1alpha2.TrafficSplit{
 		ObjectMeta: v1.ObjectMeta{

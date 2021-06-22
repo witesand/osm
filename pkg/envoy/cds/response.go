@@ -40,18 +40,18 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 			return nil, err
 		}
 
-<<<<<<< HEAD
-		if catalog.GetWitesandCataloger().IsWSEdgePodService(dstService) {
-			getWSEdgePodUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
-			continue
-		} else if catalog.GetWitesandCataloger().IsWSUnicastService(dstService.Name) {
-			getWSUnicastUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
-			// fall thru to generate anycast cluster
-		}
-
-		remoteCluster, err := getUpstreamServiceCluster(dstService, proxyServiceName.GetMeshServicePort(), cfg)
-
-=======
+//<<<<<<< HEAD
+//		if catalog.GetWitesandCataloger().IsWSEdgePodService(dstService) {
+//			getWSEdgePodUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
+//			continue
+//		} else if catalog.GetWitesandCataloger().IsWSUnicastService(dstService.Name) {
+//			getWSUnicastUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
+//			// fall thru to generate anycast cluster
+//		}
+//
+//		remoteCluster, err := getUpstreamServiceCluster(dstService, proxyServiceName.GetMeshServicePort(), cfg)
+//
+//=======
 		clusters = append(clusters, cluster)
 	}
 
@@ -60,7 +60,7 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 	for _, proxyService := range svcList {
 		localClusterName := envoy.GetLocalClusterNameForService(proxyService)
 		localCluster, err := getLocalServiceCluster(meshCatalog, proxyService, localClusterName)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to get local cluster config for proxy %s", proxyService)
 			return nil, err
@@ -68,19 +68,19 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 		clusters = append(clusters, localCluster)
 	}
 
-<<<<<<< HEAD
-		if featureflags.IsBackpressureEnabled() {
-			enableBackpressure(catalog, remoteCluster, dstService.GetMeshService())
-		}
-		//log.Debug().Msgf("remoteName:%s, remoteCluster:%+v", remoteCluster.Name, remoteCluster)
-
-		clusterFactories[remoteCluster.Name] = remoteCluster
-	}
-
-	// Create a local cluster for the service.
-	// The local cluster will be used for incoming traffic.
-	localClusters, err := getLocalServiceCluster(catalog, proxyServiceName)
-=======
+//<<<<<<< HEAD
+//		if featureflags.IsBackpressureEnabled() {
+//			enableBackpressure(catalog, remoteCluster, dstService.GetMeshService())
+//		}
+//		//log.Debug().Msgf("remoteName:%s, remoteCluster:%+v", remoteCluster.Name, remoteCluster)
+//
+//		clusterFactories[remoteCluster.Name] = remoteCluster
+//	}
+//
+//	// Create a local cluster for the service.
+//	// The local cluster will be used for incoming traffic.
+//	localClusters, err := getLocalServiceCluster(catalog, proxyServiceName)
+//=======
 	// Add egress clusters based on applied policies
 	if egressTrafficPolicy, err := meshCatalog.GetEgressTrafficPolicy(proxyIdentity.ToServiceIdentity()); err != nil {
 		log.Error().Err(err).Msgf("Error retrieving egress policies for proxy with identity %s, skipping egress clusters", proxyIdentity)
@@ -91,21 +91,21 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 	}
 
 	outboundPassthroughCluser, err := getOriginalDestinationEgressCluster(envoy.OutboundPassthroughCluster)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to passthrough cluster for egress for proxy %s", envoy.OutboundPassthroughCluster)
 		return nil, err
 	}
-<<<<<<< HEAD
-
-	count := 0
-	for _, localCluster := range localClusters {
-		clusterFactories[localCluster.Name] = localCluster
-		log.Debug().Msgf("local:%s localCluster:%+v", localCluster.Name, localCluster)
-		count++
-	}
-=======
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//<<<<<<< HEAD
+//
+//	count := 0
+//	for _, localCluster := range localClusters {
+//		clusterFactories[localCluster.Name] = localCluster
+//		log.Debug().Msgf("local:%s localCluster:%+v", localCluster.Name, localCluster)
+//		count++
+//	}
+//=======
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// Add an outbound passthrough cluster for egress if global mesh-wide Egress is enabled
 	if cfg.IsEgressEnabled() {

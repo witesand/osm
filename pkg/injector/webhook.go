@@ -62,12 +62,12 @@ const (
 	inboundPortExclusionListAnnotation = "openservicemesh.io/inbound-port-exclusion-list"
 )
 
-<<<<<<< HEAD
-// NewWebhook starts a new web server handling requests from the injector MutatingWebhookConfiguration
-func NewWebhook(config Config, kubeClient kubernetes.Interface, certManager certificate.Manager, meshCatalog catalog.MeshCataloger, kubeController k8s.Controller, meshName, osmControllerName, osmNamespace, webhookConfigName string, stop <-chan struct{}, cfg configurator.Configurator) error {
-	cn := certificate.CommonName(fmt.Sprintf("%s.%s.svc", osmControllerName, osmNamespace))
-	cert, err := certManager.IssueCertificate(cn, constants.XDSCertificateValidityPeriod)
-=======
+//<<<<<<< HEAD
+//// NewWebhook starts a new web server handling requests from the injector MutatingWebhookConfiguration
+//func NewWebhook(config Config, kubeClient kubernetes.Interface, certManager certificate.Manager, meshCatalog catalog.MeshCataloger, kubeController k8s.Controller, meshName, osmControllerName, osmNamespace, webhookConfigName string, stop <-chan struct{}, cfg configurator.Configurator) error {
+//	cn := certificate.CommonName(fmt.Sprintf("%s.%s.svc", osmControllerName, osmNamespace))
+//	cert, err := certManager.IssueCertificate(cn, constants.XDSCertificateValidityPeriod)
+//=======
 // NewMutatingWebhook starts a new web server handling requests from the injector MutatingWebhookConfiguration
 func NewMutatingWebhook(config Config, kubeClient kubernetes.Interface, certManager certificate.Manager, kubeController k8s.Controller, meshName, osmNamespace, webhookConfigName string, stop <-chan struct{}, cfg configurator.Configurator) error {
 	// This is a certificate issued for the webhook handler
@@ -76,7 +76,7 @@ func NewMutatingWebhook(config Config, kubeClient kubernetes.Interface, certMana
 	webhookHandlerCert, err := certManager.IssueCertificate(
 		certificate.CommonName(fmt.Sprintf("%s.%s.svc", injectorServiceName, osmNamespace)),
 		constants.XDSCertificateValidityPeriod)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if err != nil {
 		return errors.Errorf("Error issuing certificate for the mutating webhook: %+v", err)
 	}
@@ -249,10 +249,10 @@ func (wh *mutatingWebhook) mutate(req *admissionv1.AdmissionRequest, proxyUUID u
 		log.Error().Err(err).Msgf("Error unmarshaling request to pod with UUID %s in namespace %s", proxyUUID, req.Namespace)
 		return webhook.AdmissionError(err)
 	}
-<<<<<<< HEAD
-	//log.Trace().Msgf("Mutation request: (new object: %v) (old object: %v)", string(req.Object.Raw), string(req.OldObject.Raw))
-=======
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//<<<<<<< HEAD
+//	//log.Trace().Msgf("Mutation request: (new object: %v) (old object: %v)", string(req.Object.Raw), string(req.OldObject.Raw))
+//=======
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// Start building the response
 	resp := &admissionv1.AdmissionResponse{

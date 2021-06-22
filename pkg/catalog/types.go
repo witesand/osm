@@ -42,16 +42,16 @@ type MeshCatalog struct {
 	// lookups
 	kubeController k8s.Controller
 
-<<<<<<< HEAD
-	// Maintain a mapping of pod UID to CN of the Envoy on that pod
-	podUIDToCN sync.Map
-
-	witesandCatalog   *witesand.WitesandCatalog
-=======
+//<<<<<<< HEAD
+//	// Maintain a mapping of pod UID to CN of the Envoy on that pod
+//	podUIDToCN sync.Map
+//
+//	witesandCatalog   *witesand.WitesandCatalog
+//=======
 	// policyController implements the functionality related to the resources part of the policy.openrservicemesh.io
 	// API group, such as egress.
 	policyController policy.Controller
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 }
 
 // MeshCataloger is the mechanism by which the Service Mesh controller discovers all Envoy proxies connected to the catalog.
@@ -59,19 +59,19 @@ type MeshCataloger interface {
 	// ListInboundTrafficPolicies returns all inbound traffic policies related to the given service identity and inbound services
 	ListInboundTrafficPolicies(identity.ServiceIdentity, []service.MeshService) []*trafficpolicy.InboundTrafficPolicy
 
-<<<<<<< HEAD
-	// ListAllowedInboundServices lists the inbound services allowed to connect to the given service.
-	ListAllowedInboundServices(service.MeshServicePort) ([]service.MeshService, error)
-
-	// ListAllowedOutboundServices lists the services the given service is allowed outbound connections to.
-	ListAllowedOutboundServices(service.MeshService) ([]service.MeshServicePort, error)
-=======
+//<<<<<<< HEAD
+//	// ListAllowedInboundServices lists the inbound services allowed to connect to the given service.
+//	ListAllowedInboundServices(service.MeshServicePort) ([]service.MeshService, error)
+//
+//	// ListAllowedOutboundServices lists the services the given service is allowed outbound connections to.
+//	ListAllowedOutboundServices(service.MeshService) ([]service.MeshServicePort, error)
+//=======
 	// ListOutboundTrafficPolicies returns all outbound traffic policies related to the given service identity
 	ListOutboundTrafficPolicies(identity.ServiceIdentity) []*trafficpolicy.OutboundTrafficPolicy
 
 	// ListAllowedOutboundServicesForIdentity list the services the given service identity is allowed to initiate outbound connections to
 	ListAllowedOutboundServicesForIdentity(identity.ServiceIdentity) []service.MeshService
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// ListAllowedInboundServiceIdentities lists the downstream service identities that can connect to the given service identity
 	ListAllowedInboundServiceIdentities(identity.ServiceIdentity) ([]identity.ServiceIdentity, error)
@@ -102,30 +102,30 @@ type MeshCataloger interface {
 	// ie. 'spec.ports[].targetPort' instead of 'spec.ports[].port' for a Kubernetes service.
 	GetTargetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
 
-<<<<<<< HEAD
-	//GetWeightedClusterForServicePort returns the weighted cluster for a ServicePort
-	GetWeightedClusterForServicePort(service service.MeshServicePort) (service.WeightedCluster, error)
-
-	// GetIngressRoutesPerHost returns the HTTP route matches per host associated with an ingress service
-	GetIngressRoutesPerHost(service.MeshService) (map[string][]trafficpolicy.HTTPRouteMatch, error)
-
-	// ListMonitoredNamespaces lists namespaces monitored by the control plane
-	ListMonitoredNamespaces() []string
-
-	// GetProvider returns provider given providerName
-	GetProvider(ident string) endpoint.Provider
-
-	// GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol
-	GetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
-
-	GetWitesandCataloger() witesand.WitesandCataloger
-}
-=======
+//<<<<<<< HEAD
+//	//GetWeightedClusterForServicePort returns the weighted cluster for a ServicePort
+//	GetWeightedClusterForServicePort(service service.MeshServicePort) (service.WeightedCluster, error)
+//
+//	// GetIngressRoutesPerHost returns the HTTP route matches per host associated with an ingress service
+//	GetIngressRoutesPerHost(service.MeshService) (map[string][]trafficpolicy.HTTPRouteMatch, error)
+//
+//	// ListMonitoredNamespaces lists namespaces monitored by the control plane
+//	ListMonitoredNamespaces() []string
+//
+//	// GetProvider returns provider given providerName
+//	GetProvider(ident string) endpoint.Provider
+//
+//	// GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol
+//	GetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
+//
+//	GetWitesandCataloger() witesand.WitesandCataloger
+//}
+//=======
 	// GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol,
 	// where the ports returned are the ones used by downstream clients in their requests. This can be different from the ports
 	// actually exposed by the application binary, ie. 'spec.ports[].port' instead of 'spec.ports[].targetPort' for a Kubernetes service.
 	GetPortToProtocolMappingForService(service.MeshService) (map[uint32]string, error)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// ListInboundTrafficTargetsWithRoutes returns a list traffic target objects composed of its routes for the given destination service identity
 	ListInboundTrafficTargetsWithRoutes(identity.ServiceIdentity) ([]trafficpolicy.TrafficTargetWithRoutes, error)

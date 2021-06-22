@@ -49,33 +49,33 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 		return endpoints
 	}
 
-<<<<<<< HEAD
-	kubernetesEndpoints := endpointsInterface.(*corev1.Endpoints)
-	if kubernetesEndpoints != nil {
-		if !c.kubeController.IsMonitoredNamespace(kubernetesEndpoints.Namespace) {
-			// Doesn't belong to namespaces we are observing
-			return endpoints
-		}
-		log.Info().Msgf("[%s] Endpoint subsets for service %s on Kubernetes :%+v", c.providerIdent, svc, kubernetesEndpoints.Subsets)
-		for _, kubernetesEndpoint := range kubernetesEndpoints.Subsets {
-			for _, address := range kubernetesEndpoint.Addresses {
-				podName := ""
-				if address.TargetRef != nil && address.TargetRef.Kind == "Pod" {
-					podName = address.TargetRef.Name
-				}
-				for _, port := range kubernetesEndpoint.Ports {
-					ip := net.ParseIP(address.IP)
-					if ip == nil {
-						log.Error().Msgf("[%s] Error parsing IP address %s", c.providerIdent, address.IP)
-						break
-					}
-					ept := endpoint.Endpoint{
-						IP:      ip,
-						Port:    endpoint.Port(port.Port),
-						PodName: podName,
-					}
-					endpoints = append(endpoints, ept)
-=======
+//<<<<<<< HEAD
+//	kubernetesEndpoints := endpointsInterface.(*corev1.Endpoints)
+//	if kubernetesEndpoints != nil {
+//		if !c.kubeController.IsMonitoredNamespace(kubernetesEndpoints.Namespace) {
+//			// Doesn't belong to namespaces we are observing
+//			return endpoints
+//		}
+//		log.Info().Msgf("[%s] Endpoint subsets for service %s on Kubernetes :%+v", c.providerIdent, svc, kubernetesEndpoints.Subsets)
+//		for _, kubernetesEndpoint := range kubernetesEndpoints.Subsets {
+//			for _, address := range kubernetesEndpoint.Addresses {
+//				podName := ""
+//				if address.TargetRef != nil && address.TargetRef.Kind == "Pod" {
+//					podName = address.TargetRef.Name
+//				}
+//				for _, port := range kubernetesEndpoint.Ports {
+//					ip := net.ParseIP(address.IP)
+//					if ip == nil {
+//						log.Error().Msgf("[%s] Error parsing IP address %s", c.providerIdent, address.IP)
+//						break
+//					}
+//					ept := endpoint.Endpoint{
+//						IP:      ip,
+//						Port:    endpoint.Port(port.Port),
+//						PodName: podName,
+//					}
+//					endpoints = append(endpoints, ept)
+//=======
 	for _, kubernetesEndpoint := range kubernetesEndpoints.Subsets {
 		for _, address := range kubernetesEndpoint.Addresses {
 			for _, port := range kubernetesEndpoint.Ports {
@@ -87,7 +87,7 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 				ept := endpoint.Endpoint{
 					IP:   ip,
 					Port: endpoint.Port(port.Port),
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 				}
 				endpoints = append(endpoints, ept)
 			}
@@ -163,23 +163,23 @@ func (c Client) GetServicesForServiceAccount(svcAccount identity.K8sServiceAccou
 	}
 
 	if services.Cardinality() == 0 {
-<<<<<<< HEAD
-		// Add a service, which is a representation of the ServiceAccount, but not a real K8s service.
-		// This will ensure that all pods in the service account are represented as one service.
-		/* WITESAND START COMMENTED */
-		/*
-		synthService := svcAccount.GetSyntheticService()
-		services.Add(synthService)
-		log.Trace().Msgf("[%s] No services for service account %s/%s; Adding synthetic service %s", c.providerIdent, svcAccount.Name, svcAccount.Namespace, synthService)
-		*/
-		/* WITESAND END */
-		return make([]service.MeshService, 0), errServiceNotFound
-	} else {
-		//log.Trace().Msgf("[%s] Services for service account %s: %+v", c.providerIdent, svcAccount, services)
-=======
+//<<<<<<< HEAD
+//		// Add a service, which is a representation of the ServiceAccount, but not a real K8s service.
+//		// This will ensure that all pods in the service account are represented as one service.
+//		/* WITESAND START COMMENTED */
+//		/*
+//		synthService := svcAccount.GetSyntheticService()
+//		services.Add(synthService)
+//		log.Trace().Msgf("[%s] No services for service account %s/%s; Adding synthetic service %s", c.providerIdent, svcAccount.Name, svcAccount.Namespace, synthService)
+//		*/
+//		/* WITESAND END */
+//		return make([]service.MeshService, 0), errServiceNotFound
+//	} else {
+//		//log.Trace().Msgf("[%s] Services for service account %s: %+v", c.providerIdent, svcAccount, services)
+//=======
 		log.Error().Err(errServiceNotFound).Msgf("[%s] No services for service account %s", c.providerIdent, svcAccount)
 		return nil, errServiceNotFound
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	}
 
 	log.Trace().Msgf("[%s] Services for service account %s: %+v", c.providerIdent, svcAccount, services)
@@ -240,10 +240,10 @@ func (c *Client) getServicesByLabels(podLabels map[string]string, namespace stri
 		}
 
 		svcRawSelector := svc.Spec.Selector
-<<<<<<< HEAD
-=======
-		// service has no selectors, we do not need to match against the pod label
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//<<<<<<< HEAD
+//=======
+//		// service has no selectors, we do not need to match against the pod label
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 		if len(svcRawSelector) == 0 {
 			continue
 		}
@@ -269,13 +269,13 @@ func (c *Client) GetResolvableEndpointsForService(svc service.MeshService) ([]en
 		return nil, errServiceNotFound
 	}
 
-<<<<<<< HEAD
-	if len(kubeService.Spec.ClusterIP) == 0 || kubeService.Spec.ClusterIP == "None" {
-		// If service has no cluster IP, use final endpoint as resolvable destinations
-=======
+//<<<<<<< HEAD
+//	if len(kubeService.Spec.ClusterIP) == 0 || kubeService.Spec.ClusterIP == "None" {
+//		// If service has no cluster IP, use final endpoint as resolvable destinations
+//=======
 	if len(kubeService.Spec.ClusterIP) == 0 || kubeService.Spec.ClusterIP == corev1.ClusterIPNone {
 		// If service has no cluster IP or cluster IP is <none>, use final endpoint as resolvable destinations
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 		return c.ListEndpointsForService(svc), nil
 	}
 

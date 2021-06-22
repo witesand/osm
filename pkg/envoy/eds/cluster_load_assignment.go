@@ -19,13 +19,13 @@ const (
 	zone = "zone"
 )
 
-<<<<<<< HEAD:pkg/envoy/cla/cluster_load_assignment.go
-// NewClusterLoadAssignment constructs the Envoy struct necessary for TrafficSplit implementation.
-func NewClusterLoadAssignment(serviceName service.MeshServicePort, serviceEndpoints []endpoint.Endpoint) *xds_endpoint.ClusterLoadAssignment {
-=======
+//<<<<<<< HEAD:pkg/envoy/cla/cluster_load_assignment.go
+//// NewClusterLoadAssignment constructs the Envoy struct necessary for TrafficSplit implementation.
+//func NewClusterLoadAssignment(serviceName service.MeshServicePort, serviceEndpoints []endpoint.Endpoint) *xds_endpoint.ClusterLoadAssignment {
+//=======
 // newClusterLoadAssignment returns the cluster load assignments for the given service and its endpoints
 func newClusterLoadAssignment(serviceName service.MeshService, serviceEndpoints []endpoint.Endpoint) *xds_endpoint.ClusterLoadAssignment {
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/envoy/eds/cluster_load_assignment.go
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7:pkg/envoy/eds/cluster_load_assignment.go
 	cla := &xds_endpoint.ClusterLoadAssignment{
 		ClusterName: serviceName.String(),
 		Endpoints: []*xds_endpoint.LocalityLbEndpoints{

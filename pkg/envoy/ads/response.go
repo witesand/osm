@@ -67,25 +67,25 @@ func (s *Server) sendResponse(proxy *envoy.Proxy, server *xds_discovery.Aggregat
 		}
 	}
 
-<<<<<<< HEAD
-	// There is an SDS validation cert corresponding to each upstream service
-	upstreamServices, err := meshCatalog.ListAllowedOutboundServices(serviceForProxy)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error listing outbound services for proxy %q", serviceForProxy)
-		return nil
-	}
-	for _, upstream := range upstreamServices {
-		upstreamRootCertResource := envoy.SDSCert{
-			MeshService: upstream.GetMeshService(),
-			CertType:    envoy.RootCertTypeForMTLSOutbound,
-		}.String()
-		discoveryRequest.ResourceNames = append(discoveryRequest.ResourceNames, upstreamRootCertResource)
-=======
+//<<<<<<< HEAD
+//	// There is an SDS validation cert corresponding to each upstream service
+//	upstreamServices, err := meshCatalog.ListAllowedOutboundServices(serviceForProxy)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error listing outbound services for proxy %q", serviceForProxy)
+//		return nil
+//	}
+//	for _, upstream := range upstreamServices {
+//		upstreamRootCertResource := envoy.SDSCert{
+//			MeshService: upstream.GetMeshService(),
+//			CertType:    envoy.RootCertTypeForMTLSOutbound,
+//		}.String()
+//		discoveryRequest.ResourceNames = append(discoveryRequest.ResourceNames, upstreamRootCertResource)
+//=======
 	isFullUpdate := len(typeURIsToSend) == len(envoy.XDSResponseOrder)
 	if isFullUpdate {
 		success := !thereWereErrors
 		xdsPathTimeTrack(time.Now(), log.Info(), envoy.TypeADS, proxy, success)
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	}
 
 	return nil
@@ -122,13 +122,13 @@ func (s *Server) newAggregatedDiscoveryResponse(proxy *envoy.Proxy, request *xds
 		Nonce:       proxy.SetNewNonce(typeURL),
 	}
 
-<<<<<<< HEAD
-	//if envoy.TypeURI(request.TypeUrl) == envoy.TypeSDS {
-	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s", response.TypeUrl, response.VersionInfo)
-	//} else {
-	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s; %+v", response.TypeUrl, response.VersionInfo, response)
-	//}
-=======
+//<<<<<<< HEAD
+//	//if envoy.TypeURI(request.TypeUrl) == envoy.TypeSDS {
+//	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s", response.TypeUrl, response.VersionInfo)
+//	//} else {
+//	//	log.Trace().Msgf("Constructed %s response: VersionInfo=%s; %+v", response.TypeUrl, response.VersionInfo, response)
+//	//}
+//=======
 	resourcesSent := mapset.NewSet()
 	for _, res := range resources {
 		proto, err := ptypes.MarshalAny(res)
@@ -139,7 +139,7 @@ func (s *Server) newAggregatedDiscoveryResponse(proxy *envoy.Proxy, request *xds
 		response.Resources = append(response.Resources, proto)
 		resourcesSent.Add(cache.GetResourceName(res))
 	}
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// Validate the generated resources given the request
 	validateRequestResponse(proxy, request, resources)

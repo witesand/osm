@@ -15,11 +15,11 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-<<<<<<< HEAD
-	// "github.com/openservicemesh/osm/pkg/configurator"
-=======
+//<<<<<<< HEAD
+//	// "github.com/openservicemesh/osm/pkg/configurator"
+//=======
 	"github.com/openservicemesh/osm/pkg/constants"
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	"github.com/openservicemesh/osm/pkg/envoy"
 	"github.com/openservicemesh/osm/pkg/envoy/rds/route"
 	"github.com/openservicemesh/osm/pkg/service"
@@ -116,12 +116,12 @@ func (lb *listenerBuilder) getInboundMeshHTTPFilterChain(proxyService service.Me
 	}
 
 	// Construct downstream TLS context
-<<<<<<< HEAD
-	/* WITESAND_TLS_DISABLE
-	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(proxyService, true))
-=======
+//<<<<<<< HEAD
+//	/* WITESAND_TLS_DISABLE
+//	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(proxyService, true))
+//=======
 	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(lb.serviceIdentity, true /* mTLS */))
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if err != nil {
 		log.Error().Err(err).Msgf("Error marshalling DownstreamTLSContext for proxy service %s", proxyService)
 		return nil, err
@@ -174,12 +174,12 @@ func (lb *listenerBuilder) getInboundMeshTCPFilterChain(proxyService service.Mes
 	}
 
 	// Construct downstream TLS context
-<<<<<<< HEAD
-	/* WITESAND_TLS_DISABLE
-	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(proxyService, true))
-=======
+//<<<<<<< HEAD
+//	/* WITESAND_TLS_DISABLE
+//	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(proxyService, true))
+//=======
 	marshalledDownstreamTLSContext, err := ptypes.MarshalAny(envoy.GetDownstreamTLSContext(lb.serviceIdentity, true /* mTLS */))
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	if err != nil {
 		log.Error().Err(err).Msgf("Error marshalling DownstreamTLSContext for proxy service %s", proxyService)
 		return nil, err
@@ -343,58 +343,58 @@ func (lb *listenerBuilder) getOutboundHTTPFilterChainForService(upstream service
 	}, nil
 }
 
-<<<<<<< HEAD
-/* WITESAND specific */
-func (lb *listenerBuilder) getInboundInMeshFilterChain(proxyServiceName service.MeshService) (*xds_listener.FilterChain, error) {
-	/* WITESAND_TLS_DISABLE
-	marshalledDownstreamTLSContext, err := envoy.MessageToAny(envoy.GetDownstreamTLSContext(proxyServiceName, true ))
-	if err != nil {
-		log.Error().Err(err).Msgf("Error marshalling DownstreamTLSContext object for proxy %s", proxyServiceName)
-		return nil, err
-	}
-	*/
-
-	inboundConnManager := getHTTPConnectionManager(route.InboundRouteConfigName, lb.cfg)
-	marshalledInboundConnManager, err := ptypes.MarshalAny(inboundConnManager)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error marshalling inbound HttpConnectionManager object for proxy %s", proxyServiceName)
-		return nil, err
-	}
-
-	filterChain := &xds_listener.FilterChain{
-		Filters: []*xds_listener.Filter{
-			{
-				Name: wellknown.HTTPConnectionManager,
-				ConfigType: &xds_listener.Filter_TypedConfig{
-					TypedConfig: marshalledInboundConnManager,
-				},
-			},
-		},
-
-		// Apply this filter chain only to requests where the auth.UpstreamTlsContext.Sni matches
-		// one from the list of ServerNames provided below.
-		// This field is configured by the GetDownstreamTLSContext() function.
-		// This is not a field obtained from the mTLS Certificate.
-
-		/* WITESAND_TLS_DISABLE
-		FilterChainMatch: &xds_listener.FilterChainMatch{
-			ServerNames:          []string{proxyServiceName.GetCommonName().String()},
-			TransportProtocol:    envoy.TransportProtocolTLS,
-			ApplicationProtocols: envoy.ALPNInMesh, // in-mesh proxies will advertise this, set in UpstreamTlsContext
-		},
-		TransportSocket: &xds_core.TransportSocket{
-			Name: wellknown.TransportSocketTls,
-			ConfigType: &xds_core.TransportSocket_TypedConfig{
-				TypedConfig: marshalledDownstreamTLSContext,
-			},
-		},
-		*/
-	}
-
-	return filterChain, nil
-}
-
-=======
+//<<<<<<< HEAD
+///* WITESAND specific */
+//func (lb *listenerBuilder) getInboundInMeshFilterChain(proxyServiceName service.MeshService) (*xds_listener.FilterChain, error) {
+//	/* WITESAND_TLS_DISABLE
+//	marshalledDownstreamTLSContext, err := envoy.MessageToAny(envoy.GetDownstreamTLSContext(proxyServiceName, true ))
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error marshalling DownstreamTLSContext object for proxy %s", proxyServiceName)
+//		return nil, err
+//	}
+//	*/
+//
+//	inboundConnManager := getHTTPConnectionManager(route.InboundRouteConfigName, lb.cfg)
+//	marshalledInboundConnManager, err := ptypes.MarshalAny(inboundConnManager)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error marshalling inbound HttpConnectionManager object for proxy %s", proxyServiceName)
+//		return nil, err
+//	}
+//
+//	filterChain := &xds_listener.FilterChain{
+//		Filters: []*xds_listener.Filter{
+//			{
+//				Name: wellknown.HTTPConnectionManager,
+//				ConfigType: &xds_listener.Filter_TypedConfig{
+//					TypedConfig: marshalledInboundConnManager,
+//				},
+//			},
+//		},
+//
+//		// Apply this filter chain only to requests where the auth.UpstreamTlsContext.Sni matches
+//		// one from the list of ServerNames provided below.
+//		// This field is configured by the GetDownstreamTLSContext() function.
+//		// This is not a field obtained from the mTLS Certificate.
+//
+//		/* WITESAND_TLS_DISABLE
+//		FilterChainMatch: &xds_listener.FilterChainMatch{
+//			ServerNames:          []string{proxyServiceName.GetCommonName().String()},
+//			TransportProtocol:    envoy.TransportProtocolTLS,
+//			ApplicationProtocols: envoy.ALPNInMesh, // in-mesh proxies will advertise this, set in UpstreamTlsContext
+//		},
+//		TransportSocket: &xds_core.TransportSocket{
+//			Name: wellknown.TransportSocketTls,
+//			ConfigType: &xds_core.TransportSocket_TypedConfig{
+//				TypedConfig: marshalledDownstreamTLSContext,
+//			},
+//		},
+//		*/
+//	}
+//
+//	return filterChain, nil
+//}
+//
+//=======
 func (lb *listenerBuilder) getOutboundTCPFilterChainForService(upstream service.MeshService, port uint32) (*xds_listener.FilterChain, error) {
 	// Get TCP filter for service
 	filter, err := lb.getOutboundTCPFilter(upstream)
@@ -505,4 +505,4 @@ func (lb *listenerBuilder) getOutboundFilterChainPerUpstream() []*xds_listener.F
 
 	return filterChains
 }
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7

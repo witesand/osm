@@ -2,6 +2,8 @@ package lds
 
 import (
 	"fmt"
+	"ws/osm/pkg/kubernetes"
+	"ws/osm/pkg/service"
 
 	mapset "github.com/deckarep/golang-set"
 	xds_core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -14,15 +16,15 @@ import (
 
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/envoy"
-<<<<<<< HEAD
-	"github.com/openservicemesh/osm/pkg/envoy/route"
-	"github.com/openservicemesh/osm/pkg/kubernetes"
-	"github.com/openservicemesh/osm/pkg/service"
-)
-
-const (
-	outboundMeshFilterChainName   = "outbound-mesh-filter-chain"
-=======
+//<<<<<<< HEAD
+//	"github.com/openservicemesh/osm/pkg/envoy/route"
+//	"github.com/openservicemesh/osm/pkg/kubernetes"
+//	"github.com/openservicemesh/osm/pkg/service"
+//)
+//
+//const (
+//	outboundMeshFilterChainName   = "outbound-mesh-filter-chain"
+//=======
 	"github.com/openservicemesh/osm/pkg/featureflags"
 	"github.com/openservicemesh/osm/pkg/trafficpolicy"
 )
@@ -31,38 +33,38 @@ const (
 	inboundListenerName           = "inbound-listener"
 	outboundListenerName          = "outbound-listener"
 	prometheusListenerName        = "inbound-prometheus-listener"
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	outboundEgressFilterChainName = "outbound-egress-filter-chain"
 	egressTCPProxyStatPrefix      = "egress-tcp-proxy"
 	singleIpv4Mask                = 32
 )
 
-<<<<<<< HEAD
-func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshService) (*xds_listener.Listener, error) {
-	/* WITESAND_DISABLE
-	 * We do not want enumerate each and every (service)endpoint
-	serviceFilterChains, err := lb.getOutboundFilterChains(downstreamSvc)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting filter chains for outbound listener")
-		return nil, err
-	}
-
-	if len(serviceFilterChains) == 0 {
-		log.Info().Msgf("No filterchains for outbound services. Not programming Outbound listener.")
-		return nil, nil
-	}
-	*/
-	connManager := getHTTPConnectionManager(route.OutboundRouteConfigName, lb.cfg)
-
-	marshalledConnManager, err := ptypes.MarshalAny(connManager)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error marshalling HttpConnectionManager object")
-		return nil, err
-	}
-=======
+//<<<<<<< HEAD
+//func (lb *listenerBuilder) newOutboundListener(downstreamSvc []service.MeshService) (*xds_listener.Listener, error) {
+//	/* WITESAND_DISABLE
+//	 * We do not want enumerate each and every (service)endpoint
+//	serviceFilterChains, err := lb.getOutboundFilterChains(downstreamSvc)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error getting filter chains for outbound listener")
+//		return nil, err
+//	}
+//
+//	if len(serviceFilterChains) == 0 {
+//		log.Info().Msgf("No filterchains for outbound services. Not programming Outbound listener.")
+//		return nil, nil
+//	}
+//	*/
+//	connManager := getHTTPConnectionManager(route.OutboundRouteConfigName, lb.cfg)
+//
+//	marshalledConnManager, err := ptypes.MarshalAny(connManager)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error marshalling HttpConnectionManager object")
+//		return nil, err
+//	}
+//=======
 func (lb *listenerBuilder) newOutboundListener() (*xds_listener.Listener, error) {
 	serviceFilterChains := lb.getOutboundFilterChainPerUpstream()
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	listener := &xds_listener.Listener{
 		Name:             outboundListenerName,
@@ -238,30 +240,30 @@ func getFilterMatchPredicateForTrafficMatches(matches []*trafficpolicy.TrafficMa
 		}
 	}
 
-<<<<<<< HEAD
-	// Transform into set, when listing apex services we might face repetitions
-	for _, meshSvc := range outboundSvc {
-		dstServicesSet[meshSvc.GetMeshService()] = struct{}{}
-	}
-
-	// Getting apex services referring to the outbound services
-	// We get possible apexes which could traffic split to any of the possible
-	// outbound services
-	splitServices := lb.meshCatalog.GetSMISpec().ListTrafficSplitServices()
-	for _, svc := range splitServices {
-		for _, outSvc := range outboundSvc {
-			if svc.Service == outSvc.GetMeshService() {
-				rootServiceName := kubernetes.GetServiceFromHostname(svc.RootService)
-				rootMeshService := service.MeshService{
-					Namespace: outSvc.Namespace,
-					Name:      rootServiceName,
-				}
-
-				// Add this root service into the set
-				dstServicesSet[rootMeshService] = struct{}{}
-			}
-		}
-=======
+//<<<<<<< HEAD
+//	// Transform into set, when listing apex services we might face repetitions
+//	for _, meshSvc := range outboundSvc {
+//		dstServicesSet[meshSvc.GetMeshService()] = struct{}{}
+//	}
+//
+//	// Getting apex services referring to the outbound services
+//	// We get possible apexes which could traffic split to any of the possible
+//	// outbound services
+//	splitServices := lb.meshCatalog.GetSMISpec().ListTrafficSplitServices()
+//	for _, svc := range splitServices {
+//		for _, outSvc := range outboundSvc {
+//			if svc.Service == outSvc.GetMeshService() {
+//				rootServiceName := kubernetes.GetServiceFromHostname(svc.RootService)
+//				rootMeshService := service.MeshService{
+//					Namespace: outSvc.Namespace,
+//					Name:      rootServiceName,
+//				}
+//
+//				// Add this root service into the set
+//				dstServicesSet[rootMeshService] = struct{}{}
+//			}
+//		}
+//=======
 	if len(ports) == 0 {
 		return nil
 	}
@@ -273,7 +275,7 @@ func getFilterMatchPredicateForTrafficMatches(matches []*trafficpolicy.TrafficMa
 func getFilterMatchPredicateForPorts(ports []int) *xds_listener.ListenerFilterChainMatchPredicate {
 	if len(ports) == 0 {
 		return nil
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
+//>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 	}
 
 	matchPredicates := []*xds_listener.ListenerFilterChainMatchPredicate{}
