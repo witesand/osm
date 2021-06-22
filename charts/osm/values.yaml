@@ -9,17 +9,12 @@ OpenServiceMesh:
   image:
     # -- Container image registry
     registry: openservicemesh
-<<<<<<< HEAD
-    pullPolicy: Always
-    tag: v0.6.0
-=======
     # -- Container image pull policy
     pullPolicy: IfNotPresent
     # -- Container image tag
     tag: v0.9.0
 
   # -- `osm-controller` image pull secret
->>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
   imagePullSecrets: []
   # -- Envoy sidecar image
   sidecarImage: envoyproxy/envoy-alpine:v1.18.3
