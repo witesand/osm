@@ -2,8 +2,8 @@ package lds
 
 import (
 	"fmt"
-	"ws/osm/pkg/kubernetes"
-	"ws/osm/pkg/service"
+	//"ws/osm/pkg/kubernetes"
+	//"ws/osm/pkg/service"
 
 	mapset "github.com/deckarep/golang-set"
 	xds_core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"

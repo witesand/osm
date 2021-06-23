@@ -3,8 +3,8 @@ package rds
 import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
-	"ws/osm/pkg/kubernetes"
-	"ws/osm/pkg/service"
+	//"ws/osm/pkg/kubernetes"
+	//"ws/osm/pkg/service"
 
 	//<<<<<<< HEAD
 //	"fmt"

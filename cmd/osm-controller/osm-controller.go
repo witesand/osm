@@ -12,8 +12,8 @@ import (
 	"os"
 	"path"
 	"strings"
-	"ws/osm/pkg/certificate"
-	"ws/osm/pkg/injector"
+	//"ws/osm/pkg/certificate"
+	//"ws/osm/pkg/injector"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"

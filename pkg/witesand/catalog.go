@@ -8,7 +8,7 @@ import (
 
 	"github.com/openservicemesh/osm/pkg/announcements"
 	"github.com/openservicemesh/osm/pkg/kubernetes/events"
-	"github.com/openservicemesh/osm/pkg/service"
+	//"github.com/openservicemesh/osm/pkg/service"
 )
 
 func NewWitesandCatalog(kubeClient kubernetes.Interface, clusterId string) *WitesandCatalog {
@@ -120,9 +120,9 @@ func (wc *WitesandCatalog) ListRemoteK8s() map[string]RemoteK8s {
 	return remoteK8s
 }
 
-func (wc *WitesandCatalog) IsWSEdgePodService(svc service.MeshServicePort) bool {
-	return strings.HasPrefix(svc.Name, "edgepod")
-}
+//func (wc *WitesandCatalog) IsWSEdgePodService(svc service.MeshServicePort) bool {
+//	return strings.HasPrefix(svc.Name, "edgepod")
+//}
 
 func (wc *WitesandCatalog) IsWSUnicastService(inputSvcName string) bool {
 	for _, prefix := range wc.unicastEnabledSvcs {

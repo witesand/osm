@@ -18,7 +18,6 @@ import (
 	"github.com/openservicemesh/osm/pkg/service"
 	"github.com/openservicemesh/osm/pkg/smi"
 	"github.com/openservicemesh/osm/pkg/trafficpolicy"
-	"github.com/openservicemesh/osm/pkg/witesand"
 )
 
 var (
@@ -70,7 +69,7 @@ type MeshCataloger interface {
 	ListOutboundTrafficPolicies(identity.ServiceIdentity) []*trafficpolicy.OutboundTrafficPolicy
 
 	// ListAllowedOutboundServicesForIdentity list the services the given service identity is allowed to initiate outbound connections to
-	ListAllowedOutboundServicesForIdentity(identity.ServiceIdentity) []service.MeshService
+	ListAllowedOutboundServicesForIdentity(identity.ServiceIdentity) []service.MeshServicePort
 //>>>>>>> 865c66ed45ee888b5719d2e56a32f1534b61d1e7
 
 	// ListAllowedInboundServiceIdentities lists the downstream service identities that can connect to the given service identity

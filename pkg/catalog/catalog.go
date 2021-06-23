@@ -12,7 +12,7 @@ import (
 	"github.com/openservicemesh/osm/pkg/policy"
 	"github.com/openservicemesh/osm/pkg/smi"
 	"github.com/openservicemesh/osm/pkg/ticker"
-	"github.com/openservicemesh/osm/pkg/witesand"
+	//"github.com/openservicemesh/osm/pkg/witesand"
 )
 
 const (
