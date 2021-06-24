@@ -96,7 +96,7 @@ func (ms MeshServicePort) Equals(service MeshServicePort) bool {
 func UnmarshalMeshServicePort(str string) (*MeshServicePort, error) {
 	slices := strings.Split(str, namespaceNameSeparator)
 	if len(slices) != 3 {
-		return nil, errInvalidMeshServiceFormat
+		return nil, fmt.Errorf("len err")
 	}
 
 	// Make sure the slices are not empty. Split might actually leave empty slices.
@@ -106,7 +106,7 @@ func UnmarshalMeshServicePort(str string) (*MeshServicePort, error) {
 			continue
 		}
 		if len(sep) == 0 {
-			return nil, errInvalidMeshServiceFormat
+			return nil, fmt.Errorf("len err")
 		}
 	}
 
