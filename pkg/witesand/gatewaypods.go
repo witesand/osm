@@ -83,11 +83,24 @@ func (wc *WitesandCatalog) ListAllEdgePods() ([]string, error) {
 	return pods, nil
 }
 
+func (wc *WitesandCatalog) ListTunnelPods() ([]string, error) {
+	pods := make([]string, 0)
+	for _, clusterPods := range wc.allPodMap {
+		for pod, _ := range clusterPods.PodToIPMap {
+			if strings.HasPrefix(pod, "tunnelpod") {
+				pods = append(pods, pod)
+			}
+		}
+	}
+
+	return pods, nil
+}
+
 func (wc *WitesandCatalog) ListAllPods() ([]string, error) {
 	pods := make([]string, 0)
 	for _, clusterPods := range wc.allPodMap {
 		for pod, _ := range clusterPods.PodToIPMap {
-			pods = append(pods, pod)
+				pods = append(pods, pod)
 		}
 	}
 
