@@ -87,7 +87,8 @@ func (wc *WitesandCatalog) ListTunnelPods() ([]string, error) {
 	pods := make([]string, 0)
 	for _, clusterPods := range wc.allPodMap {
 		for pod, _ := range clusterPods.PodToIPMap {
-			if strings.HasPrefix(pod, "tunnelpod") {
+			upper := strings.ToUpper(pod)
+			if strings.HasPrefix(upper, "TUNNELD") {
 				pods = append(pods, pod)
 			}
 		}
