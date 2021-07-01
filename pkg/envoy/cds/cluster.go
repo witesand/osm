@@ -23,18 +23,22 @@ import (
 const (
 	// clusterConnectTimeout is the timeout duration used by Envoy to timeout connections to the cluster
 	clusterConnectTimeout = 1 * time.Second
+	MaxConnectionThreshold = 1024*15
 )
 
 // getUpstreamServiceCluster returns an Envoy Cluster corresponding to the given upstream service
 // Note: ServiceIdentity must be in the format "name.namespace" [https://github.com/openservicemesh/osm/issues/3188]
 func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upstreamSvc service.MeshService, cfg configurator.Configurator) (*xds_cluster.Cluster, error) {
 	clusterName := upstreamSvc.String()
-	marshalledUpstreamTLSContext, err := ptypes.MarshalAny(
-		envoy.GetUpstreamTLSContext(downstreamIdentity, upstreamSvc))
-	if err != nil {
-		return nil, err
-	}
 
+	/* WITESAND_TLS_DISABLE
+	//marshalledUpstreamTLSContext, err := ptypes.MarshalAny(
+	//	envoy.GetUpstreamTLSContext(downstreamIdentity, upstreamSvc))
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	*/
 	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
 	if err != nil {
 		return nil, err
@@ -43,11 +47,15 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 	remoteCluster := &xds_cluster.Cluster{
 		Name:           clusterName,
 		ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
-		TransportSocket: &xds_core.TransportSocket{
-			Name: wellknown.TransportSocketTls,
-			ConfigType: &xds_core.TransportSocket_TypedConfig{
-				TypedConfig: marshalledUpstreamTLSContext,
-			},
+		// WITESAND_TLS_DISABLE
+		//TransportSocket: &xds_core.TransportSocket{
+		//	Name: wellknown.TransportSocketTls,
+		//	ConfigType: &xds_core.TransportSocket_TypedConfig{
+		//		TypedConfig: marshalledUpstreamTLSContext,
+		//	},
+		//},
+		CircuitBreakers: &xds_cluster.CircuitBreakers{
+			Thresholds:   makeWSThresholds(),
 		},
 		TypedExtensionProtocolOptions: HTTP2ProtocolOptions,
 	}
@@ -60,7 +68,7 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 		// Configure service discovery based on traffic policies
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}
 		remoteCluster.EdsClusterConfig = &xds_cluster.Cluster_EdsClusterConfig{EdsConfig: envoy.GetADSConfigSource()}
-		remoteCluster.LbPolicy = xds_cluster.Cluster_ROUND_ROBIN
+		remoteCluster.LbPolicy = xds_cluster.Cluster_ROUND_RING_HASH
 	}
 
 	return remoteCluster, nil

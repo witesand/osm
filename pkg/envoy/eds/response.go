@@ -3,7 +3,6 @@ package eds
 import (
 	xds_discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-
 	"github.com/openservicemesh/osm/pkg/catalog"
 	"github.com/openservicemesh/osm/pkg/certificate"
 	"github.com/openservicemesh/osm/pkg/configurator"
@@ -21,6 +20,9 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 		log.Error().Err(err).Msgf("Error looking up proxy identity for proxy with SerialNumber=%s on Pod with UID=%s", proxy.GetCertificateSerialNumber(), proxy.GetPodUID())
 		return nil, err
 	}
+
+	//allTrafficPolicies, err := catalog.ListTrafficPolicies(proxyServiceName)
+	////log.Debug().Msgf("EDS svc %s allTrafficPolicies %+v", proxyServiceName, allTrafficPolicies)
 
 	allowedEndpoints, err := getEndpointsForProxy(meshCatalog, proxyIdentity.ToServiceIdentity())
 	if err != nil {
@@ -41,6 +43,42 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 // Note: ServiceIdentity must be in the format "name.namespace" [https://github.com/openservicemesh/osm/issues/3188]
 func getEndpointsForProxy(meshCatalog catalog.MeshCataloger, proxyIdentity identity.ServiceIdentity) (map[service.MeshService][]endpoint.Endpoint, error) {
 	allowedServicesEndpoints := make(map[service.MeshService][]endpoint.Endpoint)
+
+	//var protos []*any.Any
+	//for svc, endpoints := range outboundServicesEndpoints {
+	//	if catalog.GetWitesandCataloger().IsWSEdgePodService(svc) {
+	//		loadAssignments := cla.NewWSEdgePodClusterLoadAssignment(catalog, svc)
+	//		for _, loadAssignment := range *loadAssignments {
+	//			proto, err := ptypes.MarshalAny(loadAssignment)
+	//			if err != nil {
+	//				log.Error().Err(err).Msgf("Error marshalling EDS payload for proxy %s: %+v", proxyServiceName, loadAssignment)
+	//				continue
+	//			}
+	//			protos = append(protos, proto)
+	//		}
+	//		continue
+	//	} else if catalog.GetWitesandCataloger().IsWSUnicastService(svc.Name) {
+	//		loadAssignments := cla.NewWSUnicastClusterLoadAssignment(catalog, svc)
+	//		for _, loadAssignment := range *loadAssignments {
+	//			proto, err := ptypes.MarshalAny(loadAssignment)
+	//			if err != nil {
+	//				log.Error().Err(err).Msgf("Error marshalling EDS payload for proxy %s: %+v", proxyServiceName, loadAssignment)
+	//				continue
+	//			}
+	//			protos = append(protos, proto)
+	//		}
+	//		// fall thru for default CLAs
+	//	}
+	//	loadAssignment := cla.NewClusterLoadAssignment(svc, endpoints)
+	//	proto, err := ptypes.MarshalAny(loadAssignment)
+	//			protos = append(protos, proto)
+	//}
+	//
+	//		//log.Debug().Msgf("EDS url:%s protos: %+v", string(envoy.TypeEDS), protos)
+	//		//resp := &xds_discovery.DiscoveryResponse{
+	//		//	Resources: protos,
+	//		//	TypeUrl:   string(envoy.TypeEDS),
+
 
 	for _, dstSvc := range meshCatalog.ListAllowedOutboundServicesForIdentity(proxyIdentity) {
 		endpoints, err := meshCatalog.ListAllowedEndpointsForService(proxyIdentity, dstSvc)

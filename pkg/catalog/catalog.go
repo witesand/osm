@@ -11,10 +11,11 @@ import (
 	"github.com/openservicemesh/osm/pkg/policy"
 	"github.com/openservicemesh/osm/pkg/smi"
 	"github.com/openservicemesh/osm/pkg/ticker"
+	"github.com/openservicemesh/osm/pkg/witesand"
 )
 
 // NewMeshCatalog creates a new service catalog
-func NewMeshCatalog(kubeController k8s.Controller, kubeClient kubernetes.Interface, meshSpec smi.MeshSpec, certManager certificate.Manager, ingressMonitor ingress.Monitor, policyController policy.Controller, stop <-chan struct{}, cfg configurator.Configurator, endpointsProviders ...endpoint.Provider) *MeshCatalog {
+func NewMeshCatalog(kubeController k8s.Controller, kubeClient kubernetes.Interface, meshSpec smi.MeshSpec, certManager certificate.Manager, ingressMonitor ingress.Monitor, policyController policy.Controller, stop <-chan struct{}, cfg configurator.Configurator, wc *witesand.WitesandCatalog, endpointsProviders ...endpoint.Provider) *MeshCatalog {
 	log.Info().Msg("Create a new Service MeshCatalog.")
 	mc := MeshCatalog{
 		endpointsProviders: endpointsProviders,
@@ -29,6 +30,7 @@ func NewMeshCatalog(kubeController k8s.Controller, kubeClient kubernetes.Interfa
 		// The certificate itself would contain the cluster ID making it easy to lookup the client in this map.
 		kubeClient:     kubeClient,
 		kubeController: kubeController,
+		witesandCatalog: wc,
 	}
 
 	go mc.dispatcher()

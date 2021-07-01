@@ -14,6 +14,7 @@ import (
 	"github.com/openservicemesh/osm/pkg/configurator"
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/envoy"
+	dpb "github.com/golang/protobuf/ptypes/duration"
 )
 
 // trafficDirection defines, for filter terms, the direction of the traffic from an application
@@ -41,6 +42,7 @@ func getHTTPConnectionManager(routeName string, cfg configurator.Configurator, h
 				Name: wellknown.HTTPRoleBasedAccessControl,
 			},
 		},
+		StreamIdleTimeout: &dpb.Duration{Seconds:1200},
 		RouteSpecifier: &xds_hcm.HttpConnectionManager_Rds{
 			Rds: &xds_hcm.Rds{
 				ConfigSource:    envoy.GetADSConfigSource(),
