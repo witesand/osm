@@ -1,10 +1,15 @@
 package configurator
 
-import "strings"
+import (
+	"github.com/openservicemesh/osm/pkg/constants"
+	"net"
+	"sort"
+	"strings"
+)
 
 // GetMeshCIDRRanges returns a list of mesh CIDR ranges
 func (c *Client) GetMeshCIDRRanges() []string {
-	noSpaces := strings.ReplaceAll(c.getConfigMap().MeshCIDRRanges, " ", ",")
+	noSpaces := strings.ReplaceAll(c.getMeshConfig().Spec.MeshCIDRRanges, " ", ",")
 	commaSeparatedCIDRs := strings.Split(noSpaces, ",")
 
 	cidrSet := make(map[string]interface{})

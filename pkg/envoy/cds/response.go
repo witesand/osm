@@ -38,18 +38,18 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 				dstService.Name, proxy.GetCertificateSerialNumber(), proxy.GetPodUID())
 			return nil, err
 		}
+		//
+		//if catalog.GetWitesandCataloger().IsWSEdgePodService(dstService) {
+		//	getWSEdgePodUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
+		//	continue
+		//} else if catalog.GetWitesandCataloger().IsWSUnicastService(dstService.Name) {
+		//	getWSUnicastUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
+		//	// fall thru to generate anycast cluster
+		//}
+		//
+		//remoteCluster, err := getUpstreamServiceCluster(dstService, proxyServiceName.GetMeshServicePort(), cfg)
 
-		if catalog.GetWitesandCataloger().IsWSEdgePodService(dstService) {
-			getWSEdgePodUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
-			continue
-		} else if catalog.GetWitesandCataloger().IsWSUnicastService(dstService.Name) {
-			getWSUnicastUpstreamServiceCluster(catalog, dstService, proxyServiceName.GetMeshServicePort(), cfg, clusterFactories)
-			// fall thru to generate anycast cluster
-		}
-
-		remoteCluster, err := getUpstreamServiceCluster(dstService, proxyServiceName.GetMeshServicePort(), cfg)
-
-		clusters = append(clusters, cluster)
+	//	clusters = append(clusters, cluster)
 	}
 
 	// Create a local cluster for each service behind the proxy.
@@ -64,14 +64,14 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 		clusters = append(clusters, localCluster)
 	}
 
-			//log.Debug().Msgf("remoteName:%s, remoteCluster:%+v", remoteCluster.Name, remoteCluster)
-
-			clusterFactories[remoteCluster.Name] = remoteCluster
-		}
-
-		// Create a local cluster for the service.
-		// The local cluster will be used for incoming traffic.
-		localClusters, err := getLocalServiceCluster(catalog, proxyServiceName)
+		//	//log.Debug().Msgf("remoteName:%s, remoteCluster:%+v", remoteCluster.Name, remoteCluster)
+		//
+		//	clusterFactories[remoteCluster.Name] = remoteCluster
+		//}
+		//
+		//// Create a local cluster for the service.
+		//// The local cluster will be used for incoming traffic.
+		//localClusters, err := getLocalServiceCluster(catalog, proxyServiceName)
 
 	// Add egress clusters based on applied policies
 	if egressTrafficPolicy, err := meshCatalog.GetEgressTrafficPolicy(proxyIdentity.ToServiceIdentity()); err != nil {
