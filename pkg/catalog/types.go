@@ -102,6 +102,11 @@ type MeshCataloger interface {
 
 	// GetKubeController returns the kube controller instance handling the current cluster
 	GetKubeController() k8s.Controller
+
+
+	//witesand
+	// ListLocalClusterEndpoints returns the list of endpoints for this kubernetes cluster
+	ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
 }
 
 type trafficDirection string

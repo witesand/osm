@@ -75,6 +75,9 @@ var (
 )
 
 func init() {
+	//witesand init
+	wsinit()
+
 	flags.StringVarP(&verbosity, "verbosity", "v", constants.DefaultOSMLogLevel, "Set boot log verbosity level")
 	flags.StringVar(&meshName, "mesh-name", "", "OSM mesh name")
 	flags.StringVar(&kubeConfigFile, "kubeconfig", "", "Path to Kubernetes config file.")
@@ -108,7 +111,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Error parsing cmd line arguments")
 	}
 
-	if err := logger.SetLogLevel(verbosity); err != nil {
+	if err := logger.SetLogLevel("info"); err != nil {
 		log.Fatal().Err(err).Msg("Error setting log level")
 	}
 
@@ -179,6 +182,7 @@ func main() {
 	}
 
 	endpointsProviders := []endpoint.Provider{kubeProvider}
+	err, endpointsProviders = wsRemoteCluster(kubeClient, err, stop, meshSpec, endpointsProviders)
 
 	ingressClient, err := ingress.NewIngressClient(kubeClient, kubernetesClient, stop, cfg)
 	if err != nil {
@@ -199,6 +203,7 @@ func main() {
 		policyController,
 		stop,
 		cfg,
+		witesandCatalog,
 		endpointsProviders...)
 
 	proxyRegistry := registry.NewProxyRegistry(&registry.KubeProxyServiceMapper{KubeController: kubernetesClient})

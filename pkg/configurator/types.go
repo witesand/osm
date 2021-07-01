@@ -100,4 +100,8 @@ type Configurator interface {
 
 	// GetFeatureFlags returns OSM's feature flags
 	GetFeatureFlags() v1alpha1.FeatureFlags
+
+	//Witesand
+	// GetMeshCIDRRanges returns a list of mesh CIDR ranges
+	GetMeshCIDRRanges() []string
 }

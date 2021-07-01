@@ -51,6 +51,10 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 
 	for _, kubernetesEndpoint := range kubernetesEndpoints.Subsets {
 		for _, address := range kubernetesEndpoint.Addresses {
+			podName := ""
+			if address.TargetRef != nil && address.TargetRef.Kind == "Pod" {
+				podName = address.TargetRef.Name
+			}
 			for _, port := range kubernetesEndpoint.Ports {
 				ip := net.ParseIP(address.IP)
 				if ip == nil {
@@ -60,6 +64,7 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 				ept := endpoint.Endpoint{
 					IP:   ip,
 					Port: endpoint.Port(port.Port),
+					PodName: podName,
 				}
 				endpoints = append(endpoints, ept)
 			}
@@ -119,6 +124,13 @@ func (c Client) GetServicesForServiceAccount(svcAccount identity.K8sServiceAccou
 		}
 
 		for _, svc := range k8sServices {
+			/* WITESAND START */
+			if svc.Name != svcAccount.Name {
+				// even though it defeats the purpose, we want to use
+				// only one service per destination
+				continue
+			}
+			/* WITESAND END */
 			services.Add(service.MeshService{
 				Namespace: pod.Namespace,
 				Name:      svc.Name,
