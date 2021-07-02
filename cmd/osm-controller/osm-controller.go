@@ -75,8 +75,9 @@ var (
 )
 
 func init() {
-	//witesand init
+	//witesand start
 	wsinit()
+	//Witesand end
 
 	flags.StringVarP(&verbosity, "verbosity", "v", constants.DefaultOSMLogLevel, "Set boot log verbosity level")
 	flags.StringVar(&meshName, "mesh-name", "", "OSM mesh name")
