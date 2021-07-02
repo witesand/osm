@@ -193,8 +193,16 @@ func generateIptablesCommands(outboundIPRangeExclusionList []string, outboundPor
 	// 5. Create dynamic outbound ports exclusion rules
 	if len(outboundPortExclusionList) > 0 {
 		var portExclusionListStr []string
+		count := 0
 		for _, port := range outboundPortExclusionList {
 			portExclusionListStr = append(portExclusionListStr, strconv.Itoa(port))
+			count++
+			if count % 10 == 0 {
+				outboundPortsToExclude := strings.Join(portExclusionListStr, ",")
+				rule := fmt.Sprintf("iptables -t nat -I PROXY_OUTPUT -p tcp --match multiport --dports %s -j RETURN", outboundPortsToExclude)
+				cmd = append(cmd, rule)
+				portExclusionListStr = nil
+			}
 		}
 		outboundPortsToExclude := strings.Join(portExclusionListStr, ",")
 		rule := fmt.Sprintf("iptables -t nat -I PROXY_OUTPUT -p tcp --match multiport --dports %s -j RETURN", outboundPortsToExclude)
@@ -204,8 +212,16 @@ func generateIptablesCommands(outboundIPRangeExclusionList []string, outboundPor
 	// 6. Create dynamic inbound ports exclusion rules
 	if len(inboundPortExclusionList) > 0 {
 		var portExclusionListStr []string
+		count := 0
 		for _, port := range inboundPortExclusionList {
 			portExclusionListStr = append(portExclusionListStr, strconv.Itoa(port))
+			count++
+			if count % 10 == 0 {
+				inboundPortsToExclude := strings.Join(portExclusionListStr, ",")
+				rule := fmt.Sprintf("iptables -t nat -I PROXY_INBOUND -p tcp --match multiport --dports %s -j RETURN", inboundPortsToExclude)
+				cmd = append(cmd, rule)
+				portExclusionListStr = nil
+			}
 		}
 		inboundPortsToExclude := strings.Join(portExclusionListStr, ",")
 		rule := fmt.Sprintf("iptables -t nat -I PROXY_INBOUND -p tcp --match multiport --dports %s -j RETURN", inboundPortsToExclude)
