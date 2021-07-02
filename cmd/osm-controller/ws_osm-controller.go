@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/openservicemesh/osm/pkg/catalog"
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/endpoint"
 	"github.com/openservicemesh/osm/pkg/endpoint/providers/remote"
@@ -17,7 +16,6 @@ var (
 	osmControllerName   string
 	remoteProvider      *remote.Client
 	witesandCatalog     *witesand.WitesandCatalog
-	m                   *catalog.MeshCatalog
 )
 
 func wsinit() {

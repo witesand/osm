@@ -26,57 +26,6 @@ var iptablesRedirectionChains = []string{
 // iptablesOutboundStaticRules is the list of iptables rules related to outbound traffic interception and redirection
 var iptablesOutboundStaticRules = []string{
 
-	//#WITEDAND---START
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 22 -j ACCEPT"),  // # ssh port
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 49 -j ACCEPT"),  // # tacacs
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 69 -j ACCEPT"),  // # tftp
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 88 -j ACCEPT"),  // # nacmode
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 139 -j ACCEPT"), // # samba
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 389 -j ACCEPT"), // # radius port
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 443 -j ACCEPT"), // # aruba
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 445 -j ACCEPT"), // # samba
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 587 -j ACCEPT"), //# email port
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 636 -j ACCEPT"), // # ldaps
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 830 -j ACCEPT"), // # netconf
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 2579 -j ACCEPT"), // # kine
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 2500 -j ACCEPT"), // # osm-rest
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 4343 -j ACCEPT"), // # aruba
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 5000 -j ACCEPT"), // # devicedb
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 5432 -j ACCEPT"), // # postgres
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 5556 -j ACCEPT"), // # wsdex
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 5557 -j ACCEPT"), // # wsdex
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 7201 -j ACCEPT"), // # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 7203 -j ACCEPT"), // # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 7301 -j ACCEPT"), // # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 8005 -j ACCEPT"), // # aws metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 8080 -j ACCEPT"), // # presto
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 8081 -j ACCEPT"), // # apiserver
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 8100:8110 -j ACCEPT"), // # proxyd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 8200 -j ACCEPT"), // # valult
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 8443 -j ACCEPT"), // # apiserver
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9000:9004 -j ACCEPT"), // # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9053 -j ACCEPT"), // # waves
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9063:9064 -j ACCEPT"), // # alertdispatch
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9158 -j ACCEPT"), // # alertruled
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9073 -j ACCEPT"), // # identityd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9083 -j ACCEPT"), // # hive
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9085 -j ACCEPT"), // # filed
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9092 -j ACCEPT"), // # kafka
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9131 -j ACCEPT"), // # logd-rest
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9097 -j ACCEPT"), // # endpointd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9122 -j ACCEPT"), // # metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9126 -j ACCEPT"), // # nlp rest
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9128 -j ACCEPT"), // # historyd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9067 -j ACCEPT"), // # rcad
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9200 -j ACCEPT"), // # elastic
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 9300 -j ACCEPT"), // # elastic
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 10000 -j ACCEPT"), // # radiusconfd
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 10080 -j ACCEPT"), // # byod
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 10500 -j ACCEPT"), // # deviced/proxylistener
-	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp --dport 32443 -j ACCEPT"), // # sslport/apiserver
-	//#WITEDAND---END
-
-
 	// Redirects outbound TCP traffic hitting PROXY_REDIRECT chain to Envoy's outbound listener port
 	fmt.Sprintf("iptables -t nat -A PROXY_REDIRECT -p tcp -j REDIRECT --to-port %d", constants.EnvoyOutboundListenerPort),
 
@@ -110,53 +59,6 @@ var iptablesInboundStaticRules = []string{
 
 	// Skip metrics query traffic being directed to Envoy's inbound prometheus listener port
 	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport %d -j RETURN", constants.EnvoyPrometheusInboundListenerPort),
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 5432 -j RETURN"),
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 49 -j RETURN"), //  # tacacs
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 69 -j RETURN"), //  # tftp
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 88 -j RETURN"), //  # nacmode
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 139 -j RETURN"), //  # samba
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 389 -j RETURN"), //  # radius
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 443 -j RETURN"), //  # aruba
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 445 -j RETURN"), //  # samba
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 587 -j RETURN"), //  # email
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 636 -j RETURN"), //  # ldaps
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 830 -j RETURN"), //  # netconf
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 2579 -j RETURN"), //  # kine
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 2500 -j RETURN"), //  # osm-rest
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 4343 -j RETURN"), //  # aruba
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 5000 -j RETURN"), //  # devicedb
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 5432 -j RETURN"), //  # postgres
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 5556 -j RETURN"), //  # wsdex
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 5557 -j RETURN"), //  # wsdex
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 7201 -j RETURN"), //  # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 7203 -j RETURN"), //  # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 7301 -j RETURN"), //  # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 8005 -j RETURN"), //  # aws metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 8080 -j RETURN"), //  # presto
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 8081 -j RETURN"), //  # apiserver
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 8100:8110 -j RETURN"), //  # proxyd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 8200 -j RETURN"), //  # valult
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 8443 -j RETURN"), //  # apiserver
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9000:9004 -j RETURN"), //  # m3db/metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9053 -j RETURN"), //  # waves
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9063:9064 -j RETURN"), //  # alertdispatch
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9158 -j RETURN"), //  # alertruled
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9073 -j RETURN"), //  # identityd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9083 -j RETURN"), //  # hive
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9085 -j RETURN"), //  # filed
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9092 -j RETURN"), //  # kafka
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9131 -j RETURN"), //  # logd-rest
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9097 -j RETURN"), //  # endpointd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9122 -j RETURN"), //  # metricsd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9126 -j RETURN"), //  # nlp rest
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9128 -j RETURN"), //  # historyd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9067 -j RETURN"), //  # rcad
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9200 -j RETURN"), //  # elastic
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 9300 -j RETURN"), //  # elastic
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 10000 -j RETURN"), // # radiusconfd
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 10080 -j RETURN"), // # byod
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 10500 -j RETURN"), // # deviced/proxylistener
-	fmt.Sprintf("iptables -t nat -A PROXY_INBOUND -p tcp --dport 32443 -j RETURN"), // # sslpoort/apiserver
 
 	// Skip inbound health probes; These ports will be explicitly handled by listeners configured on the
 	// Envoy proxy IF any health probes have been configured in the Pod Spec.

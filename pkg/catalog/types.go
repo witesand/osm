@@ -106,7 +106,7 @@ type MeshCataloger interface {
 
 	//witesand
 	// ListLocalClusterEndpoints returns the list of endpoints for this kubernetes cluster
-	ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
+	//ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
 }
 
 type trafficDirection string

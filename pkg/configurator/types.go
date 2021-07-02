@@ -103,5 +103,5 @@ type Configurator interface {
 
 	//Witesand
 	// GetMeshCIDRRanges returns a list of mesh CIDR ranges
-	GetMeshCIDRRanges() []string
+	//GetMeshCIDRRanges() []string
 }

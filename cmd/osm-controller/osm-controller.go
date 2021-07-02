@@ -112,7 +112,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Error parsing cmd line arguments")
 	}
 
-	if err := logger.SetLogLevel("info"); err != nil {
+	if err := logger.SetLogLevel(verbosity); err != nil {
 		log.Fatal().Err(err).Msg("Error setting log level")
 	}
 
@@ -183,7 +183,11 @@ func main() {
 	}
 
 	endpointsProviders := []endpoint.Provider{kubeProvider}
-	err, endpointsProviders = wsRemoteCluster(kubeClient, err, stop, meshSpec, endpointsProviders)
+
+	//witesand start
+	//Witesand Remote provider plug
+	//err, endpointsProviders = wsRemoteCluster(kubeClient, err, stop, meshSpec, endpointsProviders)
+	//witesand end
 
 	ingressClient, err := ingress.NewIngressClient(kubeClient, kubernetesClient, stop, cfg)
 	if err != nil {
