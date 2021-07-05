@@ -31,6 +31,7 @@ func (mc *MeshCatalog) witesandHttpServer() {
 	// GET handlers
 	http.HandleFunc("/alledgepods", mc.GetAllEdgePods) // from waves
 	http.HandleFunc("/edgepod", mc.GetAllEdgePods)     // from waves, will deprecate
+	http.HandleFunc("/tunnelpod", mc.GetAllTunnelPods)     // from waves, will deprecate
 	http.HandleFunc("/endpoints", mc.GetLocalEndpoints)      // inter OSM
 
 	http.HandleFunc("/allpods", mc.GetAllPods) // from waves
@@ -305,6 +306,24 @@ func (mc *MeshCatalog) GetAllEdgePods(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	list, err := mc.GetWitesandCataloger().ListAllEdgePods()
+	if err != nil {
+		log.Error().Msgf("err fetching edgepod %+v", err)
+	}
+
+	if err := json.NewEncoder(w).Encode(list); err != nil {
+		log.Error().Msgf("err fetching edgepod %+v", err)
+	}
+}
+
+func (mc *MeshCatalog) GetAllTunnelPods(w http.ResponseWriter, r *http.Request) {
+	if InitialSyncingPeriod != 0 {
+		// initial cooling period, need to wait till we sync with others
+		log.Error().Msgf("InitialSyncingPeriod not over !!, send error response")
+		w.WriteHeader(503)
+		fmt.Fprintf(w, "Not ready")
+		return
+	}
+	list, err := mc.GetWitesandCataloger().ListAllTunnelPods()
 	if err != nil {
 		log.Error().Msgf("err fetching edgepod %+v", err)
 	}
