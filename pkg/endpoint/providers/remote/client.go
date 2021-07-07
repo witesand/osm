@@ -72,32 +72,32 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 	return endpoints
 }
 
-// GetServiceForServiceAccount retrieves the service for the given service account
-func (c Client) GetServicesForServiceAccount(svcAccount service.K8sServiceAccount) ([]service.MeshService, error) {
-	//log.Info().Msgf("[%s] Getting Services for service account %s on Remote", c.providerIdent, svcAccount)
-	servicesSlice := make([]service.MeshService, 0)
-
-	if c.caches == nil {
-		return servicesSlice, errDidNotFindServiceForServiceAccount
-	}
-
-	svc := fmt.Sprintf("%s/%s", svcAccount.Namespace, svcAccount.Name)
-
-	// TODO: is this needed
-
-	for _, epMap := range c.caches.k8sToServiceEndpoints {
-		if _, ok := epMap.endpoints[svc]; ok {
-			namespacedService := service.MeshService{
-				Namespace: svcAccount.Namespace,
-				Name:      svcAccount.Name,
-			}
-			servicesSlice = append(servicesSlice, namespacedService)
-			return servicesSlice, nil
-		}
-	}
-
-	return servicesSlice, errDidNotFindServiceForServiceAccount
-}
+//// GetServiceForServiceAccount retrieves the service for the given service account
+//func (c Client) GetServicesForServiceAccount(svcAccount service.K8sServiceAccount) ([]service.MeshService, error) {
+//	//log.Info().Msgf("[%s] Getting Services for service account %s on Remote", c.providerIdent, svcAccount)
+//	servicesSlice := make([]service.MeshService, 0)
+//
+//	if c.caches == nil {
+//		return servicesSlice, errDidNotFindServiceForServiceAccount
+//	}
+//
+//	svc := fmt.Sprintf("%s/%s", svcAccount.Namespace, svcAccount.Name)
+//
+//	// TODO: is this needed
+//
+//	for _, epMap := range c.caches.k8sToServiceEndpoints {
+//		if _, ok := epMap.endpoints[svc]; ok {
+//			namespacedService := service.MeshService{
+//				Namespace: svcAccount.Namespace,
+//				Name:      svcAccount.Name,
+//			}
+//			servicesSlice = append(servicesSlice, namespacedService)
+//			return servicesSlice, nil
+//		}
+//	}
+//
+//	return servicesSlice, errDidNotFindServiceForServiceAccount
+//}
 
 // GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol
 func (c Client) GetPortToProtocolMappingForService(svc service.MeshService) (map[uint32]string, error) {

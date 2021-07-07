@@ -36,7 +36,7 @@ func wsRemoteCluster(kubeClient *clientset.Clientset, err error, stop chan struc
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to initialize remote provider")
 		}
-		endpointsProviders = append(endpointsProviders, remoteProvider)
+		//endpointsProviders = append(endpointsProviders, remoteProvider)
 	}
 	return err, endpointsProviders
 }

@@ -1,6 +1,7 @@
 package witesand
 
 import (
+	"github.com/openservicemesh/osm/pkg/service"
 	"os"
 	"strings"
 
@@ -8,7 +9,6 @@ import (
 
 	"github.com/openservicemesh/osm/pkg/announcements"
 	"github.com/openservicemesh/osm/pkg/kubernetes/events"
-	"github.com/openservicemesh/osm/pkg/service"
 )
 
 func NewWitesandCatalog(kubeClient kubernetes.Interface, clusterId string) *WitesandCatalog {
@@ -52,7 +52,6 @@ func (wc *WitesandCatalog) UpdateMasterOsmIP() {
 
 func (wc *WitesandCatalog) UpdateUnicastSvcs() {
 	wc.unicastEnabledSvcs = make([]string, 0)
-	wc.unicastEnabledSvcs = append(wc.unicastEnabledSvcs, "edgepod") // by default add gw
 	unicastSvcsString := os.Getenv("UNICAST_ENABLED_SERVICES")
 	if unicastSvcsString != "" {
 		wc.unicastEnabledSvcs = append(wc.unicastEnabledSvcs, strings.Split(unicastSvcsString, ",")...)
@@ -120,7 +119,7 @@ func (wc *WitesandCatalog) ListRemoteK8s() map[string]RemoteK8s {
 	return remoteK8s
 }
 
-func (wc *WitesandCatalog) IsWSEdgePodService(svc service.MeshServicePort) bool {
+func (wc *WitesandCatalog) IsWSEdgePodService(svc service.MeshService) bool {
 	return strings.HasPrefix(svc.Name, "edgepod")
 }
 

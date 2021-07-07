@@ -2,8 +2,12 @@ package eds
 
 import (
 	"github.com/openservicemesh/osm/pkg/catalog"
+	"github.com/openservicemesh/osm/pkg/envoy"
+	"github.com/openservicemesh/osm/pkg/service"
 	"github.com/openservicemesh/osm/pkg/witesand"
 	"strconv"
+	xds_core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	xds_endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 )
 
 func getSingleEndpointCLA(clusterName string, podIP string, servicePort int) *xds_endpoint.ClusterLoadAssignment {
@@ -31,11 +35,9 @@ func getSingleEndpointCLA(clusterName string, podIP string, servicePort int) *xd
 	log.Debug().Msgf("[EDS] Constructed ClusterLoadAssignment: %+v", cla)
 	return &cla
 }
-
-func NewWSEdgePodClusterLoadAssignment(catalog catalog.MeshCataloger, serviceName service.MeshServicePort) *[]*xds_endpoint.ClusterLoadAssignment {
+func NewWSEdgePodClusterLoadAssignment(catalog catalog.MeshCataloger, serviceName service.MeshService) *[]*xds_endpoint.ClusterLoadAssignment {
 	log.Trace().Msgf("[EDS][NewWSEdgePodClusterLoadAssignment] Adding Endpoints")
-	servicePort := serviceName.Port
-	getMultiEndpointsCLA := func(atopMap witesand.ApigroupToPodIPMap, clusterName string) *xds_endpoint.ClusterLoadAssignment {
+	getMultiEndpointsCLA := func(atopMap witesand.ApigroupToPodIPMap, clusterName string, servicePort int) *xds_endpoint.ClusterLoadAssignment {
 		cla := xds_endpoint.ClusterLoadAssignment{
 			ClusterName: clusterName,
 			Endpoints: []*xds_endpoint.LocalityLbEndpoints{
@@ -65,43 +67,54 @@ func NewWSEdgePodClusterLoadAssignment(catalog catalog.MeshCataloger, serviceNam
 	var clas []*xds_endpoint.ClusterLoadAssignment
 	wscatalog := catalog.GetWitesandCataloger()
 
+	serviceEndpoints, err := catalog.GetResolvableServiceEndpoints(serviceName)
+	if err != nil {
+		log.Info().Msgf("getWSUnicastUpstreamServiceCluster err %+v", err)
+		return nil
+	}
+
 	atopMaps, _ := wscatalog.ListApigroupToPodIPs()
-	for _, atopMap := range atopMaps {
-		clusterName := atopMap.Apigroup + ":" + strconv.Itoa(servicePort)
-		cla := getMultiEndpointsCLA(atopMap, clusterName)
-		clas = append(clas, cla)
 
-		clusterName = atopMap.Apigroup + witesand.DeviceHashSuffix + ":" + strconv.Itoa(servicePort)
-		cla = getMultiEndpointsCLA(atopMap, clusterName)
-		clas = append(clas, cla)
+	for _, endpoint := range serviceEndpoints {
+		for _, atopMap := range atopMaps {
+			clusterName := atopMap.Apigroup + ":" + strconv.Itoa(int(endpoint.Port))
+			cla := getMultiEndpointsCLA(atopMap, clusterName, int(endpoint.Port))
+			clas = append(clas, cla)
+
+			clusterName = atopMap.Apigroup + witesand.DeviceHashSuffix + ":" + strconv.Itoa(int(endpoint.Port))
+			cla = getMultiEndpointsCLA(atopMap, clusterName, int(endpoint.Port))
+			clas = append(clas, cla)
+		}
 	}
 
-	pods, _ := wscatalog.ListAllEdgePodIPs()
-	for podName, podIP := range pods.PodToIPMap {
-		clusterName := podName + ":" + strconv.Itoa(servicePort)
-		cla := getSingleEndpointCLA(clusterName, podIP, servicePort)
-		clas = append(clas, cla)
-	}
+	//pods, _ := wscatalog.ListAllEdgePodIPs()
+	//for podName, podIP := range pods.PodToIPMap {
+	//	clusterName := podName + ":" + strconv.Itoa(servicePort)
+	//	cla := getSingleEndpointCLA(clusterName, podIP, servicePort)
+	//	clas = append(clas, cla)
+	//}
 	log.Trace().Msgf("[EDS][NewWSEdgePodClusterLoadAssignment] Constructed ClusterLoadAssignment: %+v", clas)
 	return &clas
 }
 
-func NewWSUnicastClusterLoadAssignment(catalog catalog.MeshCataloger, serviceName service.MeshServicePort) *[]*xds_endpoint.ClusterLoadAssignment {
+func NewWSUnicastClusterLoadAssignment(catalog catalog.MeshCataloger, serviceName service.MeshService) *[]*xds_endpoint.ClusterLoadAssignment {
 	log.Trace().Msgf("[EDS][NewWSUnicastClusterLoadAssignment] Adding Endpoints for Service:%+v", serviceName)
-	servicePort := serviceName.Port
-	serviceEndpoints, err := catalog.ListEndpointsForService(serviceName.GetMeshService())
+	//servicePort := serviceName.Port
+	serviceEndpoints, err := catalog.GetResolvableServiceEndpoints(serviceName)
 	if err != nil {
-		log.Error().Msgf("[EDS][NewWSEdgePodClusterLoadAssignment] Error adding Endpoints for Service:%+v, err:%+v", serviceName, err)
+		log.Info().Msgf("getWSUnicastUpstreamServiceCluster err %+v", err)
 		return nil
 	}
+
 	var clas []*xds_endpoint.ClusterLoadAssignment
 	for _, endpoint := range serviceEndpoints {
-		if int(endpoint.Port) != servicePort {
-			// skip non-interesting ports
-			continue
-		}
-		clusterName := endpoint.PodName + ":" + strconv.Itoa(servicePort)
-		cla := getSingleEndpointCLA(clusterName, endpoint.IP.String(), servicePort)
+		//fred
+		//if int(endpoint.Port) != servicePort {
+		//	// skip non-interesting ports
+		//	continue
+		//}
+		clusterName := endpoint.PodName + ":" + strconv.Itoa(int(endpoint.Port))
+		cla := getSingleEndpointCLA(clusterName, endpoint.IP.String(), int(endpoint.Port))
 		clas = append(clas, cla)
 	}
 	log.Trace().Msgf("[EDS][NewWSUnicastClusterLoadAssignment] Constructed ClusterLoadAssignment: %+v", clas)

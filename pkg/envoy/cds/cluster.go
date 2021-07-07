@@ -6,7 +6,6 @@ import (
 	xds_cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	xds_core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	xds_endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pkg/errors"
@@ -63,12 +62,12 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 	if cfg.IsPermissiveTrafficPolicyMode() {
 		// Since no traffic policies exist with permissive mode, rely on cluster provided service discovery.
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_ORIGINAL_DST}
-		remoteCluster.LbPolicy = xds_cluster.Cluster_CLUSTER_PROVIDED
+		remoteCluster.LbPolicy = xds_cluster.Cluster_RING_HASH
 	} else {
 		// Configure service discovery based on traffic policies
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}
 		remoteCluster.EdsClusterConfig = &xds_cluster.Cluster_EdsClusterConfig{EdsConfig: envoy.GetADSConfigSource()}
-		remoteCluster.LbPolicy = xds_cluster.Cluster_ROUND_RING_HASH
+		remoteCluster.LbPolicy = xds_cluster.Cluster_RING_HASH
 	}
 
 	return remoteCluster, nil
@@ -86,11 +85,13 @@ func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName serv
 		Name:           clusterName,
 		AltStatName:    clusterName,
 		ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
-		LbPolicy:       xds_cluster.Cluster_ROUND_ROBIN,
+		LbPolicy:       xds_cluster.Cluster_RING_HASH,
 		RespectDnsTtl:  true,
 		ClusterDiscoveryType: &xds_cluster.Cluster_Type{
 			Type: xds_cluster.Cluster_STRICT_DNS,
 		},
+		//witesand
+		DnsRefreshRate: ptypes.DurationProto(time.Second * 30),
 		DnsLookupFamily: xds_cluster.Cluster_V4_ONLY,
 		LoadAssignment: &xds_endpoint.ClusterLoadAssignment{
 			// NOTE: results.MeshService is the top level service that is cURLed.

@@ -345,5 +345,6 @@ func (mc *MeshCatalog) GetLocalEndpoints(w http.ResponseWriter, r *http.Request)
 }
 
 func (mc *MeshCatalog) ApigroupMapping(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("reached here - ApigroupMapping")
 	mc.witesandCatalog.UpdateApigroupMap(w, r)
 }

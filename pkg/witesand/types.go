@@ -1,12 +1,12 @@
 package witesand
 
 import (
+	"github.com/openservicemesh/osm/pkg/service"
 	"net/http"
 
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/openservicemesh/osm/pkg/logger"
-	"github.com/openservicemesh/osm/pkg/service"
 )
 
 var (
@@ -99,6 +99,6 @@ type WitesandCataloger interface {
 	ListAllPods() ([]string, error)
 	ListWavesPodIPs() ([]string, error)
 
-	IsWSEdgePodService(svc service.MeshServicePort) bool
+	IsWSEdgePodService(svc service.MeshService) bool
 	IsWSUnicastService(svc string) bool
 }
