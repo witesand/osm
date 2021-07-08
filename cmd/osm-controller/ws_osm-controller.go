@@ -4,7 +4,6 @@ import (
 	"github.com/openservicemesh/osm/pkg/constants"
 	"github.com/openservicemesh/osm/pkg/endpoint"
 	"github.com/openservicemesh/osm/pkg/endpoint/providers/remote"
-	"github.com/openservicemesh/osm/pkg/kubernetes/events"
 	"github.com/openservicemesh/osm/pkg/smi"
 	"github.com/openservicemesh/osm/pkg/witesand"
 	clientset "k8s.io/client-go/kubernetes"
@@ -24,20 +23,21 @@ func wsinit() {
 	flags.StringVar(&osmControllerName, "osm-controller-name", "osm-controller", "Service name of osm-controller.")
 }
 
-
-func wsRemoteCluster(kubeClient *clientset.Clientset, err error, stop chan struct{}, meshSpec smi.MeshSpec, endpointsProviders []endpoint.Provider) (error, []endpoint.Provider) {
-	log.Info().Msgf("enableRemoteCluster:%t clusterId:%s", enableRemoteCluster, clusterId)
+func addWSCatalog(kubeClient *clientset.Clientset)  {
 	witesandCatalog = witesand.NewWitesandCatalog(kubeClient, clusterId)
-	if err != nil {
-		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating Witesand catalog")
-	}
+	log.Info().Msgf("enableRemoteCluster:%t clusterId:%s", enableRemoteCluster, clusterId)
+}
+
+func addWSRemoteCluster(kubeClient *clientset.Clientset, stop chan struct{}, meshSpec smi.MeshSpec, endpointsProviders *[]endpoint.Provider) error {
+	log.Info().Msgf("enableRemoteCluster:%t clusterId:%s", enableRemoteCluster, clusterId)
 	if enableRemoteCluster {
-		remoteProvider, err = remote.NewProvider(kubeClient, witesandCatalog, clusterId, stop, meshSpec, constants.RemoteProviderName)
+		remoteProvider, err := remote.NewProvider(kubeClient, witesandCatalog, clusterId, stop, meshSpec, constants.RemoteProviderName)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to initialize remote provider")
+			return err
 		}
-		//endpointsProviders = append(endpointsProviders, remoteProvider)
+		*endpointsProviders = append(*endpointsProviders, remoteProvider)
 	}
-	return err, endpointsProviders
+	return nil
 }
 

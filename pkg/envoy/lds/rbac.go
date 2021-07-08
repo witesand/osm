@@ -1,6 +1,7 @@
 package lds
 
 import (
+	"github.com/openservicemesh/osm/pkg/trafficpolicy"
 	"strconv"
 
 	xds_listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/openservicemesh/osm/pkg/envoy/rbac"
 	"github.com/openservicemesh/osm/pkg/identity"
-	"github.com/openservicemesh/osm/pkg/trafficpolicy"
 )
 
 // buildRBACFilter builds an RBAC filter based on SMI TrafficTarget policies.
@@ -69,6 +69,62 @@ func (lb *listenerBuilder) buildInboundRBACPolicies() (*xds_network_rbac.RBAC, e
 
 	return networkRBACPolicy, nil
 }
+
+// buildInboundRBACPolicies builds the RBAC policies based on allowed principals
+//func (lb *listenerBuilder) buildInboundRBACPolicies() (*xds_network_rbac.RBAC, error) {
+//	allowsInboundSvcAccounts, err := lb.meshCatalog.ListInboundTrafficTargetsWithRoutes(lb.serviceIdentity)
+//	if err != nil {
+//		log.Error().Err(err).Msgf("Error listing allowed inbound ServiceAccounts for ServiceAccount %q", lb.serviceIdentity)
+//		return nil, err
+//	}
+//
+//	log.Trace().Msgf("Building RBAC policies for ServiceAccount %q with allowed inbound %v", lb.serviceIdentity, allowsInboundSvcAccounts)
+//
+//	// Each downstream is a principal in the RBAC policy, which will have its own permissions
+//	// based on SMI TrafficTarget policies.
+//	rbacPolicies := make(map[string]*xds_rbac.Policy)
+//	for _, downstreamSvcAccount := range allowsInboundSvcAccounts {
+//		policyName := getPolicyName(downstreamSvcAccount, lb.serviceIdentity)
+//		principal := identity.GetKubernetesServiceIdentity(downstreamSvcAccount, identity.ClusterLocalTrustDomain)
+//		if policy, err := buildAllowAllPermissionsPolicy(principal); err != nil {
+//			log.Error().Err(err).Msgf("Error building RBAC policy for ServiceAccount %q and downstream %q", lb.svcAccount, downstreamSvcAccount)
+//		} else {
+//			rbacPolicies[policyName] = policy
+//		}
+//	}
+//
+//	// Create an inbound RBAC policy that denies a request by default, unless a policy explicitly allows it
+//	networkRBACPolicy := &xds_network_rbac.RBAC{
+//		StatPrefix: "RBAC",
+//		Rules: &xds_rbac.RBAC{
+//			Action:   xds_rbac.RBAC_ALLOW, // Allows the request if and only if there is a policy that matches the request
+//			Policies: rbacPolicies,
+//		},
+//	}
+//
+//	return networkRBACPolicy, nil
+//}
+
+// buildAllowAllPermissionsPolicy creates an XDS RBAC policy for the given client principal to be granted all access
+func buildAllowAllPermissionsPolicy(clientPrincipal identity.ServiceIdentity) (*xds_rbac.Policy, error) {
+	policy := &rbac.Policy{
+		Principals: []rbac.RulesList{
+			{
+				OrRules: []rbac.Rule{
+					{Attribute: rbac.DownstreamAuthPrincipal, Value: clientPrincipal.String()},
+				},
+			},
+		},
+		// Permissions set to ANY if not specified, which grants all access for the given Principals
+	}
+
+	return policy.Generate()
+}
+
+//// getPolicyName returns a policy name for the policy used to authorize a downstream service account by the upstream
+//func getPolicyName(downstream, upstream service.K8sServiceAccount) string {
+//	return fmt.Sprintf("%s to %s", downstream, upstream)
+//}
 
 // buildRBACPolicyFromTrafficTarget creates an XDS RBAC policy from the given traffic target policy
 func buildRBACPolicyFromTrafficTarget(trafficTarget trafficpolicy.TrafficTargetWithRoutes) (*xds_rbac.Policy, error) {

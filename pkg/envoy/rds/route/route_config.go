@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/openservicemesh/osm/pkg/catalog"
+	"github.com/openservicemesh/osm/pkg/witesand"
 	"sort"
 
 	mapset "github.com/deckarep/golang-set"
@@ -240,7 +241,7 @@ func buildRoute(pathMatchTypeType trafficpolicy.PathMatchType, path string, meth
 	//for apibashed hashing
 	t := &xds_route.RouteAction_HashPolicy_Header_{
 		&xds_route.RouteAction_HashPolicy_Header{
-			HeaderName:   "x-apigroup",
+			HeaderName:   witesand.WSHashHeader,
 			RegexRewrite: nil,
 		},
 	}

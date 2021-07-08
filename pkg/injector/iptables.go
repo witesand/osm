@@ -42,11 +42,11 @@ var iptablesOutboundStaticRules = []string{
 	// Don't redirect Envoy traffic back to itself, return it to the next chain for processing
 	fmt.Sprintf("iptables -t nat -A PROXY_OUTPUT -m owner --uid-owner %d -j RETURN", constants.EnvoyUID),
 
-	// Skip localhost traffic, doesn't need to be routed via the proxy
-	"iptables -t nat -A PROXY_OUTPUT -d 127.0.0.1/32 -j RETURN",
-
-	// Redirect remaining outbound traffic to Envoy
-	"iptables -t nat -A PROXY_OUTPUT -j PROXY_REDIRECT",
+	//// Skip localhost traffic, doesn't need to be routed via the proxy
+	//"iptables -t nat -A PROXY_OUTPUT -d 127.0.0.1/32 -j RETURN",
+	//
+	//// Redirect remaining outbound traffic to Envoy
+	//"iptables -t nat -A PROXY_OUTPUT -j PROXY_REDIRECT",
 }
 
 // iptablesInboundStaticRules is the list of iptables rules related to inbound traffic interception and redirection
@@ -84,13 +84,23 @@ func generateIptablesCommands(outboundIPRangeExclusionList []string, outboundPor
 	// 3. Create inbound rules
 	cmd = append(cmd, iptablesInboundStaticRules...)
 
+	// Skip localhost traffic, doesn't need to be routed via the proxy
+	rule := fmt.Sprintf("iptables -t nat -A PROXY_OUTPUT -d 127.0.0.1/32 -j RETURN")
+	cmd = append(cmd, rule)
+
+
 	// 4. Create dynamic outbound ip ranges exclusion rules
 	for _, cidr := range outboundIPRangeExclusionList {
 		// *Note: it is important to use the insert option '-I' instead of the append option '-A' to ensure the exclusion
 		// rules take precedence over the static redirection rules. Iptables rules are evaluated in order.
-		rule := fmt.Sprintf("iptables -t nat -I PROXY_OUTPUT -d %s -j RETURN", cidr)
+		//rule := fmt.Sprintf("iptables -t nat -I PROXY_OUTPUT -d %s -j RETURN", cidr)
+		rule := fmt.Sprintf("iptables -t nat -A PROXY_OUTPUT -d %s -j PROXY_REDIRECT", cidr)
 		cmd = append(cmd, rule)
 	}
+
+	// Redirect remaining outbound traffic to Envoy
+	rule = fmt.Sprintf("iptables -t nat -A PROXY_OUTPUT -j RETURN")
+	cmd = append(cmd, rule)
 
 	// 5. Create dynamic outbound ports exclusion rules
 	if len(outboundPortExclusionList) > 0 {

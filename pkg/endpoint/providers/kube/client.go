@@ -124,13 +124,6 @@ func (c Client) GetServicesForServiceAccount(svcAccount identity.K8sServiceAccou
 		}
 
 		for _, svc := range k8sServices {
-			///* WITESAND START */
-			//if svc.Name != svcAccount.Name {
-			//	// even though it defeats the purpose, we want to use
-			//	// only one service per destination
-			//	continue
-			//}
-			///* WITESAND END */
 			services.Add(service.MeshService{
 				Namespace: pod.Namespace,
 				Name:      svc.Name,

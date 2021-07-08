@@ -185,9 +185,15 @@ func main() {
 	endpointsProviders := []endpoint.Provider{kubeProvider}
 
 	//witesand start
-	//update witesand catalog
-	//update remote cluster endpoints
-	err, endpointsProviders = wsRemoteCluster(kubeClient, err, stop, meshSpec, endpointsProviders)
+
+	//Add witesand catalog
+	addWSCatalog(kubeClient)
+
+	//Add remote cluster endpoints
+	err = addWSRemoteCluster(kubeClient, stop, meshSpec, &endpointsProviders)
+	if err != nil {
+		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error adding remote cluster")
+	}
 	//witesand end
 
 	ingressClient, err := ingress.NewIngressClient(kubeClient, kubernetesClient, stop, cfg)

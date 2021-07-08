@@ -3,6 +3,7 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/openservicemesh/osm/pkg/identity"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -25,7 +26,6 @@ const (
 
 // NewProvider implements mesh.EndpointsProvider, which creates a new Kubernetes cluster/compute provider.
 func NewProvider(kubeClient kubernetes.Interface, wsCatalog *witesand.WitesandCatalog, clusterId string, stop chan struct{}, meshSpec smi.MeshSpec, providerIdent string) (*Client, error) {
-
 	client := Client{
 		wsCatalog:           wsCatalog,
 		providerIdent:       providerIdent,
@@ -72,39 +72,40 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 	return endpoints
 }
 
-//// GetServiceForServiceAccount retrieves the service for the given service account
-//func (c Client) GetServicesForServiceAccount(svcAccount service.K8sServiceAccount) ([]service.MeshService, error) {
-//	//log.Info().Msgf("[%s] Getting Services for service account %s on Remote", c.providerIdent, svcAccount)
-//	servicesSlice := make([]service.MeshService, 0)
-//
-//	if c.caches == nil {
-//		return servicesSlice, errDidNotFindServiceForServiceAccount
-//	}
-//
-//	svc := fmt.Sprintf("%s/%s", svcAccount.Namespace, svcAccount.Name)
-//
-//	// TODO: is this needed
-//
-//	for _, epMap := range c.caches.k8sToServiceEndpoints {
-//		if _, ok := epMap.endpoints[svc]; ok {
-//			namespacedService := service.MeshService{
-//				Namespace: svcAccount.Namespace,
-//				Name:      svcAccount.Name,
-//			}
-//			servicesSlice = append(servicesSlice, namespacedService)
-//			return servicesSlice, nil
-//		}
-//	}
-//
-//	return servicesSlice, errDidNotFindServiceForServiceAccount
-//}
+func (c Client) ListEndpointsForIdentity(serviceIdentity identity.ServiceIdentity) []endpoint.Endpoint {
+	var endpoints []endpoint.Endpoint
+	return endpoints
+}
 
-// GetPortToProtocolMappingForService returns a mapping of the service's ports to their corresponding application protocol
-func (c Client) GetPortToProtocolMappingForService(svc service.MeshService) (map[uint32]string, error) {
+func (c Client) GetServicesForServiceAccount(serviceIdentity identity.K8sServiceAccount) ([]service.MeshService, error) {
+	//log.Info().Msgf("[%s] Getting Services for service account %s on Remote", c.providerIdent, svcAccount)
+	servicesSlice := make([]service.MeshService, 0)
+
+	if c.caches == nil {
+		return servicesSlice, errDidNotFindServiceForServiceAccount
+	}
+
+	svc := fmt.Sprintf("%s/%s", serviceIdentity.Namespace, serviceIdentity.Name)
+
+	// TODO: is this needed
+
+	for _, epMap := range c.caches.k8sToServiceEndpoints {
+		if _, ok := epMap.endpoints[svc]; ok {
+			namespacedService := service.MeshService{
+				Namespace: serviceIdentity.Namespace,
+				Name:      serviceIdentity.Name,
+			}
+			servicesSlice = append(servicesSlice, namespacedService)
+			return servicesSlice, nil
+		}
+	}
+
+	return servicesSlice, errDidNotFindServiceForServiceAccount
+}
+
+func (c Client) GetTargetPortToProtocolMappingForService(svc service.MeshService) (map[uint32]string, error) {
 	portToProtocolMap := make(map[uint32]string)
-
 	// TODO
-
 	return portToProtocolMap, nil
 }
 

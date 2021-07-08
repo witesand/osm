@@ -42,7 +42,6 @@ type Endpoint struct {
 }
 
 func (ep Endpoint) String() string {
-	//return fmt.Sprintf("(ip=%s, port=%d)", ep.IP, ep.Port)
 	return fmt.Sprintf("(ip=%s, port=%d, podName=%s)", ep.IP, ep.Port, ep.PodName)
 }
 

@@ -38,6 +38,8 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 			return nil, err
 		}
 
+		clusters = append(clusters, cluster)
+
 		//witesand create apibased cluster
 		if meshCatalog.GetWitesandCataloger().IsWSEdgePodService(dstService) {
 			getWSEdgePodUpstreamServiceCluster(meshCatalog, proxyIdentity.ToServiceIdentity(), dstService, cfg, &clusters)
@@ -48,8 +50,6 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 			getWSUnicastUpstreamServiceCluster(meshCatalog, proxyIdentity.ToServiceIdentity(), dstService, cfg, &clusters)
 			// fall thru to generate anycast cluster
 		}
-
-		clusters = append(clusters, cluster)
 	}
 
 	// Create a local cluster for each service behind the proxy.
@@ -98,6 +98,7 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 
 	alreadyAdded := mapset.NewSet()
 	var cdsResources []types.Resource
+
 	for _, cluster := range clusters {
 		if alreadyAdded.Contains(cluster.Name) {
 			log.Error().Msgf("Found duplicate clusters with name %s; Duplicate will not be sent to Envoy with XDS Certificate SerialNumber=%s on Pod with UID=%s",
@@ -107,6 +108,5 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 		alreadyAdded.Add(cluster.Name)
 		cdsResources = append(cdsResources, cluster)
 	}
-
 	return cdsResources, nil
 }

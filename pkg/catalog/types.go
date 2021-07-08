@@ -107,10 +107,11 @@ type MeshCataloger interface {
 	GetKubeController() k8s.Controller
 
 
-	//witesand
+	//witesand start
 	// ListLocalClusterEndpoints returns the list of endpoints for this kubernetes cluster
-	//ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
+	ListLocalClusterEndpoints() (map[string][]endpoint.Endpoint, error)
 	GetWitesandCataloger() witesand.WitesandCataloger
+	//witesand end
 }
 
 type trafficDirection string

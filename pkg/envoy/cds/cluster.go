@@ -30,14 +30,14 @@ const (
 func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upstreamSvc service.MeshService, cfg configurator.Configurator) (*xds_cluster.Cluster, error) {
 	clusterName := upstreamSvc.String()
 
-	/* WITESAND_TLS_DISABLE
+	///* WITESAND_TLS_DISABLE
 	//marshalledUpstreamTLSContext, err := ptypes.MarshalAny(
 	//	envoy.GetUpstreamTLSContext(downstreamIdentity, upstreamSvc))
 	//if err != nil {
 	//	return nil, err
 	//}
-	//
-	*/
+
+	//*/
 	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 	if cfg.IsPermissiveTrafficPolicyMode() {
 		// Since no traffic policies exist with permissive mode, rely on cluster provided service discovery.
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_ORIGINAL_DST}
-		remoteCluster.LbPolicy = xds_cluster.Cluster_RING_HASH
+		remoteCluster.LbPolicy = xds_cluster.Cluster_CLUSTER_PROVIDED
 	} else {
 		// Configure service discovery based on traffic policies
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}
