@@ -191,18 +191,20 @@ func buildInboundRoutes(rules []*trafficpolicy.Rule) []*xds_route.Route {
 		// is wildcard or if there are duplicates
 		allowedMethods := sanitizeHTTPMethods(rule.Route.HTTPRouteMatch.Methods)
 
+		//witesand
 		// Create an RBAC policy derived from 'trafficpolicy.Rule'
 		// Each route is associated with an RBAC policy
-		rbacPolicyForRoute, err := buildInboundRBACFilterForRule(rule)
-		if err != nil {
-			log.Error().Err(err).Msgf("Error building RBAC policy for rule [%v], skipping route addition", rule)
-			continue
-		}
+		//rbacPolicyForRoute, err := buildInboundRBACFilterForRule(rule)
+		//if err != nil {
+		//	log.Error().Err(err).Msgf("Error building RBAC policy for rule [%v], skipping route addition", rule)
+		//	continue
+		//}
 
 		// Each HTTP method corresponds to a separate route
 		for _, method := range allowedMethods {
 			route := buildRoute(rule.Route.HTTPRouteMatch.PathMatchType, rule.Route.HTTPRouteMatch.Path, method, rule.Route.HTTPRouteMatch.Headers, rule.Route.WeightedClusters, 100, inboundRoute)
-			route.TypedPerFilterConfig = rbacPolicyForRoute
+			//witesand
+			//route.TypedPerFilterConfig = rbacPolicyForRoute
 			routes = append(routes, route)
 		}
 	}

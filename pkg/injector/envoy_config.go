@@ -156,6 +156,8 @@ func getXdsCluster(config envoyBootstrapConfigMeta) map[string]interface{} {
 	return map[string]interface{}{
 		"name":            config.XDSClusterName,
 		"connect_timeout": "0.25s",
+		//witesand
+		"dns_refresh_rate": "30s",
 		"type":            "LOGICAL_DNS",
 		"typed_extension_protocol_options": map[string]interface{}{
 			"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": map[string]interface{}{

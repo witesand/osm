@@ -24,6 +24,12 @@ func getWSEdgePodUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 	//	return err
 	//}
 
+	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
+	if err != nil {
+		log.Info().Msgf("Gethttp2 option failed err %+v", err)
+		return err
+	}
+
 	serviceEndpoints, err := catalog.GetResolvableServiceEndpoints(upstreamSvc)
 	if err != nil {
 		log.Info().Msgf("getWSUnicastUpstreamServiceCluster err %+v", err)
@@ -41,6 +47,7 @@ func getWSEdgePodUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 				CircuitBreakers: &xds_cluster.CircuitBreakers{
 					Thresholds: makeWSThresholds(),
 				},
+				TypedExtensionProtocolOptions: HTTP2ProtocolOptions,
 			}
 
 			remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}
@@ -59,6 +66,7 @@ func getWSEdgePodUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 				CircuitBreakers: &xds_cluster.CircuitBreakers{
 					Thresholds: makeWSThresholds(),
 				},
+				TypedExtensionProtocolOptions: HTTP2ProtocolOptions,
 			}
 
 			remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}
@@ -98,6 +106,12 @@ func getWSUnicastUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 		return err
 	}
 
+	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
+	if err != nil {
+		log.Info().Msgf("Gethttp2 option failed err %+v", err)
+		return err
+	}
+
 	//log.Info().Msgf("getWSUnicastUpstreamServiceCluster endpoints %+v", serviceEndpoints)
 	// create clusters with pod-names
 	for _, endpoint := range serviceEndpoints {
@@ -108,6 +122,7 @@ func getWSUnicastUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 			CircuitBreakers: &xds_cluster.CircuitBreakers{
 				Thresholds:   makeWSThresholds(),
 			},
+			TypedExtensionProtocolOptions: HTTP2ProtocolOptions,
 		}
 
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}

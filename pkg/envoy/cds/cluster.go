@@ -30,14 +30,14 @@ const (
 func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upstreamSvc service.MeshService, cfg configurator.Configurator) (*xds_cluster.Cluster, error) {
 	clusterName := upstreamSvc.String()
 
-	///* WITESAND_TLS_DISABLE
+	//witesand WITESAND_TLS_DISABLE
 	//marshalledUpstreamTLSContext, err := ptypes.MarshalAny(
 	//	envoy.GetUpstreamTLSContext(downstreamIdentity, upstreamSvc))
 	//if err != nil {
 	//	return nil, err
 	//}
 
-	//*/
+	//
 	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
 	if err != nil {
 		return nil, err
@@ -46,13 +46,15 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 	remoteCluster := &xds_cluster.Cluster{
 		Name:           clusterName,
 		ConnectTimeout: ptypes.DurationProto(clusterConnectTimeout),
-		// WITESAND_TLS_DISABLE
+		// witesand WITESAND_TLS_DISABLE
 		//TransportSocket: &xds_core.TransportSocket{
 		//	Name: wellknown.TransportSocketTls,
 		//	ConfigType: &xds_core.TransportSocket_TypedConfig{
 		//		TypedConfig: marshalledUpstreamTLSContext,
 		//	},
 		//},
+
+		//witesand
 		CircuitBreakers: &xds_cluster.CircuitBreakers{
 			Thresholds:   makeWSThresholds(),
 		},
@@ -101,6 +103,11 @@ func getLocalServiceCluster(catalog catalog.MeshCataloger, proxyServiceName serv
 			},
 		},
 		TypedExtensionProtocolOptions: HTTP2ProtocolOptions,
+
+		//witesand
+		CircuitBreakers: &xds_cluster.CircuitBreakers{
+			Thresholds:   makeWSThresholds(),
+		},
 	}
 
 	ports, err := catalog.GetTargetPortToProtocolMappingForService(proxyServiceName)
