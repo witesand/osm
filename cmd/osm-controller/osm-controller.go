@@ -215,6 +215,7 @@ func main() {
 		policyController,
 		stop,
 		cfg,
+		//witesand
 		witesandCatalog,
 		endpointsProviders...)
 

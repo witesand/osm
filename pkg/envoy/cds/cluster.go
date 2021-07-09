@@ -22,6 +22,7 @@ import (
 const (
 	// clusterConnectTimeout is the timeout duration used by Envoy to timeout connections to the cluster
 	clusterConnectTimeout = 1 * time.Second
+	//witesand
 	MaxConnectionThreshold = 1024*15
 )
 
@@ -69,6 +70,7 @@ func getUpstreamServiceCluster(downstreamIdentity identity.ServiceIdentity, upst
 		// Configure service discovery based on traffic policies
 		remoteCluster.ClusterDiscoveryType = &xds_cluster.Cluster_Type{Type: xds_cluster.Cluster_EDS}
 		remoteCluster.EdsClusterConfig = &xds_cluster.Cluster_EdsClusterConfig{EdsConfig: envoy.GetADSConfigSource()}
+		//witesand
 		remoteCluster.LbPolicy = xds_cluster.Cluster_RING_HASH
 	}
 

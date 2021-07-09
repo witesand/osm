@@ -38,10 +38,12 @@ type Provider interface {
 type Endpoint struct {
 	net.IP `json:"ip"`
 	Port   `json:"port"`
+	//witesand
 	PodName string `json:"podName"`
 }
 
 func (ep Endpoint) String() string {
+	//witesand
 	return fmt.Sprintf("(ip=%s, port=%d, podName=%s)", ep.IP, ep.Port, ep.PodName)
 }
 

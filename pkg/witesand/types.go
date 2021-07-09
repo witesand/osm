@@ -96,6 +96,7 @@ type WitesandCataloger interface {
 	ListLocalEdgePods() (*ClusterPods, error)
 	ListAllLocalPods() (*ClusterPods, error)
 	ListAllEdgePods() ([]string, error)
+	ListTunnelPods() ([]string, error)
 	ListAllPods() ([]string, error)
 	ListWavesPodIPs() ([]string, error)
 

@@ -51,10 +51,13 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 
 	for _, kubernetesEndpoint := range kubernetesEndpoints.Subsets {
 		for _, address := range kubernetesEndpoint.Addresses {
+			//witesand
+			//needed for unicast support with direct pod name.
 			podName := ""
 			if address.TargetRef != nil && address.TargetRef.Kind == "Pod" {
 				podName = address.TargetRef.Name
 			}
+			//witesand end
 			for _, port := range kubernetesEndpoint.Ports {
 				ip := net.ParseIP(address.IP)
 				if ip == nil {
@@ -64,6 +67,7 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 				ept := endpoint.Endpoint{
 					IP:   ip,
 					Port: endpoint.Port(port.Port),
+					//witesand
 					PodName: podName,
 				}
 				endpoints = append(endpoints, ept)
@@ -95,6 +99,7 @@ func (c Client) ListEndpointsForIdentity(serviceIdentity identity.ServiceIdentit
 				log.Error().Msgf("[%s] Error parsing IP address %s", c.providerIdent, podIP.IP)
 				break
 			}
+			//witesand
 			ept := endpoint.Endpoint{IP: ip, PodName: pod.GetName()}
 			endpoints = append(endpoints, ept)
 		}

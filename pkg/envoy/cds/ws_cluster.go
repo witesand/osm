@@ -19,10 +19,6 @@ func getWSEdgePodUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 	if err != nil {
 		return err
 	}
-	//edgePodNames, err := wscatalog.ListAllEdgePods()
-	//if err != nil {
-	//	return err
-	//}
 
 	HTTP2ProtocolOptions, err := envoy.GetHTTP2ProtocolOptions()
 	if err != nil {
@@ -74,6 +70,12 @@ func getWSEdgePodUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 			remoteCluster.LbPolicy = xds_cluster.Cluster_RING_HASH
 			*cluster = append(*cluster, remoteCluster)
 		}
+
+		//This is no longer needed as it will be done as part of unicast support.
+		//edgePodNames, err := wscatalog.ListAllEdgePods()
+		//if err != nil {
+		//	return err
+		//}
 
 		//// create clusters with pod-names with ROUND_ROBIN
 		//for _, edgePodName := range edgePodNames {
@@ -129,7 +131,6 @@ func getWSUnicastUpstreamServiceCluster(catalog catalog.MeshCataloger, downstrea
 		remoteCluster.EdsClusterConfig = &xds_cluster.Cluster_EdsClusterConfig{EdsConfig: envoy.GetADSConfigSource()}
 		remoteCluster.LbPolicy = xds_cluster.Cluster_ROUND_ROBIN
 		*cluster = append(*cluster, remoteCluster)
-
 	}
 	return nil
 }

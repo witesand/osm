@@ -87,6 +87,7 @@ func NewWSEdgePodClusterLoadAssignment(catalog catalog.MeshCataloger, serviceNam
 		}
 	}
 
+	// Skipping this as it is done via unicast cla
 	//pods, _ := wscatalog.ListAllEdgePodIPs()
 	//for podName, podIP := range pods.PodToIPMap {
 	//	clusterName := podName + ":" + strconv.Itoa(servicePort)
