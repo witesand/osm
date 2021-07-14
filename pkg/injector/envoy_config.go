@@ -110,13 +110,15 @@ func getStaticResources(config envoyBootstrapConfigMeta) map[string]interface{} 
 func (wh *mutatingWebhook) createEnvoyBootstrapConfig(name, namespace, osmNamespace string, cert certificate.Certificater, originalHealthProbes healthProbes) (*corev1.Secret, error) {
 	configMeta := envoyBootstrapConfigMeta{
 		EnvoyAdminPort: constants.EnvoyAdminPort,
-		XDSClusterName: constants.OSMControllerName,
+		//witesand
+		XDSClusterName: wh.osmControllerName,
 
 		RootCert: base64.StdEncoding.EncodeToString(cert.GetIssuingCA()),
 		Cert:     base64.StdEncoding.EncodeToString(cert.GetCertificateChain()),
 		Key:      base64.StdEncoding.EncodeToString(cert.GetPrivateKey()),
 
-		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", constants.OSMControllerName, osmNamespace),
+		//witesand
+		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", wh.osmControllerName, osmNamespace),
 		XDSPort: constants.ADSServerPort,
 
 		// OriginalHealthProbes stores the path and port for liveness, readiness, and startup health probes as initially

@@ -27,6 +27,10 @@ type MutatingWebhookConfigurationReconciler struct {
 	Scheme       *runtime.Scheme
 	OsmWebhook   string
 	OsmNamespace string
+
+	//witesand
+	OsmControllerName string
+	OsmInjectorName string
 }
 
 // Reconcile is the reconciliation method for OSM MutatingWebhookConfiguration.

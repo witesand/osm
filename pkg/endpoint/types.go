@@ -34,11 +34,11 @@ type Provider interface {
 	GetID() string
 }
 
+//witesand change
 // Endpoint is a tuple of IP and Port representing an instance of a service
 type Endpoint struct {
-	net.IP `json:"ip"`
-	Port   `json:"port"`
-	//witesand
+	IP      net.IP `json:"ip"`
+	Port    Port   `json:"port"`
 	PodName string `json:"podName"`
 }
 

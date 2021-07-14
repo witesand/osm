@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/openservicemesh/osm/pkg/identity"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/pkg/errors"
 
 	a "github.com/openservicemesh/osm/pkg/announcements"
 	"github.com/openservicemesh/osm/pkg/endpoint"
@@ -19,20 +18,15 @@ import (
 	"github.com/openservicemesh/osm/pkg/witesand"
 )
 
-const (
-        // defaultAppProtocol is the default application protocol for a port if unspecified
-        defaultAppProtocol = "http"
-)
-
 // NewProvider implements mesh.EndpointsProvider, which creates a new Kubernetes cluster/compute provider.
 func NewProvider(kubeClient kubernetes.Interface, wsCatalog *witesand.WitesandCatalog, clusterId string, stop chan struct{}, meshSpec smi.MeshSpec, providerIdent string) (*Client, error) {
 	client := Client{
-		wsCatalog:           wsCatalog,
-		providerIdent:       providerIdent,
-		clusterId:           clusterId,
-		meshSpec:            meshSpec,
-		caches:              nil,
-		announcements:       make(chan a.Announcement),
+		wsCatalog:     wsCatalog,
+		providerIdent: providerIdent,
+		clusterId:     clusterId,
+		meshSpec:      meshSpec,
+		caches:        nil,
+		announcements: make(chan a.Announcement),
 	}
 
 	client.caches = &CacheCollection{
@@ -43,7 +37,6 @@ func NewProvider(kubeClient kubernetes.Interface, wsCatalog *witesand.WitesandCa
 		return nil, errors.Errorf("Failed to start Remote EndpointProvider client: %+v", err)
 	}
 	log.Info().Msgf("[NewProvider] started Remote provider")
-
 	return &client, nil
 }
 
@@ -55,8 +48,8 @@ func (c *Client) GetID() string {
 
 // ListEndpointsForService retrieves the list of IP addresses for the given service
 func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endpoint {
-	log.Info().Msgf("[%s] Getting Endpoints for service %s on Remote", c.providerIdent, svc)
-	var endpoints []endpoint.Endpoint = []endpoint.Endpoint{}
+	//log.Info().Msgf("[%s] Getting Endpoints for service %s on Remote", c.providerIdent, svc)
+	var endpoints = []endpoint.Endpoint{}
 
 	if c.caches == nil {
 		return endpoints
@@ -64,7 +57,7 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 
 	for _, epMap := range c.caches.k8sToServiceEndpoints {
 		if eps, exists := epMap.endpoints[svc.String()]; exists {
-			log.Info().Msgf("[%s:ListEndpointsForService] Endpoints for service %s on Remote:%+v", c.providerIdent, svc.String(), eps)
+			//log.Info().Msgf("[%s:ListEndpointsForService] Endpoints for service %s on Remote:%+v", c.providerIdent, svc.String(), eps)
 			endpoints = append(endpoints, eps...)
 		}
 	}
@@ -73,8 +66,11 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 }
 
 func (c Client) ListEndpointsForIdentity(serviceIdentity identity.ServiceIdentity) []endpoint.Endpoint {
-	var endpoints []endpoint.Endpoint
-	return endpoints
+	//log.Info().Msgf("ListEndpointsForIdentity Getting Services for serviceIdentity %+v on Remote", serviceIdentity)
+	sa := serviceIdentity.ToK8sServiceAccount()
+	meshSrv := service.MeshService{Name: sa.Name, Namespace: sa.Namespace}
+	eps := c.ListEndpointsForService(meshSrv)
+	return eps
 }
 
 func (c Client) GetServicesForServiceAccount(serviceIdentity identity.K8sServiceAccount) ([]service.MeshService, error) {
@@ -88,7 +84,6 @@ func (c Client) GetServicesForServiceAccount(serviceIdentity identity.K8sService
 	svc := fmt.Sprintf("%s/%s", serviceIdentity.Namespace, serviceIdentity.Name)
 
 	// TODO: is this needed
-
 	for _, epMap := range c.caches.k8sToServiceEndpoints {
 		if _, ok := epMap.endpoints[svc]; ok {
 			namespacedService := service.MeshService{
@@ -99,7 +94,6 @@ func (c Client) GetServicesForServiceAccount(serviceIdentity identity.K8sService
 			return servicesSlice, nil
 		}
 	}
-
 	return servicesSlice, errDidNotFindServiceForServiceAccount
 }
 
@@ -176,6 +170,5 @@ func (c *Client) run() error {
 
 	// start an end-less loop
 	go poll()
-
 	return nil
 }

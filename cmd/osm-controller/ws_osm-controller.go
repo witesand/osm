@@ -24,8 +24,8 @@ func wsinit() {
 }
 
 func addWSCatalog(kubeClient *clientset.Clientset)  {
+	log.Info().Msgf("witesand flags enableRemoteCluster:%v clusterId:%s osmcontrollername=%s", enableRemoteCluster, clusterId, osmControllerName)
 	witesandCatalog = witesand.NewWitesandCatalog(kubeClient, clusterId)
-	log.Info().Msgf("enableRemoteCluster:%t clusterId:%s", enableRemoteCluster, clusterId)
 }
 
 func addWSRemoteCluster(kubeClient *clientset.Clientset, stop chan struct{}, meshSpec smi.MeshSpec, endpointsProviders *[]endpoint.Provider) error {

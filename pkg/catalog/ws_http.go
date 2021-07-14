@@ -352,18 +352,18 @@ func (mc *MeshCatalog) GetAllPods(w http.ResponseWriter, r *http.Request) {
 }
 
 func (mc *MeshCatalog) GetLocalEndpoints(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("[GetLocalEndpoints] invoked")
+	//log.Info().Msgf("[GetLocalEndpoints] invoked")
 	endpointMap, err := mc.ListLocalClusterEndpoints()
 	if err != nil {
 		log.Error().Msgf("err fetching endpoints %+v", err)
 	}
 
+	//log.Info().Msgf("[GetLocalEndpoints] localendpoint map=%+v", endpointMap)
 	if err := json.NewEncoder(w).Encode(endpointMap); err != nil {
 		log.Error().Msgf("err encoding endpoints %+v", err)
 	}
 }
 
 func (mc *MeshCatalog) ApigroupMapping(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("reached here - ApigroupMapping")
 	mc.witesandCatalog.UpdateApigroupMap(w, r)
 }

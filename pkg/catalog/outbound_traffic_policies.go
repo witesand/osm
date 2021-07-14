@@ -28,7 +28,6 @@ func (mc *MeshCatalog) ListOutboundTrafficPolicies(downstreamIdentity identity.S
 	outbound := mc.listOutboundPoliciesForTrafficTargets(downstreamIdentity)
 	outboundPoliciesFromSplits := mc.listOutboundTrafficPoliciesForTrafficSplits(downstreamServiceAccount.Namespace)
 	outbound = trafficpolicy.MergeOutboundPolicies(AllowPartialHostnamesMatch, outbound, outboundPoliciesFromSplits...)
-
 	return outbound
 }
 
@@ -113,7 +112,7 @@ func (mc *MeshCatalog) ListAllowedOutboundServicesForIdentity(serviceIdentity id
 					Namespace: t.Spec.Destination.Namespace,
 				})
 				if err != nil {
-					log.Error().Err(err).Msgf("No Services found matching Service Account %s in Namespace %s", t.Spec.Destination.Name, t.Namespace)
+					//log.Error().Err(err).Msgf("No Services found matching Service Account %s in Namespace %s", t.Spec.Destination.Name, t.Namespace)
 					break
 				}
 				for _, destService := range destServices {

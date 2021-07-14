@@ -73,9 +73,10 @@ func validateRequestResponse(proxy *envoy.Proxy, request *xds_discovery.Discover
 	resDifference := resourcesRequested.Difference(resourcesToSend)
 	diffCardinality := resDifference.Cardinality()
 	if diffCardinality != 0 {
-		log.Warn().Msgf("Proxy SerialNumber=%s PodUID=%s: not all request resources for type %s are being responded to req [%v] resp [%v] diff [%v]",
-			proxy.GetCertificateSerialNumber(), proxy.GetPodUID(), envoy.TypeURI(request.TypeUrl).Short(),
-			resourcesRequested, resourcesToSend, resDifference)
+		//witesand
+		//log.Warn().Msgf("Proxy SerialNumber=%s PodUID=%s: not all request resources for type %s are being responded to req [%v] resp [%v] diff [%v]",
+		//	proxy.GetCertificateSerialNumber(), proxy.GetPodUID(), envoy.TypeURI(request.TypeUrl).Short(),
+		//	resourcesRequested, resourcesToSend, resDifference)
 	}
 
 	return diffCardinality

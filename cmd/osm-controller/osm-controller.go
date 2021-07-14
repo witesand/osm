@@ -194,6 +194,7 @@ func main() {
 	if err != nil {
 		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error adding remote cluster")
 	}
+	log.Info().Msgf("endpointsProviderlist=%+v", endpointsProviders)
 	//witesand end
 
 	ingressClient, err := ingress.NewIngressClient(kubeClient, kubernetesClient, stop, cfg)
