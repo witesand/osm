@@ -26,7 +26,7 @@ func (mc *MeshCatalog) GetResolvableServiceEndpoints(svc service.MeshService) ([
 	for _, provider := range mc.endpointsProviders {
 		ep, err := provider.GetResolvableEndpointsForService(svc)
 		if err != nil {
-			log.Error().Err(err).Msgf("[%s] Error getting endpoints for Service %s", provider.GetID(), svc)
+			//log.Error().Err(err).Msgf("[%s] Error getting endpoints for Service %s", provider.GetID(), svc)
 			continue
 		}
 		if len(ep) == 0 {

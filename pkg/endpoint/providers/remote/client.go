@@ -49,6 +49,8 @@ func (c *Client) GetID() string {
 // ListEndpointsForService retrieves the list of IP addresses for the given service
 func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endpoint {
 	//log.Info().Msgf("[%s] Getting Endpoints for service %s on Remote", c.providerIdent, svc)
+	c.caches.Lock()
+	defer c.caches.Unlock()
 	var endpoints = []endpoint.Endpoint{}
 
 	if c.caches == nil {
@@ -74,6 +76,9 @@ func (c Client) ListEndpointsForIdentity(serviceIdentity identity.ServiceIdentit
 }
 
 func (c Client) GetServicesForServiceAccount(serviceIdentity identity.K8sServiceAccount) ([]service.MeshService, error) {
+	c.caches.Lock()
+	defer c.caches.Unlock()
+
 	//log.Info().Msgf("[%s] Getting Services for service account %s on Remote", c.providerIdent, svcAccount)
 	servicesSlice := make([]service.MeshService, 0)
 
@@ -149,8 +154,10 @@ func (c *Client) run() error {
 
 	// update the cache
 	updateCache := func(k8sName string, epMap *ServiceToEndpointMap) {
+		c.caches.Lock()
 		log.Info().Msgf("[updateCache] updating %s", k8sName)
 		c.caches.k8sToServiceEndpoints[k8sName] = epMap
+		c.caches.Unlock()
 	}
 
 	poll := func() {

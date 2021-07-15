@@ -2,6 +2,7 @@ package remote
 
 import (
 	"github.com/openservicemesh/osm/pkg/smi"
+	"sync"
 
 	"github.com/openservicemesh/osm/pkg/announcements"
 	"github.com/openservicemesh/osm/pkg/endpoint"
@@ -19,6 +20,7 @@ type ServiceToEndpointMap struct {
 
 // CacheCollection is a struct of the remote services used in OSM
 type CacheCollection struct {
+	sync.RWMutex
 	k8sToServiceEndpoints map[string]*ServiceToEndpointMap // key=k8s
 }
 
