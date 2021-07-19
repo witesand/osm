@@ -73,7 +73,7 @@ func (mc *MeshCatalog) dispatcher() {
 
 			// Identify if this is an actual delta, or just resync
 			delta := isDeltaUpdate(psubMessage)
-			log.Debug().Msgf("[Pubsub] %s - delta: %v", psubMessage.AnnouncementType, delta)
+			//log.Info().Msgf("dispatchertrack [Pubsub] %s - delta: %v", psubMessage.AnnouncementType.String(), delta)
 
 			// Schedule an envoy broadcast update if we either:
 			// - detected a config delta
@@ -83,7 +83,6 @@ func (mc *MeshCatalog) dispatcher() {
 					broadcastScheduled = true
 					chanMaxDeadline = time.After(maxBroadcastDeadlineTime)
 					chanMovingDeadline = time.After(maxGraceDeadlineTime)
-					log.Info().Msg("Broadcast scheduled by config changes")
 				} else {
 					// If a broadcast is already scheduled, just reset the moving deadline
 					chanMovingDeadline = time.After(maxGraceDeadlineTime)
@@ -95,7 +94,7 @@ func (mc *MeshCatalog) dispatcher() {
 
 		// A select-fallthrough doesn't exist, we are copying some code here
 		case <-chanMovingDeadline:
-			log.Info().Msgf("Moving deadline trigger - Broadcast envoy update")
+			log.Info().Msgf("dispatchertrack [Moving deadline trigger] Broadcast envoy update")
 			events.GetPubSubInstance().Publish(events.PubSubMessage{
 				AnnouncementType: a.ProxyBroadcast,
 			})
@@ -106,7 +105,7 @@ func (mc *MeshCatalog) dispatcher() {
 			chanMaxDeadline = make(<-chan time.Time)
 
 		case <-chanMaxDeadline:
-			log.Info().Msgf("Max deadline trigger - Broadcast envoy update")
+			log.Info().Msgf(" dispatchertrack [Max deadline trigger] Broadcast envoy update")
 			events.GetPubSubInstance().Publish(events.PubSubMessage{
 				AnnouncementType: a.ProxyBroadcast,
 			})

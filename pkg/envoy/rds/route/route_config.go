@@ -2,6 +2,9 @@ package route
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/ptypes/duration"
+	"github.com/openservicemesh/osm/pkg/catalog"
+	"github.com/openservicemesh/osm/pkg/witesand"
 	"sort"
 
 	mapset "github.com/deckarep/golang-set"
@@ -64,7 +67,7 @@ const (
 )
 
 // BuildRouteConfiguration constructs the Envoy constructs ([]*xds_route.RouteConfiguration) for implementing inbound and outbound routes
-func BuildRouteConfiguration(inbound []*trafficpolicy.InboundTrafficPolicy, outbound []*trafficpolicy.OutboundTrafficPolicy, proxy *envoy.Proxy, cfg configurator.Configurator) []*xds_route.RouteConfiguration {
+func BuildRouteConfiguration(catalog catalog.MeshCataloger, inbound []*trafficpolicy.InboundTrafficPolicy, outbound []*trafficpolicy.OutboundTrafficPolicy, proxy *envoy.Proxy, cfg configurator.Configurator) []*xds_route.RouteConfiguration {
 	var routeConfiguration []*xds_route.RouteConfiguration
 
 	// For both Inbound and Outbound routes, we will always generate the route resource stubs and send them even when empty,
@@ -93,9 +96,19 @@ func BuildRouteConfiguration(inbound []*trafficpolicy.InboundTrafficPolicy, outb
 
 	for _, out := range outbound {
 		virtualHost := buildVirtualHostStub(outboundVirtualHost, out.Name, out.Hostnames)
-		virtualHost.Routes = buildOutboundRoutes(out.Routes)
+		//witesand start
+		wsOutboundHost := isWitesandOutboundHost(catalog, out.Name)
+		//log.Info().Msgf("[BuildRouteConfiguration] %+v out.name=%+v", wsOutboundHost, out.Name)
+		if wsOutboundHost {
+			virtualHost.Routes = buildOutboundRoutesForWS(out.Routes)
+		} else {
+			virtualHost.Routes = buildOutboundRoutes(out.Routes)
+		}
+		//log.Info().Msgf("[BuildRouteConfiguration] %+v %+v", wsOutboundHost, virtualHost)
+		//end
 		outboundRouteConfig.VirtualHosts = append(outboundRouteConfig.VirtualHosts, virtualHost)
 	}
+
 	routeConfiguration = append(routeConfiguration, outboundRouteConfig)
 
 	return routeConfiguration
@@ -178,18 +191,20 @@ func buildInboundRoutes(rules []*trafficpolicy.Rule) []*xds_route.Route {
 		// is wildcard or if there are duplicates
 		allowedMethods := sanitizeHTTPMethods(rule.Route.HTTPRouteMatch.Methods)
 
+		//witesand
 		// Create an RBAC policy derived from 'trafficpolicy.Rule'
 		// Each route is associated with an RBAC policy
-		rbacPolicyForRoute, err := buildInboundRBACFilterForRule(rule)
-		if err != nil {
-			log.Error().Err(err).Msgf("Error building RBAC policy for rule [%v], skipping route addition", rule)
-			continue
-		}
+		//rbacPolicyForRoute, err := buildInboundRBACFilterForRule(rule)
+		//if err != nil {
+		//	log.Error().Err(err).Msgf("Error building RBAC policy for rule [%v], skipping route addition", rule)
+		//	continue
+		//}
 
 		// Each HTTP method corresponds to a separate route
 		for _, method := range allowedMethods {
 			route := buildRoute(rule.Route.HTTPRouteMatch.PathMatchType, rule.Route.HTTPRouteMatch.Path, method, rule.Route.HTTPRouteMatch.Headers, rule.Route.WeightedClusters, 100, inboundRoute)
-			route.TypedPerFilterConfig = rbacPolicyForRoute
+			//witesand
+			//route.TypedPerFilterConfig = rbacPolicyForRoute
 			routes = append(routes, route)
 		}
 	}
@@ -223,6 +238,25 @@ func buildEgressRoutes(routingRules []*trafficpolicy.EgressHTTPRoutingRule) []*x
 }
 
 func buildRoute(pathMatchTypeType trafficpolicy.PathMatchType, path string, method string, headersMap map[string]string, weightedClusters mapset.Set, totalWeight int, direction Direction) *xds_route.Route {
+	//Witesand change
+
+	//for apibashed hashing
+	t := &xds_route.RouteAction_HashPolicy_Header_{
+		&xds_route.RouteAction_HashPolicy_Header{
+			HeaderName:   witesand.WSHashHeader,
+			RegexRewrite: nil,
+		},
+	}
+
+	r := &xds_route.RouteAction_HashPolicy{
+		PolicySpecifier: t,
+		Terminal:        false,
+	}
+
+	// disable the timeouts, without this synchronous calls timeout
+	routeTimeout := duration.Duration{Seconds: 0}
+	//end
+
 	route := xds_route.Route{
 		Match: &xds_route.RouteMatch{
 			Headers: getHeadersForRoute(method, headersMap),
@@ -232,6 +266,8 @@ func buildRoute(pathMatchTypeType trafficpolicy.PathMatchType, path string, meth
 				ClusterSpecifier: &xds_route.RouteAction_WeightedClusters{
 					WeightedClusters: buildWeightedCluster(weightedClusters, totalWeight, direction),
 				},
+				HashPolicy: []*xds_route.RouteAction_HashPolicy{r},
+				Timeout: &routeTimeout,
 			},
 		},
 	}

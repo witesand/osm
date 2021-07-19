@@ -5,7 +5,6 @@ import (
 	xds_cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	xds_discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-
 	"github.com/openservicemesh/osm/pkg/catalog"
 	"github.com/openservicemesh/osm/pkg/certificate"
 	"github.com/openservicemesh/osm/pkg/configurator"
@@ -38,8 +37,19 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 				dstService.Name, proxy.GetCertificateSerialNumber(), proxy.GetPodUID())
 			return nil, err
 		}
-
 		clusters = append(clusters, cluster)
+
+		//witesand create apibased cluster
+		if meshCatalog.GetWitesandCataloger().IsWSEdgePodService(dstService) {
+			getWSEdgePodUpstreamServiceCluster(meshCatalog, proxyIdentity.ToServiceIdentity(), dstService, cfg, &clusters)
+			// fall thru to generate unicast cluster
+		}
+
+		//witesand create unicast cluster
+		if meshCatalog.GetWitesandCataloger().IsWSUnicastService(dstService.Name) {
+			getWSUnicastUpstreamServiceCluster(meshCatalog, proxyIdentity.ToServiceIdentity(), dstService, cfg, &clusters)
+			// fall thru to generate anycast cluster
+		}
 	}
 
 	// Create a local cluster for each service behind the proxy.
@@ -88,15 +98,15 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 
 	alreadyAdded := mapset.NewSet()
 	var cdsResources []types.Resource
+
 	for _, cluster := range clusters {
 		if alreadyAdded.Contains(cluster.Name) {
-			log.Error().Msgf("Found duplicate clusters with name %s; Duplicate will not be sent to Envoy with XDS Certificate SerialNumber=%s on Pod with UID=%s",
-				cluster.Name, proxy.GetCertificateSerialNumber(), proxy.GetPodUID())
+			log.Error().Msgf("Found duplicate clusters with name %s; Duplicate will not be sent to Envoy with XDS Certificate SerialNumber=%s on Pod with UID=%s name=%s",
+				cluster.Name, proxy.GetCertificateSerialNumber(), proxy.GetPodUID(), proxy.GetCertificateCommonName())
 			continue
 		}
 		alreadyAdded.Add(cluster.Name)
 		cdsResources = append(cdsResources, cluster)
 	}
-
 	return cdsResources, nil
 }

@@ -3,7 +3,6 @@ package eds
 import (
 	xds_discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-
 	"github.com/openservicemesh/osm/pkg/catalog"
 	"github.com/openservicemesh/osm/pkg/certificate"
 	"github.com/openservicemesh/osm/pkg/configurator"
@@ -30,6 +29,24 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 
 	var rdsResources []types.Resource
 	for svc, endpoints := range allowedEndpoints {
+		//witesand unicast services.
+		if meshCatalog.GetWitesandCataloger().IsWSUnicastService(svc.Name) {
+			loadAssignments := NewWSUnicastClusterLoadAssignment(meshCatalog, svc)
+			for _, loadAssignment := range *loadAssignments {
+				rdsResources = append(rdsResources, loadAssignment)
+			}
+			// fall thru for default CLAs
+		}
+
+		//witesand edgepod services
+		if meshCatalog.GetWitesandCataloger().IsWSEdgePodService(svc) {
+			loadAssignments := NewWSEdgePodClusterLoadAssignment(meshCatalog, svc)
+			for _, loadAssignment := range *loadAssignments {
+				rdsResources = append(rdsResources, loadAssignment)
+			}
+			continue
+		}
+
 		loadAssignment := newClusterLoadAssignment(svc, endpoints)
 		rdsResources = append(rdsResources, loadAssignment)
 	}
@@ -41,7 +58,6 @@ func NewResponse(meshCatalog catalog.MeshCataloger, proxy *envoy.Proxy, _ *xds_d
 // Note: ServiceIdentity must be in the format "name.namespace" [https://github.com/openservicemesh/osm/issues/3188]
 func getEndpointsForProxy(meshCatalog catalog.MeshCataloger, proxyIdentity identity.ServiceIdentity) (map[service.MeshService][]endpoint.Endpoint, error) {
 	allowedServicesEndpoints := make(map[service.MeshService][]endpoint.Endpoint)
-
 	for _, dstSvc := range meshCatalog.ListAllowedOutboundServicesForIdentity(proxyIdentity) {
 		endpoints, err := meshCatalog.ListAllowedEndpointsForService(proxyIdentity, dstSvc)
 		if err != nil {

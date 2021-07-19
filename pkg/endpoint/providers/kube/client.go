@@ -40,7 +40,7 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 
 	kubernetesEndpoints, err := c.kubeController.GetEndpoints(svc)
 	if err != nil || kubernetesEndpoints == nil {
-		log.Error().Err(err).Msgf("[%s] Error fetching Kubernetes Endpoints from cache for service %s", c.providerIdent, svc)
+		//log.Error().Err(err).Msgf("[%s] Error fetching Kubernetes Endpoints from cache for service %s", c.providerIdent, svc)
 		return endpoints
 	}
 
@@ -51,6 +51,13 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 
 	for _, kubernetesEndpoint := range kubernetesEndpoints.Subsets {
 		for _, address := range kubernetesEndpoint.Addresses {
+			//witesand
+			//needed for unicast support with direct pod name.
+			podName := ""
+			if address.TargetRef != nil && address.TargetRef.Kind == "Pod" {
+				podName = address.TargetRef.Name
+			}
+			//witesand end
 			for _, port := range kubernetesEndpoint.Ports {
 				ip := net.ParseIP(address.IP)
 				if ip == nil {
@@ -60,6 +67,8 @@ func (c Client) ListEndpointsForService(svc service.MeshService) []endpoint.Endp
 				ept := endpoint.Endpoint{
 					IP:   ip,
 					Port: endpoint.Port(port.Port),
+					//witesand
+					PodName: podName,
 				}
 				endpoints = append(endpoints, ept)
 			}
@@ -90,7 +99,8 @@ func (c Client) ListEndpointsForIdentity(serviceIdentity identity.ServiceIdentit
 				log.Error().Msgf("[%s] Error parsing IP address %s", c.providerIdent, podIP.IP)
 				break
 			}
-			ept := endpoint.Endpoint{IP: ip}
+			//witesand
+			ept := endpoint.Endpoint{IP: ip, PodName: pod.GetName()}
 			endpoints = append(endpoints, ept)
 		}
 	}
@@ -127,8 +137,20 @@ func (c Client) GetServicesForServiceAccount(svcAccount identity.K8sServiceAccou
 	}
 
 	if services.Cardinality() == 0 {
-		log.Error().Err(errServiceNotFound).Msgf("[%s] No services for service account %s", c.providerIdent, svcAccount)
-		return nil, errServiceNotFound
+		//log.Error().Err(errServiceNotFound).Msgf("[%s] No services for service account %s", c.providerIdent, svcAccount)
+		//return nil, errServiceNotFound
+
+		//witesand
+		// Add a service, which is a representation of the ServiceAccount, but not a real K8s service.
+		// This will ensure that all pods in the service account are represented as one service.
+		/* WITESAND START COMMENTED */
+		/*
+			synthService := svcAccount.GetSyntheticService()
+			services.Add(synthService)
+			log.Trace().Msgf("[%s] No services for service account %s/%s; Adding synthetic service %s", c.providerIdent, svcAccount.Name, svcAccount.Namespace, synthService)
+		*/
+		/* WITESAND END */
+		return make([]service.MeshService, 0), errServiceNotFound
 	}
 
 	log.Trace().Msgf("[%s] Services for service account %s: %+v", c.providerIdent, svcAccount, services)

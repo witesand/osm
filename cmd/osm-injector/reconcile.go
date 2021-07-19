@@ -8,7 +8,7 @@ import (
 )
 
 // createReconciler sets up k8s controller manager to reconcile osm-injector's mutatingwehbookconfiguration
-func createReconciler(kubeClient *kubernetes.Clientset) error {
+func createReconciler(kubeClient *kubernetes.Clientset, osmInjectorName, osmControllerName string) error {
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: "0", /* disables controller manager metrics serving */
@@ -25,7 +25,10 @@ func createReconciler(kubeClient *kubernetes.Clientset) error {
 		KubeClient:   kubeClient,
 		Scheme:       mgr.GetScheme(),
 		OsmWebhook:   webhookConfigName,
+		//witesand
 		OsmNamespace: osmNamespace,
+		OsmControllerName:osmControllerName,
+		OsmInjectorName:osmInjectorName,
 	}).SetupWithManager(mgr); err != nil {
 		log.Error().Err(err).Msg("Error creating controller to reconcile MutatingWebhookConfiguration")
 		return err

@@ -60,6 +60,10 @@ var (
 )
 
 func init() {
+	//witesand
+	wsInjectorInit()
+	//witesand
+
 	flags.StringVarP(&verbosity, "verbosity", "v", "info", "Set log verbosity level")
 	flags.StringVar(&meshName, "mesh-name", "", "OSM mesh name")
 	flags.StringVar(&kubeConfigFile, "kubeconfig", "", "Path to Kubernetes config file.")
@@ -158,7 +162,7 @@ func main() {
 	}
 
 	// Initialize the sidecar injector webhook
-	if err := injector.NewMutatingWebhook(injectorConfig, kubeClient, certManager, kubeController, meshName, osmNamespace, webhookConfigName, stop, cfg); err != nil {
+	if err := injector.NewMutatingWebhook(injectorConfig, kubeClient, certManager, kubeController, meshName, osmInjectorName, osmControllerName, osmNamespace, webhookConfigName, stop, cfg); err != nil {
 		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating sidecar injector webhook")
 	}
 
@@ -177,7 +181,7 @@ func main() {
 	}
 
 	// Initialize the reconciler for the injector's MutatingWebhookConfiguration
-	if err := createReconciler(kubeClient); err != nil {
+	if err := createReconciler(kubeClient, osmInjectorName, osmControllerName); err != nil {
 		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating controller manager to reconcile sidecar injector webhook config")
 	}
 

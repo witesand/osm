@@ -110,13 +110,15 @@ func getStaticResources(config envoyBootstrapConfigMeta) map[string]interface{} 
 func (wh *mutatingWebhook) createEnvoyBootstrapConfig(name, namespace, osmNamespace string, cert certificate.Certificater, originalHealthProbes healthProbes) (*corev1.Secret, error) {
 	configMeta := envoyBootstrapConfigMeta{
 		EnvoyAdminPort: constants.EnvoyAdminPort,
-		XDSClusterName: constants.OSMControllerName,
+		//witesand
+		XDSClusterName: wh.osmControllerName,
 
 		RootCert: base64.StdEncoding.EncodeToString(cert.GetIssuingCA()),
 		Cert:     base64.StdEncoding.EncodeToString(cert.GetCertificateChain()),
 		Key:      base64.StdEncoding.EncodeToString(cert.GetPrivateKey()),
 
-		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", constants.OSMControllerName, osmNamespace),
+		//witesand
+		XDSHost: fmt.Sprintf("%s.%s.svc.cluster.local", wh.osmControllerName, osmNamespace),
 		XDSPort: constants.ADSServerPort,
 
 		// OriginalHealthProbes stores the path and port for liveness, readiness, and startup health probes as initially
@@ -156,6 +158,8 @@ func getXdsCluster(config envoyBootstrapConfigMeta) map[string]interface{} {
 	return map[string]interface{}{
 		"name":            config.XDSClusterName,
 		"connect_timeout": "0.25s",
+		//witesand
+		"dns_refresh_rate": "30s",
 		"type":            "LOGICAL_DNS",
 		"typed_extension_protocol_options": map[string]interface{}{
 			"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": map[string]interface{}{

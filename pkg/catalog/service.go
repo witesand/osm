@@ -12,6 +12,7 @@ import (
 	"github.com/openservicemesh/osm/pkg/kubernetes"
 	"github.com/openservicemesh/osm/pkg/service"
 	"github.com/openservicemesh/osm/pkg/utils"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // isTrafficSplitBackendService returns true if the given service is a backend service in any traffic split
@@ -75,7 +76,7 @@ func (mc *MeshCatalog) getServicesForServiceAccount(sa identity.K8sServiceAccoun
 	for _, provider := range mc.endpointsProviders {
 		providerServices, err := provider.GetServicesForServiceAccount(sa)
 		if err != nil {
-			log.Error().Err(err).Msgf("Error getting K8s Services linked to Service Account %s from provider %s", sa, provider.GetID())
+			//log.Error().Err(err).Msgf("Error getting K8s Services linked to Service Account %s from provider %s", sa, provider.GetID())
 			continue
 		}
 		var svcs []string
@@ -121,6 +122,10 @@ func (mc *MeshCatalog) GetTargetPortToProtocolMappingForService(svc service.Mesh
 	var portToProtocolMap, previous map[uint32]string
 
 	for _, provider := range mc.endpointsProviders {
+		//witesand
+		if provider.GetID() == constants.RemoteProviderName {
+			continue
+		}
 		current, err := provider.GetTargetPortToProtocolMappingForService(svc)
 		if err != nil {
 			return nil, err
@@ -179,7 +184,13 @@ func (mc *MeshCatalog) listMeshServices() []service.MeshService {
 func (mc *MeshCatalog) getServiceHostnames(meshService service.MeshService, sameNamespace bool) ([]string, error) {
 	svc := mc.kubeController.GetService(meshService)
 	if svc == nil {
-		return nil, errors.Errorf("Error fetching service %q", meshService)
+		//witesand changes
+		var svc1 corev1.Service
+		svc1.Name =  meshService.Name
+		svc1.Namespace =  meshService.Namespace
+		svc1.Spec.Ports = make([]corev1.ServicePort, 0)
+		svc = &svc1
+		//return nil, errors.Errorf("Error fetching service %q", meshService)
 	}
 
 	hostnames := kubernetes.GetHostnamesForService(svc, sameNamespace)

@@ -1,10 +1,8 @@
-// Package lds implements Envoy's Listener Discovery Service (LDS).
 package lds
 
 import (
 	"github.com/openservicemesh/osm/pkg/catalog"
 	"github.com/openservicemesh/osm/pkg/configurator"
-
 	"github.com/openservicemesh/osm/pkg/identity"
 	"github.com/openservicemesh/osm/pkg/logger"
 )
@@ -12,6 +10,13 @@ import (
 var (
 	log = logger.New("envoy/lds")
 )
+
+//// listenerBuilder is a type containing data to build the listener configurations
+//type listenerBuilder struct {
+//	svcAccount  service.K8sServiceAccount
+//	meshCatalog catalog.MeshCataloger
+//	cfg         configurator.Configurator
+//}
 
 // listenerBuilder is a type containing data to build the listener configurations
 type listenerBuilder struct {

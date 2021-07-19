@@ -52,3 +52,4 @@ func newClusterLoadAssignment(serviceName service.MeshService, serviceEndpoints 
 	log.Debug().Msgf("[EDS] Constructed ClusterLoadAssignment: %+v", cla)
 	return cla
 }
+

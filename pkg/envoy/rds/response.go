@@ -38,7 +38,7 @@ func NewResponse(cataloger catalog.MeshCataloger, proxy *envoy.Proxy, discoveryR
 	inboundTrafficPolicies = cataloger.ListInboundTrafficPolicies(proxyIdentity.ToServiceIdentity(), services)
 	outboundTrafficPolicies = cataloger.ListOutboundTrafficPolicies(proxyIdentity.ToServiceIdentity())
 
-	routeConfiguration := route.BuildRouteConfiguration(inboundTrafficPolicies, outboundTrafficPolicies, proxy, cfg)
+	routeConfiguration := route.BuildRouteConfiguration(cataloger, inboundTrafficPolicies, outboundTrafficPolicies, proxy, cfg)
 	var rdsResources []types.Resource
 
 	for _, config := range routeConfiguration {

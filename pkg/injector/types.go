@@ -29,6 +29,12 @@ type mutatingWebhook struct {
 	cert           certificate.Certificater
 	configurator   configurator.Configurator
 
+	//witesand
+	// OSM injecotr name can be different for each cluster
+	osmInjectorName string
+	// controller name
+	osmControllerName string
+
 	nonInjectNamespaces mapset.Set
 }
 

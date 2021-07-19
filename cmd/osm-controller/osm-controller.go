@@ -75,6 +75,10 @@ var (
 )
 
 func init() {
+	//witesand start
+	wsinit()
+	//Witesand end
+
 	flags.StringVarP(&verbosity, "verbosity", "v", constants.DefaultOSMLogLevel, "Set boot log verbosity level")
 	flags.StringVar(&meshName, "mesh-name", "", "OSM mesh name")
 	flags.StringVar(&kubeConfigFile, "kubeconfig", "", "Path to Kubernetes config file.")
@@ -108,7 +112,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Error parsing cmd line arguments")
 	}
 
-	if err := logger.SetLogLevel(verbosity); err != nil {
+	if err := logger.SetLogLevel("info"); err != nil {
 		log.Fatal().Err(err).Msg("Error setting log level")
 	}
 
@@ -180,6 +184,19 @@ func main() {
 
 	endpointsProviders := []endpoint.Provider{kubeProvider}
 
+	//witesand start
+
+	//Add witesand catalog
+	addWSCatalog(kubeClient)
+
+	//Add remote cluster endpoints
+	err = addWSRemoteCluster(kubeClient, stop, meshSpec, &endpointsProviders)
+	if err != nil {
+		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error adding remote cluster")
+	}
+	log.Info().Msgf("endpointsProviderlist=%+v", endpointsProviders)
+	//witesand end
+
 	ingressClient, err := ingress.NewIngressClient(kubeClient, kubernetesClient, stop, cfg)
 	if err != nil {
 		events.GenericEventRecorder().FatalEvent(err, events.InitializationError, "Error creating Ingress monitor client")
@@ -199,6 +216,8 @@ func main() {
 		policyController,
 		stop,
 		cfg,
+		//witesand
+		witesandCatalog,
 		endpointsProviders...)
 
 	proxyRegistry := registry.NewProxyRegistry(&registry.KubeProxyServiceMapper{KubeController: kubernetesClient})
